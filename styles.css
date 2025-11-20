@@ -64,17 +64,197 @@ body {
   text-transform: uppercase;
 }
 
-.version-badge {
+.enhanced-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  padding: 28px 20px 26px;
+  margin-bottom: 28px;
+
+  border-radius: 22px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  background:
+    radial-gradient(circle at top, rgba(56, 189, 248, 0.18), transparent 55%),
+    rgba(15, 23, 42, 0.96);
+  box-shadow:
+    0 18px 45px rgba(15, 23, 42, 0.9),
+    0 0 0 1px rgba(15, 23, 42, 1) inset;
+}
+
+.hero-overline {
   font-size: 11px;
-  padding: 2px 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.9);
+  margin-bottom: 6px;
+  padding: 3px 12px;
   border-radius: 999px;
-  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.85));
+}
+
+.hero-logo-wrap {
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+
+.hero-logo {
+  max-height: 110px;
+  width: auto;
+  border-radius: 18px;
+  padding: 6px 8px;
+  background: radial-gradient(circle at top, rgba(2, 6, 23, 0.95), rgba(15, 23, 42, 0.98));
+  filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.35));
+  transition: transform 0.28s ease, filter 0.28s ease;
+}
+
+.hero-logo:hover {
+  transform: translateY(-1px) scale(1.03);
+  filter: drop-shadow(0 0 22px rgba(56, 189, 248, 0.55));
+}
+
+.hero-text-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.hero-title {
+  position: relative;
+  font-size: 32px;
+  font-weight: 800;
+  color: #f9fafb;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  text-indent: 0.18em;
+  text-align: center;
+  margin: 0;
+
+  text-shadow:
+    0 0 22px rgba(15, 23, 42, 0.9),
+    0 0 1px rgba(15, 23, 42, 0.9);
+}
+
+.hero-title-accent {
   color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.4);
+  font-weight: 900;
+  position: relative;
+}
+
+.hero-title-accent::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg,
+    rgba(56,189,248,0) 0%,
+    rgba(56,189,248,1) 50%,
+    rgba(56,189,248,0) 100%
+  );
+  border-radius: 999px;
+  animation: madnessBar 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes madnessBar {
+  0%   { transform: scaleX(0.6); opacity: 0.6; }
+  100% { transform: scaleX(1.0); opacity: 1; }
+}
+
+/* Bracket accents */
+.hero-title-bracket {
+  font-size: 0.85em;
+  color: rgba(148, 163, 184, 0.8);
+  text-shadow: 0 0 12px rgba(15, 23, 42, 0.9);
+}
+
+.hero-title-bracket-left {
+  margin-right: 10px;
+}
+
+.hero-title-bracket-right {
+  margin-left: 10px;
+}
+
+/* Underline “data bar” */
+.hero-title::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0),
+    rgba(56, 189, 248, 0.8),
+    rgba(248, 250, 252, 0.9),
+    rgba(56, 189, 248, 0.8),
+    rgba(15, 23, 42, 0)
+  );
+  opacity: 0.85;
+}
+
+.hero-subtitle {
+  font-size: 15px;
+  color: #9ca3af;
+  max-width: 640px;
+  margin-top: 14px;
+  text-align: center;
+}
+
+.hero-sub-highlight {
+  color: #e5e7eb;
+  font-weight: 500;
+}
+
+.hero-text-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  animation: heroTextIn 0.9s ease-out forwards;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+@keyframes heroTextIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-logo:hover {
+  transform: scale(1.05);
+  transition: transform 0.3s ease;
+}
+
+.version-badge {
+  margin-top: 8px;
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: radial-gradient(circle at top, rgba(56, 189, 248, 0.18), rgba(15, 23, 42, 0.98));
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
 }
 
 .app-subtitle {
-  font-size: 13px;
+  font-size: 18px;
   color: #9ca3af;
   max-width: 720px;
 }
@@ -105,8 +285,157 @@ body {
   align-items: stretch;
 }
 
+/* ========== MATCHUP BAR (COLLAPSED SETUP) ========== */
+
+.matchup-bar {
+  position: relative;            /* so the edit button can float inside */
+  display: none;
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  border-radius: 18px;
+  background: radial-gradient(
+      circle at top left,
+      rgba(56, 189, 248, 0.12),
+      transparent 55%
+    ),
+    rgba(15, 23, 42, 0.96);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.85);
+  font-size: 0.95rem;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition:
+    opacity 200ms ease-out,
+    transform 200ms ease-out;
+}
+
+.matchup-bar.visible {
+  display: block;                /* simple block, no flex */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Main trio (Cinderella | VS + Round | Favorite) is centered */
+.matchup-bar-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  max-width: 960px;       
+  margin: 0 auto;       
+}
+
+.matchup-bar-left,
+.matchup-bar-right {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  align-items: center;
+  text-align: center;
+}
+
+.matchup-bar-left {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.matchup-bar-right {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.matchup-bar-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.matchup-bar-team {
+  font-size: 1.1rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.matchup-bar-seed {
+  font-size: 0.85rem;
+  opacity: 0.85;
+  margin-left: 6px;
+}
+
+.matchup-bar-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.matchup-bar-vs {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  opacity: 0.7;
+}
+
+.matchup-bar-round {
+  font-size: 0.85rem;
+  padding-inline: 12px;
+  padding-block: 2px;
+}
+
+/* Edit button sits on the far right, outside the centered trio */
+
+.matchup-bar-edit {
+  border: 1px solid rgba(148, 163, 253, 0.35);
+  background: rgba(15, 23, 42, 0.95);
+  color: #a5b4fc;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 3px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+.matchup-bar-edit:hover {
+  background: rgba(30, 64, 175, 0.8);
+  border-color: rgba(129, 140, 248, 0.9);
+}
+
+/* Collapse animation for the big setup section */
+
+.top-bar {
+  transition:
+    max-height 220ms ease-out,
+    opacity 220ms ease-out,
+    margin-bottom 220ms ease-out,
+    transform 220ms ease-out;
+  max-height: 1200px;
+}
+
+@keyframes heroAccentShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.top-bar.collapsed {
+  max-height: 0;
+  opacity: 0;
+  margin-bottom: 0;
+  transform: translateY(-8px);
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .card-title {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   color: #e5e7eb;
   margin: 0 0 6px;
@@ -114,7 +443,7 @@ body {
 
 .helper-text {
   margin: 4px 0 0;
-  font-size: 10px;
+  font-size: 12px;
   color: #9ca3af;
   line-height: 1.5;
 }
@@ -123,7 +452,7 @@ body {
 
 .status {
   margin-top: 6px;
-  font-size: 10px;
+  font-size: 12px;
   padding: 4px 8px;
   border-radius: 999px;
   display: inline-flex;
@@ -176,7 +505,7 @@ body {
   border-radius: 10px;
   border: 1px dashed rgba(148, 163, 253, 0.45);
   cursor: pointer;
-  font-size: 10px;
+  font-size: 12px;
   color: #cbd5f5;
   background: rgba(15, 23, 42, 0.96);
 }
@@ -192,7 +521,7 @@ body {
   outline: none;
   border-radius: 999px;
   padding: 6px 14px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   display: inline-flex;
@@ -250,6 +579,25 @@ body {
   color: #9ca3af;
 }
 
+/* Sandbox toggle */
+.sandbox-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #9ca3af;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px dashed rgba(75, 85, 99, 0.9);
+}
+
+.sandbox-toggle input[type="checkbox"] {
+  width: 11px;
+  height: 11px;
+  accent-color: #38bdf8;
+}
+
 /* Selects */
 
 .select-wrap {
@@ -261,7 +609,7 @@ body {
 }
 
 .select-wrap label {
-  font-size: 9px;
+  font-size: 12px;
   color: #9ca3af;
 }
 
@@ -272,7 +620,7 @@ select {
   border: 1px solid rgba(75, 85, 99, 0.9);
   background: rgba(9, 12, 23, 0.98);
   color: #e5e7eb;
-  font-size: 10px;
+  font-size: 12px;
   outline: none;
   appearance: none;
   background-image: linear-gradient(
@@ -319,14 +667,14 @@ select:focus {
 }
 
 .role-label strong {
-  font-size: 9px;
+  font-size: 12px;
   color: #e5e7eb;
 }
 
 .pill {
   padding: 2px 7px;
   border-radius: 999px;
-  font-size: 8px;
+  font-size: 12px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -342,7 +690,7 @@ select:focus {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  font-size: 8.5px;
+  font-size: 12px;
   color: #9ca3af;
 }
 
@@ -368,6 +716,41 @@ select:focus {
   gap: 6px;
 }
 
+.round-selector-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.round-dropdown {
+  position: absolute;
+  top: 33px;
+  left: 0;
+  min-width: 140px;
+  background: rgba(9, 12, 23, 0.98);
+  border: 1px solid rgba(75, 85, 99, 0.9);
+  border-radius: 10px;
+  padding: 6px 0;
+  z-index: 50;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+.round-dropdown.hidden {
+  display: none;
+}
+
+.round-option {
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #cbd5e1;
+  white-space: nowrap;
+}
+
+.round-option:hover {
+  background: rgba(56, 189, 248, 0.18);
+  color: #38bdf8;
+}
+
 /* ========== SUMMARY SECTION ========== */
 
 .summary-card {
@@ -390,13 +773,13 @@ select:focus {
 }
 
 .summary-header h2 {
-  font-size: 13px;
+  font-size: 14px;
   margin: 0;
 }
 
 .summary-help {
   margin: 0;
-  font-size: 9px;
+  font-size: 12px;
   color: #9ca3af;
 }
 
@@ -406,18 +789,89 @@ select:focus {
   gap: 8px;
 }
 
+.summary-round-row {
+  margin-top: 6px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.summary-round-pill {
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(55, 65, 81, 0.9);
+  background: rgba(9, 9, 15, 0.95);
+  font-size: 12px;
+  color: #e5e7eb;
+}
+
+.summary-table {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.summary-table th,
+.summary-table td {
+  text-align: center;
+}
+
+.summary-table .summary-team {
+  font-weight: 600;
+  color: #e5e7eb;
+  margin-bottom: 2px;
+}
+
+.summary-table .summary-mi {
+  font-variant-numeric: tabular-nums;
+  color: #cbd5f5;
+}
+
+.summary-table .summary-delta {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.summary-table .summary-pred {
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.summary-table .summary-lean-text {
+  font-size: 12px;
+  color: #cbd5f5;
+}
+
+/* Make the center "MATCHUP EDGE" header stand out */
+.summary-table th.summary-matchup-header {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #f9fafb;
+  text-align: center;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+}
+
+/* Optional: subtle underline bar across the header row */
+.summary-table thead tr {
+  border-bottom: 2px solid rgba(56, 189, 248, 0.35);
+}
+
 .summary-block {
   padding: 8px 8px 6px;
   border-radius: 12px;
   background: rgba(9, 9, 15, 0.98);
   border: 1px solid rgba(75, 85, 99, 0.95);
-  font-size: 9px;
+  font-size: 12px;
   color: #9ca3af;
 }
 
 .summary-block h4 {
   margin: 0 0 2px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: #e5e7eb;
 }
@@ -425,7 +879,7 @@ select:focus {
 .summary-total {
   font-weight: 700;
   color: #38bdf8;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .summary-lean {
@@ -437,7 +891,76 @@ select:focus {
 
 .summary-lean-text {
   margin-top: 4px;
-  font-size: 9px;
+  font-size: 12px;
+  color: #cbd5f5;
+}
+
+/* Make the three summary cells look like distinct mini-cards */
+.summary-table td {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.summary-table .summary-block {
+  text-align: center;
+}
+
+/* Center headers in the Scorecards & Matchup Summary table */
+.summary-table th {
+  text-align: center !important;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: #dbeafe; /* same faint-blue as other headings */
+}
+
+.summary-team-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+
+.summary-team-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e5e7eb;
+  margin-bottom: 2px;
+}
+
+.summary-mi-line {
+  font-size: 11px;
+  color: #cbd5f5;
+  margin-bottom: 1px;
+}
+
+.summary-int-line {
+  font-size: 10px;
+  color: #9ca3af;
+}
+
+.summary-delta-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+
+.summary-delta-value {
+  font-size: 13px;
+  font-weight: 700;
+  color: #38bdf8;
+  margin-bottom: 2px;
+}
+
+.summary-pred-line {
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.summary-lean-text {
+  font-size: 11px;
   color: #cbd5f5;
 }
 
@@ -495,6 +1018,87 @@ select:focus {
   color: #9ca3af;
 }
 
+/* ========== INTERACTION METRICS TABLE ========== */
+
+.interaction-table {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.interaction-table th,
+.interaction-table td {
+  text-align: center;
+}
+
+/* Slightly tighter padding than Core tables */
+.interaction-table th,
+.interaction-table td {
+  padding: 4px 6px;
+}
+
+/* Edge pill in the second column */
+.int-edge-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* Edge state colors */
+.int-edge-A {
+  background: rgba(56, 189, 248, 0.14);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.6);
+}
+
+.int-edge-B {
+  background: rgba(249, 115, 22, 0.14);
+  color: #f97316;
+  border: 1px solid rgba(249, 115, 22, 0.7);
+}
+
+.int-edge-even {
+  background: rgba(55, 65, 81, 0.4);
+  color: #e5e7eb;
+  border: 1px solid rgba(75, 85, 99, 0.8);
+}
+
+/* Row-level tint so you can scan who has leverage */
+.int-row-A {
+  background: linear-gradient(
+    to right,
+    rgba(56, 189, 248, 0.15),
+    transparent
+  );
+}
+
+.int-row-B {
+  background: linear-gradient(
+    to left,
+    rgba(249, 115, 22, 0.15),
+    transparent
+  );
+}
+
+.int-row-even {
+  background: rgba(15, 23, 42, 0.8);
+}
+
+/* Totals row at the bottom */
+.interaction-total {
+  border-top: 1px solid rgba(148, 163, 253, 0.4);
+  font-weight: 600;
+}
+
+.interaction-total td {
+  padding-top: 6px;
+}
+
 /* ========== MAIN RESULT LAYOUT ========== */
 
 .result-layout {
@@ -532,6 +1136,132 @@ select:focus {
   color: #e5e7eb;
 }
 
+/* Layout inside each team card */
+.team-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Bottom row = two tiles side-by-side */
+.team-card-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+/* Make sure context tiles stretch nicely in the bottom row */
+.team-card-bottom .context-tile {
+  height: 100%;
+}
+
+/* Make bottom-row flip tiles a bit taller */
+.team-card-bottom .flip-tile-inner {
+  min-height: 90px;   /* tweak 90 → 100 if you want even more space */
+}
+
+/* Use the same background + radius as the tile for back faces in bottom row */
+.team-card-bottom .context-tile.flip-tile {
+  padding: 0;  /* move padding into the faces */
+}
+
+.team-card-bottom .context-tile.flip-tile .tile-face {
+  padding: 6px 8px 5px;   /* same as original context-tile padding */
+}
+
+/* Back face for these compact tiles: no extra border, just flip */
+.team-card-bottom .context-tile.flip-tile .tile-face.tile-back {
+  background: transparent;
+  border: none;
+}
+
+/* --- Flip card base --- */
+.team-card {
+  position: relative;
+  padding: 0;              /* move padding to inner wrapper */
+  perspective: 1400px;
+}
+
+.team-card .flip-inner {
+  position: relative;
+  width: 100%;
+  min-height: 220px;       /* adjust if needed */
+  padding: 10px 10px 8px;  /* same as old .team-card padding */
+  transform-style: preserve-3d;
+  transition: transform 0.45s ease;
+}
+
+/* Flipped state */
+.team-card.flipped .flip-inner {
+  transform: rotateY(180deg);
+}
+
+/* Faces */
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+/* Let the front behave like your old card */
+.card-face.card-front {
+  position: relative;
+}
+
+/* Back side */
+.card-face.card-back {
+  transform: rotateY(180deg);
+}
+
+/* Back content styling */
+.card-back-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 9px;
+  color: #e5e7eb;
+}
+
+.card-back-content h3 {
+  margin: 0 0 4px;
+  font-size: 10px;
+}
+
+.back-line {
+  margin: 2px 0;
+  font-size: 8px;
+  color: #cbd5f5;
+  line-height: 1.4;
+}
+
+.back-meta {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0;
+}
+
+.back-meta li {
+  margin-bottom: 2px;
+}
+
+.back-helper {
+  margin-top: auto;
+  font-size: 7.5px;
+  color: #9ca3af;
+  opacity: 0.9;
+}
+
+/* Slight visual hint that a card is interactive */
+.team-card.card {
+  cursor: pointer;
+}
+
+.team-card.card button {
+  cursor: pointer; /* keep buttons normal */
+}
+
 .role-tag {
   font-size: 8px;
   padding: 2px 8px;
@@ -557,6 +1287,46 @@ select:focus {
   color: #9ca3af;
 }
 
+/* Mini flip tiles inside the card */
+.flip-tile {
+  position: relative;
+  perspective: 1200px;
+}
+
+.flip-tile-inner {
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.35s ease;
+}
+
+/* Flipped state */
+.flip-tile.flipped .flip-tile-inner {
+  transform: rotateY(180deg);
+}
+
+/* Tile faces */
+.tile-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.tile-face.tile-front {
+  position: relative; /* let the existing layout work normally */
+}
+
+.tile-face.tile-back {
+  transform: rotateY(180deg);
+  padding: 6px 6px 5px;
+  border-radius: 12px;
+  background: rgba(9, 9, 15, 0.98);
+  border: 1px solid rgba(31, 41, 55, 0.98);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 /* Profile Sections */
 
 .profile-section {
@@ -577,12 +1347,10 @@ select:focus {
 
 .section-header h3 {
   margin: 0;
-  font-size: 9.5px;
+  font-size: 14px;
   font-weight: 600;
   color: #e5e7eb;
 }
-
-
 
 /* Explain Toggle Buttons */
 
@@ -608,7 +1376,16 @@ select:focus {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 4px;
-  font-size: 8px;
+  font-size: 12px;
+}
+
+/* Subtle row striping */
+.explain-table tbody tr:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.015); /* faint stripe */
+}
+
+.explain-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.005);
 }
 
 .explain-table thead {
@@ -617,17 +1394,109 @@ select:focus {
 
 .explain-table th,
 .explain-table td {
-  padding: 2px 3px;
+  padding: 6px 8px;
   border-bottom: 1px solid rgba(31, 41, 55, 0.98);
+  text-align: center;
+  vertical-align: middle;
+}
+
+.explain-table td:first-child,
+.explain-table th:first-child {
   text-align: left;
 }
 
+.explain-table td:first-child,
+.explain-table th:first-child {
+  text-align: left;
+}
+
+.explain-table td + td,
+.explain-table th + th {
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .explain-table th {
-  font-size: 7.5px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #6b7280;
   font-weight: 600;
+}
+
+/* Highlight right-side metric cluster */
+.metric-block {
+  font-weight: 600;
+  color: #d1e9ff;
+}
+
+/* Tier highlights */
+.tier-Elite {
+  background: radial-gradient(circle, rgba(56,189,248,0.18), transparent);
+  color: #38bdf8;
+}
+
+.tier-Strong {
+  background: radial-gradient(circle, rgba(16,185,129,0.18), transparent);
+  color: #4ade80;
+}
+
+.tier-Slightly,
+.tier-Above,
+.tier-Average {
+  color: #e5e7eb;
+}
+
+.tier-Weak {
+  background: radial-gradient(circle, rgba(251,146,60,0.14), transparent);
+  color: #fb923c;
+}
+
+.tier-Fragile {
+  background: radial-gradient(circle, rgba(239,68,68,0.14), transparent);
+  color: #ef4444;
+}
+
+/* Improved spacing + clipping */
+.explain-table th,
+.explain-table td {
+  padding: 6px 8px;
+}
+
+.explain-table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Floating/sticky header on scroll */
+.explain-table thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(9, 12, 23, 0.96);
+  backdrop-filter: blur(4px);
+  z-index: 4;
+}
+
+/* Decorative top bar above each core traits section */
+.profile-section {
+  position: relative;
+}
+
+.profile-section::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 12px 12px 0 0;
+  background: linear-gradient(to right, #38bdf8, #1e3a8a);
+  opacity: 0.35;
+}
+
+/* Right-side metric block */
+.explain-table td.metric-block {
+  font-weight: 600;
+  color: #d1e9ff;
 }
 
 /* Rule row tier tints */
@@ -660,7 +1529,7 @@ select:focus {
   border-radius: 8px;
   background: rgba(9, 9, 15, 1);
   border: 1px solid rgba(31, 41, 55, 0.98);
-  font-size: 7.5px;
+  font-size: 9px;
   color: #9ca3af;
   display: none;
   white-space: pre-line;
@@ -680,7 +1549,7 @@ select:focus {
   justify-content: space-between;
   align-items: center;
   gap: 4px;
-  font-size: 8px;
+  font-size: 14px;
   border-top: 1px solid rgba(31, 41, 55, 0.98);
   color: #9ca3af;
 }
@@ -688,7 +1557,7 @@ select:focus {
 .subtotal-value {
   font-weight: 600;
   color: #38bdf8;
-  font-size: 9px;
+  font-size: 14px;
 }
 
 .team-total-row {
@@ -704,13 +1573,13 @@ select:focus {
 .team-total-row span:first-child {
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  font-size: 7px;
+  font-size: 14px;
   color: #9ca3af;
 }
 
 .team-total-value {
   font-weight: 700;
-  font-size: 11px;
+  font-size: 14px;
   color: #22c55e;
 }
 
@@ -724,9 +1593,19 @@ select:focus {
   background: rgba(9, 9, 15, 0.98);
   border: 1px solid rgba(31, 41, 55, 0.98);
   display: flex;
-  flex-direction: column;
   gap: 2px;
-  font-size: 8px;
+  font-size: 12px;
+  overflow: hidden;
+}
+
+/* Center résumé (and profile marks) FRONT faces only */
+.context-tile.flip-tile .tile-front {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* vertical center */
+  align-items: center;       /* horizontal center */
+  text-align: center;
+  height: 100%;
 }
 
 .context-header {
@@ -739,12 +1618,12 @@ select:focus {
 .context-label {
   font-weight: 600;
   color: #e5e7eb;
-  font-size: 8px;
+  font-size: 12px;
 }
 
 .context-score {
   font-weight: 600;
-  font-size: 9px;
+  font-size: 12px;
   color: #38bdf8;
 }
 
@@ -754,7 +1633,7 @@ select:focus {
   justify-content: space-between;
   gap: 6px;
   color: #9ca3af;
-  font-size: 7.5px;
+  font-size: 9px;
 }
 
 .context-tier {
@@ -779,6 +1658,38 @@ select:focus {
 
 .context-tile.context-neutral {
   border-color: rgba(55, 65, 81, 0.9);
+}
+
+/* === Identity Tile (CIS / FAS) === */
+
+.identity-tile {
+  margin-bottom: 6px;
+}
+
+/* Slightly tighten content inside identity tile */
+.identity-subrow {
+  justify-content: space-between;
+  width: 100%;
+}
+
+.identity-tile .context-score {
+  font-size: 14px;
+}
+
+/* Role-based tints for the identity tile */
+.identity-tile.identity-favorite {
+  border-color: rgba(249, 115, 22, 0.9);
+  box-shadow: 0 0 9px rgba(249, 115, 22, 0.32);
+}
+
+.identity-tile.identity-cinderella {
+  border-color: rgba(56, 189, 248, 0.9);
+  box-shadow: 0 0 9px rgba(56, 189, 248, 0.32);
+}
+
+.identity-tile.identity-neutral {
+  border-color: rgba(75, 85, 99, 0.95);
+  box-shadow: 0 0 6px rgba(31, 41, 55, 0.45);
 }
 
 /* ========== DEBUG PANEL ========== */
@@ -1030,6 +1941,20 @@ select:focus {
 @media (max-width: 600px) {
   .app-header h1 {
     font-size: 22px;
+  }
+
+  .enhanced-header {
+    padding: 20px 14px 18px;
+    border-radius: 18px;
+  }
+
+  .hero-title {
+    font-size: 24px;
+    letter-spacing: 0.14em;
+  }
+
+  .hero-logo {
+    max-height: 90px;
   }
 
   .version-badge {
