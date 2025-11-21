@@ -176,6 +176,7 @@ const ALIASES = {
   w: ['W', 'Wins'],
   l: ['L', 'Losses'],
   sos: ['SOS', 'sos', 'Sos'],
+  cgw: ['CGW%', 'CGW_pct', 'CGW pct', 'Close Game Win %'],
 
   // Shooting / FT / distribution
   threepr: ['3P Rate', '3P_Rate', '3PR', '3P_Att_Rate', '3PAr'],
@@ -190,6 +191,7 @@ const ALIASES = {
   opp_3pp: ['Opp3P%', 'Opp 3P%', 'Opp. 3PT%', 'Opp. 3PT pct'],
   def_efg: ['Def. eFG %', 'DEFG%', 'Opp eFG%', 'Opp eFG', 'Def. eFG_pct', 'Def. eFG pct'],
   opp_2p_pct: ['Opp2P%', 'Opp 2P%'],
+  oapp: ['Opp. Asst./Poss.', 'Opp Asst/Poss',],
 
   // Foul / FT rate
   ftr: ['FTR', 'FT Rate', 'FTr'],
@@ -307,6 +309,19 @@ function getTierLabelFromZ(z) {
   if (z >= 0.00) return 'Slightly Above / Average';
   if (z >= -0.80) return 'Weak';
   return 'Fragile';
+}
+
+function updateInteractionHeadersFromSelections() {
+  const selectA = document.getElementById('teamA');
+  const selectB = document.getElementById('teamB');
+  const adjAHeader = document.getElementById('adjAHeader');
+  const adjBHeader = document.getElementById('adjBHeader');
+
+  const aTeam = selectA?.value ? getTeamByName(selectA.value) : null;
+  const bTeam = selectB?.value ? getTeamByName(selectB.value) : null;
+
+  if (adjAHeader) adjAHeader.textContent = `Adj to ${aTeam?.name || 'Team A'}`;
+  if (adjBHeader) adjBHeader.textContent = `Adj to ${bTeam?.name || 'Team B'}`;
 }
 
 // ---------- CSV Parsing & Initialization ----------
@@ -683,6 +698,17 @@ function computeCoreForTeam(team) {
       points: wOffDef * zDef,
     },
     {
+      key:   'adjem',
+      label: 'Adj. Efficiency Margin',
+      mean:  fsAdjEM.mean,
+      sd:    fsAdjEM.sd,
+      value: team.adjem,
+      z:     zAdjEM,
+      tier:  L(zAdjEM),
+      weight: wAdjEM,
+      points: wAdjEM * zAdjEM,
+    },
+    {
       key:   'ts',
       label: 'True Shooting %',
       mean:  fsTS.mean,
@@ -737,17 +763,6 @@ function computeCoreForTeam(team) {
       weight: wPoss,
       points: wPoss * zTO,
     },
-    {
-      key:   'adjem',
-      label: 'Adj. Efficiency Margin',
-      mean:  fsAdjEM.mean,
-      sd:    fsAdjEM.sd,
-      value: team.adjem,
-      z:     zAdjEM,
-      tier:  L(zAdjEM),
-      weight: wAdjEM,
-      points: wAdjEM * zAdjEM,
-    },
   ];
 }
 
@@ -801,10 +816,6 @@ function computeBreadthForTeam(team) {
 }
 
 // ---------- Résumé Context Score (R) — MI_base Component ----------
-//
-// v3.2: Résumé Context is a low-impact, opponent-independent credibility
-// layer that blends record (wp) and schedule hardness (P).
-// It is added directly into MI_base and is NOT treated as a “neutral modifier.”
 
 function computeResumeContextForTeam(team) {
   // If we’re missing résumé data or field stats, treat as neutral résumé.
@@ -822,8 +833,6 @@ function computeResumeContextForTeam(team) {
   const z_wp = zScore(team.wp, FIELD_STATS.wp.mean, FIELD_STATS.wp.sd || 0.00001);
   const z_P  = zScore(team.P,  FIELD_STATS.P.mean,  FIELD_STATS.P.sd  || 0.00001);
 
-  // 2) Résumé Context Index (R)
-  //    v3.2: balance record success and schedule hardness equally
   const R = (z_wp + z_P) / 2;
 
   // 3) Map R into global z-tier bands (same system used elsewhere),
@@ -862,10 +871,7 @@ function computeResumeContextForTeam(team) {
 }
 
 // ---------- Interaction Metrics (Directional, Tiered, Half-Mirrored) ----------
-// expects: getZ(team, key, invert=false), FIELD_STATS with wp/P for resume
-// note: 3P keys = threepr (rate), threepp (pct); Glass uses scpg (extra scoring chances)
 
-// Tier map used by all half-mirrored interactions
 function halfMirroredAdjust(gap) {
   const mag = Math.abs(gap);
   if (mag < 0.50) return 0;
@@ -1039,7 +1045,179 @@ function interactionResume(a, b) {
   if (gap > 0) _applyToA(base, 'resume'); else if (gap < 0) _applyToB(base, 'resume');
 }
 
-/* Bundle all interactions */
+/* 7) Physicality / Contact Tolerance */
+function interactionPhysicality(a, b) {
+  // Offensive physicality: lives in contact and the paint
+  const physOffA = (
+    getZ(a, 'ftr') +          // draw fouls
+    getZ(a, 'pct_pts_2') +    // % of points from 2s
+    getZ(a, 'nb2')            // non-blocked 2s
+  ) / 3;
+
+  const physOffB = (
+    getZ(b, 'ftr') +
+    getZ(b, 'pct_pts_2') +
+    getZ(b, 'nb2')
+  ) / 3;
+
+  // Defensive contact tolerance: rim resistance + foul discipline
+  const tolDefA = (
+    getZ(a, 'blk') +              // rim challenge
+    getZ(a, 'def_efg', true) +    // invert: lower Def eFG% = better
+    getZ(a, 'opp_ftr', true)      // invert: lower OppFTR = better discipline
+  ) / 3;
+
+  const tolDefB = (
+    getZ(b, 'blk') +
+    getZ(b, 'def_efg', true) +
+    getZ(b, 'opp_ftr', true)
+  ) / 3;
+
+  const gapA = physOffA - tolDefB; // A's physical style vs B's tolerance
+  const gapB = physOffB - tolDefA; // B's physical style vs A's tolerance
+
+  // Choose the stronger directional signal, then half-mirror
+  if (Math.abs(gapA) >= Math.abs(gapB)) {
+    const base = halfMirroredAdjust(gapA);
+    if (!base) return;
+    if (gapA > 0) _applyToA(base, 'phys');  // A's physicality stresses B
+    else          _applyToB(base, 'phys');  // B's interior toughness wins
+  } else {
+    const base = halfMirroredAdjust(gapB);
+    if (!base) return;
+    if (gapB > 0) _applyToB(base, 'phys');
+    else          _applyToA(base, 'phys');
+  }
+}
+
+/* 8) Shot Quality / Shot Discipline */
+function interactionShotQuality(a, b) {
+  // Offensive shot quality: efficiency + geometry + clean interior looks
+  const sqA = (
+    getZ(a, 'efg') +          // overall shot efficiency
+    getZ(a, 'threepr') +      // 3P rate (spacing / geometry)
+    getZ(a, 'nb2')            // non-blocked 2s (clean paint looks)
+  ) / 3;
+
+  const sqB = (
+    getZ(b, 'efg') +
+    getZ(b, 'threepr') +
+    getZ(b, 'nb2')
+  ) / 3;
+
+  // Defensive shot discipline: suppress eFG and assisted, in-rhythm looks
+  const sdA = (
+    getZ(a, 'def_efg', true) +      // invert: lower Def eFG% = better
+    getZ(a, 'opp_ast_poss', true)   // invert: lower opp AST/poss = more disruption
+  ) / 2;
+
+  const sdB = (
+    getZ(b, 'def_efg', true) +
+    getZ(b, 'opp_ast_poss', true)
+  ) / 2;
+
+  const gapA = sqA - sdB; // A's shot diet vs B's ability to distort it
+  const gapB = sqB - sdA; // B's shot diet vs A's disruption
+
+  if (Math.abs(gapA) >= Math.abs(gapB)) {
+    const base = halfMirroredAdjust(gapA);
+    if (!base) return;
+    if (gapA > 0) _applyToA(base, 'shotq'); // A keeps its shot diet intact
+    else          _applyToB(base, 'shotq'); // B meaningfully distorts A
+  } else {
+    const base = halfMirroredAdjust(gapB);
+    if (!base) return;
+    if (gapB > 0) _applyToB(base, 'shotq');
+    else          _applyToA(base, 'shotq');
+  }
+}
+
+/* 9) Variance Sensitivity */
+function interactionVariance(a, b) {
+  // --- Helper: Turnover Fragility index (same logic as the mark, but numeric)
+  function getTurnoverFragility(team) {
+    // stability = good if -TO% high and EPR high
+    const stability = (-getZ(team, 'to') + getZ(team, 'epr')) / 2;
+    // fragility = inverse of stability
+    return -stability;
+  }
+
+  // --- Helper: small bonus for shot-volatility marks
+  function getVarianceMarkBonus(team) {
+    const marks = Array.isArray(team.profileMarks) ? team.profileMarks : [];
+    let bonus = 0;
+
+    if (marks.includes('Unstable Perimeter Profile — Severe')) bonus += 0.10;
+    else if (marks.includes('Unstable Perimeter Profile — Moderate')) bonus += 0.05;
+
+    if (marks.includes('Cold Arc Team — Severe')) bonus += 0.10;
+    else if (marks.includes('Cold Arc Team — Moderate')) bonus += 0.05;
+
+    return bonus;
+  }
+
+  // Variance Exposure Index (VEI): how volatile this team's style is
+  function getVEI(team) {
+    const threeVol   = getZ(team, 'threepr');        // high 3P rate → more variance
+    const lowFTR     = getZ(team, 'ftr', true);      // low FTR → fewer stabilizing FTs
+    const lowORB     = getZ(team, 'orb', true);      // low ORB → fewer extra chances
+    const toFrag     = getTurnoverFragility(team);   // bad TO/EPR mix → volatility
+    const markBonus  = getVarianceMarkBonus(team);   // add small boost for bad marks
+
+    return (
+      0.40 * threeVol +
+      0.20 * lowFTR +
+      0.20 * lowORB +
+      0.20 * toFrag +
+      markBonus
+    );
+  }
+
+  // Opponent Stabilization Index (OSI): how much this team suppresses volatility
+  function getOSI(team) {
+    const press     = getZ(team, 'otpp');          // forces TOs → punishes fragile styles
+    const dReb      = getZ(team, 'drb');           // strong DRB → removes 2nd-chance safety
+    const ftDisc    = getZ(team, 'opp_ftr', true); // invert: lower OppFTR = fewer free points
+    const perimDisc = getZ(team, 'opp_3pp', true); // invert: lower Opp3P% = stabilizes 3-happy foes
+
+    return (press + dReb + ftDisc + perimDisc) / 4;
+  }
+
+  const veiA = getVEI(a);
+  const veiB = getVEI(b);
+  const osiA = getOSI(a);
+  const osiB = getOSI(b);
+
+  // "Risk exposure" for each side: how much their volatility is *exposed* by this opponent
+  const riskA = veiA - osiB;
+  const riskB = veiB - osiA;
+
+  // We treat higher risk as a liability and award leverage to the more stable side
+  if (Math.abs(riskA) >= Math.abs(riskB)) {
+    const base = halfMirroredAdjust(riskA);
+    if (!base) return;
+
+    if (riskA > 0) {
+      // A's volatility is exposed by B → favors B
+      _applyToB(base, 'var');
+    } else if (riskA < 0) {
+      // B cannot meaningfully punish A's volatility → favors A (A effectively more stable here)
+      _applyToA(base, 'var');
+    }
+  } else {
+    const base = halfMirroredAdjust(riskB);
+    if (!base) return;
+
+    if (riskB > 0) {
+      // B's volatility is exposed by A → favors A
+      _applyToA(base, 'var');
+    } else if (riskB < 0) {
+      // A cannot meaningfully punish B's volatility → favors B
+      _applyToB(base, 'var');
+    }
+  }
+}
+
 function computeInteractions(a, b) {
   __INT = { a: 0, b: 0, breakdown: {} }; // reset
 
@@ -1049,6 +1227,9 @@ function computeInteractions(a, b) {
   interactionTO(a, b);
   interactionGlass(a, b);
   interactionResume(a, b);
+  interactionPhysicality(a, b);
+  interactionShotQuality(a, b);
+  interactionVariance(a, b);
 
   return { a: __INT.a, b: __INT.b, breakdown: __INT.breakdown };
 }
@@ -1247,6 +1428,12 @@ function computeStaticIdentities() {
     const P = perfMap.get(team.name) ?? 0.5;
     team.performancePercentile = P;
 
+  // 1–99 Madness Index Rating (cosmetic, based on MI_base percentile)
+  let rating = Math.round(P * 100);
+  if (rating < 1) rating = 1;
+  if (rating > 99) rating = 99;
+  team.mi_rating = rating;    
+
     const Sf = (17 - s) / 16; // favorite-side index
     const Su = (s - 1) / 16;  // underdog-side index
 
@@ -1316,17 +1503,6 @@ function computeMIBase(team) {
 }
 
 // ---------- Matchup Madness Index (MI_matchup) ----------
-// Section 7 — v3.2 Final
-// MI_matchup = MI_base + INT
-//
-// Where:
-//   MI_base = MIBS + BreadthBonus + resumeAdj
-//   INT     = total Interaction Leverage for this matchup (sum of 6 interactions)
-//
-// This function returns the *matchup-specific* Madness Index used for:
-//   - Predicted winner
-//   - ΔMI gap
-//   - Lean strength
 
 function computeFinalMI(team, interactionAdj) {
   // Safeguard: ensure MI_base exists
@@ -1430,6 +1606,7 @@ function populateTeamDropdowns() {
   // When teams change, re-calc which rounds are possible
   const onTeamChange = () => {
     updateRoundOptionsForCurrentSeeds();
+    updateInteractionHeadersFromSelections();
   };
 
   selectA.addEventListener('change', onTeamChange);
@@ -1664,77 +1841,119 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
 
 function renderInteractionsTable(result) {
   const table = document.getElementById('interactionsTable');
+  const totalsBar = document.getElementById('interactionTotalsBar');
   if (!table) return;
 
-  const labels = {
+  // ==== Full canonical interaction list (ALWAYS displayed) ====
+  const ORDER = [
+    '3pt', 'ft', 'paint', 'to', 'glass', 'resume', 'phys', 'shotq', 'var'
+  ];
+
+  const LABEL = {
     '3pt':   '3PT Tension',
     'ft':    'FT Pressure',
     'paint': 'Paint Tension',
     'to':    'Turnover Pressure',
     'glass': 'Glass Tension',
-    'resume': 'Résumé Pressure',
+    'resume':'Résumé Pressure',
+    'phys':  'Physicality / Contact Tolerance',
+    'shotq': 'Shot Quality / Discipline',
+    'var':   'Variance Sensitivity',
   };
 
+  const DOMAIN = {
+    '3pt':   'Shooting',
+    'ft':    'Pressure',
+    'paint': 'Pressure',
+    'to':    'Pressure',
+    'glass': 'Glass',
+    'resume':'Résumé',
+    'phys':  'Physicality',
+    'shotq': 'Shooting',
+    'var':   'Variance',
+  };
+
+  const intensityLabel = (val) => {
+    const x = Math.abs(val);
+    if (x >= 0.50) return 'Major';
+    if (x >= 0.25) return 'Moderate';
+    return 'Minor';
+  };
+
+  // ===== Team names (robust fallback) =====
+  const aName = result?.a?.name || result?.teamA?.name || result?.a?.team || "Team A";
+  const bName = result?.b?.name || result?.teamB?.name || result?.b?.team || "Team B";
+
+  // ===== Update table headers =====
+  const adjAHeader = document.getElementById("adjAHeader");
+  const adjBHeader = document.getElementById("adjBHeader");
+  if (adjAHeader) adjAHeader.textContent = `Adj to ${aName}`;
+  if (adjBHeader) adjBHeader.textContent = `Adj to ${bName}`;
+
   const breakdown = result.interactions?.breakdown || {};
+  const tbody = table.querySelector("tbody");
+  tbody.innerHTML = "";
 
-  // --- update the existing HTML headers (do NOT rebuild thead) ---
-  const adjAHeader = document.getElementById('adjAHeader');
-  const adjBHeader = document.getElementById('adjBHeader');
-  if (adjAHeader) adjAHeader.textContent = `Adj to ${result.a.name}`;
-  if (adjBHeader) adjBHeader.textContent = `Adj to ${result.b.name}`;
+  // ===== Always render ALL interactions =====
+  ORDER.forEach((key, i) => {
+    const raw = breakdown[key];   // may be undefined, numeric, or object
+    let aAdj = 0, bAdj = 0, edgeText = 'EVEN';
 
-  const tbody = table.querySelector('tbody');
-  if (!tbody) return;
-
-  const rows = Object.entries(labels).map(([key, label]) => {
-    const val  = breakdown[key] || 0;
-    const aAdj = val;
-    const bAdj = -val;
-
-    let rowClass  = 'int-row-even';
-    let edgeLabel = 'Even';
-    let edgeClass = 'int-edge-even';
-
-    if (val > 0.0001) {
-      rowClass  = 'int-row-A';
-      edgeLabel = `Favors ${result.a.name}`;
-      edgeClass = 'int-edge-A';
-    } else if (val < -0.0001) {
-      rowClass  = 'int-row-B';
-      edgeLabel = `Favors ${result.b.name}`;
-      edgeClass = 'int-edge-B';
+    if (typeof raw === 'number') {
+      aAdj = raw;
+      bAdj = -raw;
+      if (raw > 0) edgeText = `FAVORS ${aName}`;
+      else if (raw < 0) edgeText = `FAVORS ${bName}`;
+    }
+    else if (raw && typeof raw === 'object') {
+      aAdj = raw.aAdj ?? 0;
+      bAdj = raw.bAdj ?? 0;
+      edgeText = raw.edge || 'EVEN';
     }
 
-    return `
+    const intensity = intensityLabel(aAdj);
+
+    let pillClass = 'int-edge-even';
+    if (aAdj > 0) pillClass = 'int-edge-A';
+    if (aAdj < 0) pillClass = 'int-edge-B';
+
+    const rowClass = i % 2 === 0 ? "int-row-even" : "int-row-odd";
+
+    tbody.innerHTML += `
       <tr class="${rowClass}">
-        <td>${label}</td>
-        <td>
-          <span class="int-edge-pill ${edgeClass}">
-            ${edgeLabel}
-          </span>
-        </td>
-        <td>${fmt(aAdj, 3)}</td>
-        <td>${fmt(bAdj, 3)}</td>
+        <td class="int-name">${LABEL[key]}</td>
+        <td class="col-domain">${DOMAIN[key]}</td>
+        <td class="int-edge"><span class="int-edge-pill ${pillClass}">${edgeText}</span></td>
+        <td class="col-intensity">${intensity}</td>
+        <td class="int-adj ${aAdj >= 0 ? 'pos' : 'neg'}">${fmt(aAdj, 3)}</td>
+        <td class="int-adj ${bAdj >= 0 ? 'pos' : 'neg'}">${fmt(bAdj, 3)}</td>
       </tr>
     `;
-  }).join('');
+  });
 
+  // ===== Totals Bar =====
   const totalA = result.interactions?.a || 0;
   const totalB = result.interactions?.b || 0;
 
-  const totalsRow = `
-    <tr class="interaction-total">
-      <td><strong>Total Interaction Leverage</strong></td>
-      <td></td>
-      <td><strong>${fmt(totalA, 3)}</strong></td>
-      <td><strong>${fmt(totalB, 3)}</strong></td>
-    </tr>
-  `;
+  if (totalsBar) {
+    const favored =
+      totalA > totalB ? aName :
+      totalB > totalA ? bName :
+      'EVEN';
 
-  // Only replace the body; leave the header alone
-  tbody.innerHTML = rows + totalsRow;
+    totalsBar.innerHTML = `
+      <div class="totals-left">
+        <div class="totals-title">Total Interaction Leverage</div>
+        <div class="totals-favored">FAVORS <span>${favored}</span></div>
+      </div>
+      <div class="totals-right">
+        <div class="totals-val ${totalA >= 0 ? 'pos' : 'neg'}">${fmt(totalA, 3)}</div>
+        <div class="totals-sep">/</div>
+        <div class="totals-val ${totalB >= 0 ? 'pos' : 'neg'}">${fmt(totalB, 3)}</div>
+      </div>
+    `;
+  }
 }
-
 
 // ========== RENDER PROFILE MARK BADGES ==========
 function renderProfileMarks(team, containerId) {
@@ -1947,6 +2166,75 @@ function renderNeutralTable(team, mi, interactionsTotal, tableId, subtotalSpanId
   subtotalSpan.textContent = fmt(neutralSubtotal, 3);
 }
 
+function buildTeamSummary(team, opponent, result, side) {
+  const isA = side === 'A';
+
+  const coreRows = team.coreDetails || [];
+  let strongest = null, weakest = null;
+  if (coreRows.length) {
+    strongest = coreRows.reduce((best, r) => r.points > (best?.points ?? -Infinity) ? r : best, null);
+    weakest   = coreRows.reduce((worst, r) => r.points < (worst?.points ?? Infinity) ? r : worst, null);
+  }
+
+  const breadthHits = team.breadthHits ?? 0;
+  const breadthScore = team.breadth ?? 0;
+  const resumeScore  = team.resumeR ?? 0;
+  const resumeTier   = team.resumeRTier || 'Average';
+
+  const marks = Array.isArray(team.profileMarks) ? team.profileMarks : [];
+  const severeCount   = marks.filter(m => m.includes('Severe')).length;
+  const moderateCount = marks.filter(m => m.includes('Moderate')).length;
+
+  // If you have interactions labeled with swings, grab top 1–2
+  const intSide = isA ? result.interactions.a : result.interactions.b;
+  const topInts = (intSide?.details || [])
+    .slice()
+    .sort((x, y) => Math.abs(y.points) - Math.abs(x.points))
+    .slice(0, 2);
+
+  // Opponent context (seed / MI gap etc if you want)
+  const oppSeed = opponent?.seed;
+  const mySeed  = team?.seed;
+
+  // Build short clauses
+  const coreClause = (strongest && weakest)
+    ? `${strongest.label} is the main edge, while ${weakest.label} is the soft spot.`
+    : `Core Traits show this team’s main statistical shape.`;
+
+  const breadthClause = (breadthScore > 0)
+    ? `${breadthHits} Above-Average hits earn a Breadth Bonus of +${fmt(breadthScore,3)}.`
+    : `Breadth is neutral — strengths are concentrated rather than spread out.`;
+
+  const resumeClause = (resumeScore > 0.0001)
+    ? `${resumeTier} résumé adds +${fmt(resumeScore,3)}.`
+    : (resumeScore < -0.0001)
+      ? `${resumeTier} résumé subtracts ${fmt(resumeScore,3)}.`
+      : `${resumeTier} résumé is neutral.`;
+
+  const marksClause = (!marks.length)
+    ? `No Profile Marks — clean structural profile.`
+    : (severeCount > 0)
+      ? `${severeCount} Severe / ${moderateCount} Moderate marks flag volatility or structural risk.`
+      : `${moderateCount} Moderate marks flag matchup-sensitive weaknesses.`;
+
+  const interactionClause = (topInts.length)
+    ? `Biggest matchup swing: ${topInts.map(i => `${i.label} (${fmt(i.points,3)})`).join(', ')}.`
+    : `No major matchup leverage flagged.`;
+
+  return {
+    strongest,
+    weakest,
+    coreClause,
+    breadthClause,
+    resumeClause,
+    marksClause,
+    interactionClause,
+    severeCount,
+    moderateCount,
+    breadthHits
+  };
+}
+
 function renderTeamSide(side, result) {
   const isA   = side === 'A';
   const team  = isA ? result.a   : result.b;
@@ -1966,6 +2254,8 @@ function renderTeamSide(side, result) {
   const core    = team.mibs    || 0;
   const breadth = team.breadth || 0;
   const resume  = team.resumeR || 0;
+  const opponent = isA ? result.b : result.a;
+  const summary = buildTeamSummary(team, opponent, result, side);
 
   // Baseline profile subtotal and MI_base
   const profileSubtotal = core + breadth;
@@ -2185,6 +2475,62 @@ function renderTeamSide(side, result) {
         + levelText;
     }
   }
+  // ============================================================
+  // MINI-TILE BACKS (Core mini tile, Résumé mini tile, Marks mini tile)
+  // ============================================================
+
+  // ----- Core Traits Mini Tile Back -----
+  const coreTileBackEl     = document.getElementById(isA ? 'backCoreTileA'     : 'backCoreTileB');
+  const breadthTileBackEl  = document.getElementById(isA ? 'backBreadthTileA'  : 'backBreadthTileB');
+
+  if (coreTileBackEl) {
+    const rows = team.coreDetails || [];
+    let strongest = null;
+    let weakest   = null;
+
+    if (rows.length) {
+      strongest = rows.reduce(
+        (best, r) => (r.points > (best?.points ?? -Infinity) ? r : best),
+        null
+      );
+      weakest = rows.reduce(
+        (worst, r) => (r.points < (worst?.points ??  Infinity) ? r : worst),
+        null
+      );
+    }
+
+    if (strongest && weakest) {
+      coreTileBackEl.textContent =
+        `${strongest.label} is this team's strongest Core Trait, while ` +
+        `${weakest.label} is the weakest.`;
+    } else {
+      coreTileBackEl.textContent =
+        `Core Traits summarize eight field-normalized strengths that form the Core score.`;
+    }
+  }
+
+  if (breadthTileBackEl) {
+    const hits = team.breadthHits != null ? team.breadthHits : 0;
+    if (breadthScore > 0) {
+      breadthTileBackEl.textContent =
+        `Breadth Bonus: ${hits} Above-Average strengths → +${fmt(breadthScore, 3)}.`;
+    } else {
+      breadthTileBackEl.textContent =
+        `No Breadth Bonus: strengths are more concentrated in fewer areas.`;
+    }
+  }
+
+  // ----- Résumé Mini Tile Back -----
+  const resumeTileBackEl = document.getElementById(isA ? 'backResumeTileA' : 'backResumeTileB');
+  if (resumeTileBackEl) {
+    resumeTileBackEl.textContent = resumeEl?.textContent || '';
+  }
+
+  // ----- Profile Marks Mini Tile Back -----
+  const marksTileBackEl = document.getElementById(isA ? 'backMarksTileA' : 'backMarksTileB');
+  if (marksTileBackEl) {
+    marksTileBackEl.textContent = marksEl?.textContent || '';
+  }
 }
 
 function renderTeamCards(result) {
@@ -2211,22 +2557,20 @@ function updateRoundOptionsForCurrentSeeds() {
   const teamAName = selectA?.value || '';
   const teamBName = selectB?.value || '';
 
-  // Helper: show all rounds + reset label
   const showAllRounds = () => {
     roundDropdown.querySelectorAll(".round-option").forEach(opt => {
-      opt.style.display = ""; // revert to CSS default
+      opt.style.display = "";
     });
     CURRENT_ROUND = null;
     roundBtn.textContent = "Select Round";
   };
 
-  // 🔹 Sandbox Mode: never restrict by seeds
+  // Sandbox = no restrictions
   if (SANDBOX_MODE) {
     showAllRounds();
     return;
   }
 
-  // If we don't have both teams, just show all rounds and wait
   if (!teamAName || !teamBName) {
     showAllRounds();
     return;
@@ -2236,7 +2580,6 @@ function updateRoundOptionsForCurrentSeeds() {
   const teamB = getTeamByName(teamBName);
 
   if (!teamA || !teamB || teamA.seed == null || teamB.seed == null) {
-    // No usable seed info → don't restrict rounds
     showAllRounds();
     return;
   }
@@ -2245,14 +2588,10 @@ function updateRoundOptionsForCurrentSeeds() {
 
   roundDropdown.querySelectorAll(".round-option").forEach(opt => {
     const code = opt.getAttribute("data-round");
-    if (allowedRounds.has(code)) {
-      opt.style.display = "";
-    } else {
-      opt.style.display = "none";
-    }
+    opt.style.display = allowedRounds.has(code) ? "" : "none";
   });
 
-  // Force user to explicitly pick a valid round for this seed combo
+  // Force user to pick a compatible round
   CURRENT_ROUND = null;
   roundBtn.textContent = "Select Round";
 }
@@ -2283,6 +2622,7 @@ function setupEventListeners() {
       reader.onload = (ev) => {
         try {
           const { headers, rows } = parseCSV(ev.target.result);
+          RAW_ROWS = rows;
           console.log('[MI] CSV headers:', headers);
           console.log('[MI] First data row:', rows[0]);
 
@@ -2318,57 +2658,49 @@ function setupEventListeners() {
     document.getElementById('runCompare');
 
   if (compareBtn) {
-    compareBtn.addEventListener('click', () => {
-      const selectA =
-        document.getElementById('teamA') ||
-        document.getElementById('teamASelect') ||
-        document.getElementById('cindTeamSelect');
+  compareBtn.addEventListener('click', () => {
+    console.log('[MI] Compare button clicked');
 
-      const selectB =
-        document.getElementById('teamB') ||
-        document.getElementById('teamBSelect') ||
-        document.getElementById('favTeamSelect');
+    if (!RAW_ROWS || RAW_ROWS.length === 0) {
+      alert('Please upload the tournament CSV first.');
+      return;
+    }
 
-      if (!selectA || !selectB || !selectA.value || !selectB.value) {
-        alert('Please select both teams before comparing.');
+    const selectA = document.getElementById('teamA');
+    const selectB = document.getElementById('teamB');
+
+    if (!selectA || !selectB || !selectA.value || !selectB.value) {
+      alert('Please select both teams before comparing.');
+      return;
+    }
+
+    const teamA = getTeamByName(selectA.value);
+    const teamB = getTeamByName(selectB.value);
+
+    if (!teamA || !teamB) {
+      alert('Selected teams are not recognized. Try reloading the data.');
+      return;
+    }
+
+    if (!CURRENT_ROUND) {
+      alert('Please select a round before comparing.');
+      return;
+    }
+
+    // 🔥 ONLY enforce legal rounds when Sandbox mode is OFF
+    if (!SANDBOX_MODE) {
+      const allowedRounds = getPossibleRoundsForSeeds(teamA.seed, teamB.seed);
+      if (!allowedRounds.includes(CURRENT_ROUND)) {
+        alert(
+          `As seeds ${teamA.seed} and ${teamB.seed}, these teams can only meet in: ` +
+          allowedRounds.map(getRoundLabelFromCode).join(', ') +
+          `. Please choose one of those rounds.`
+        );
         return;
       }
+    }
 
-      const teamA = getTeamByName(selectA.value);
-      const teamB = getTeamByName(selectB.value);
-
-      if (!teamA || !teamB) {
-        alert('Selected teams are not recognized. Try reloading the data.');
-        return;
-      }
-
-      // A round must always be chosen
-      if (!CURRENT_ROUND) {
-        alert('Please select a round before comparing.');
-        return;
-      }
-
-      // In normal mode, enforce seed–round compatibility.
-      // In SANDBOX_MODE, skip this check and allow *any* round.
-      if (!SANDBOX_MODE) {
-        const allowedRounds = getPossibleRoundsForSeeds(teamA.seed, teamB.seed);
-        if (!allowedRounds.includes(CURRENT_ROUND)) {
-          alert(
-            `As seeds ${teamA.seed} and ${teamB.seed}, these teams can only meet in: ` +
-            allowedRounds.map(getRoundLabelFromCode).join(', ') +
-            `. Please choose one of those rounds.`
-          );
-          return;
-        }
-      }
-
-      console.log('[MI] Compare click:', {
-        teamA: selectA.value,
-        teamB: selectB.value,
-        round: CURRENT_ROUND,
-        sandbox: SANDBOX_MODE,
-      });
-
+      console.log('[MI] Running compareTeams...');
       compareTeams(selectA.value, selectB.value);
     });
   }

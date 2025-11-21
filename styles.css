@@ -719,18 +719,23 @@ select:focus {
 .round-selector-wrap {
   position: relative;
   display: inline-block;
+  z-index: 200;
+  overflow: visible;
 }
 
 .round-dropdown {
   position: absolute;
-  top: 33px;
+
+  /* Anchor directly under the button, not a hardcoded pixel offset */
+  top: calc(100% + 6px);
   left: 0;
+
   min-width: 140px;
   background: rgba(9, 12, 23, 0.98);
   border: 1px solid rgba(75, 85, 99, 0.9);
   border-radius: 10px;
   padding: 6px 0;
-  z-index: 50;
+  z-index: 201; /* just above the wrapper */
   box-shadow: 0 8px 20px rgba(0,0,0,0.5);
 }
 
@@ -785,7 +790,7 @@ select:focus {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr 2.2fr 1fr;
   gap: 8px;
 }
 
@@ -846,7 +851,7 @@ select:focus {
 
 /* Make the center "MATCHUP EDGE" header stand out */
 .summary-table th.summary-matchup-header {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -891,7 +896,7 @@ select:focus {
 
 .summary-lean-text {
   margin-top: 4px;
-  font-size: 12px;
+  font-size: 14px;
   color: #cbd5f5;
 }
 
@@ -908,13 +913,13 @@ select:focus {
 /* Center headers in the Scorecards & Matchup Summary table */
 .summary-table th {
   text-align: center !important;
-  font-size: 12px;
+  font-size: 16px;
   letter-spacing: 0.06em;
   color: #dbeafe; /* same faint-blue as other headings */
 }
 
 .summary-team-label {
-  font-size: 11px;
+  font-size: 16px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #9ca3af;
@@ -922,25 +927,25 @@ select:focus {
 }
 
 .summary-team-name {
-  font-size: 13px;
+  font-size: 18px;
   font-weight: 600;
   color: #e5e7eb;
   margin-bottom: 2px;
 }
 
 .summary-mi-line {
-  font-size: 11px;
+  font-size: 16px;
   color: #cbd5f5;
   margin-bottom: 1px;
 }
 
 .summary-int-line {
-  font-size: 10px;
+  font-size: 14px;
   color: #9ca3af;
 }
 
 .summary-delta-label {
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #9ca3af;
@@ -948,19 +953,19 @@ select:focus {
 }
 
 .summary-delta-value {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   color: #38bdf8;
   margin-bottom: 2px;
 }
 
 .summary-pred-line {
-  font-size: 11px;
+  font-size: 18px;
   margin-bottom: 2px;
 }
 
 .summary-lean-text {
-  font-size: 11px;
+  font-size: 16px;
   color: #cbd5f5;
 }
 
@@ -1043,7 +1048,7 @@ select:focus {
   justify-content: center;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -1097,6 +1102,55 @@ select:focus {
 
 .interaction-total td {
   padding-top: 6px;
+}
+
+/* ========== INTERACTIONS SECTION (make it a full layer) ========== */
+.interactions-card {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.interactions-card .legend-header h3 {
+  font-size: 13px;          /* match other section headers */
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #f9fafb;
+  margin-bottom: 6px;
+}
+
+.interactions-card .summary-help {
+  font-size: 12px;          /* same as summary help text */
+  margin-bottom: 6px;
+}
+
+/* Wider interpretive columns */
+.interaction-table th.col-domain,
+.interaction-table td.col-domain {
+  width: 14%;
+  text-align: center;
+  color: #aab3c5;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.interaction-table th.col-intensity,
+.interaction-table td.col-intensity {
+  width: 12%;
+  text-align: center;
+  font-weight: 700;
+  color: #e7e9ee;
+}
+
+/* Rebalance other columns a bit */
+.interaction-table th:first-child,
+.interaction-table td:first-child {
+  width: 28%;
+}
+
+.interaction-table th:nth-child(3),
+.interaction-table td:nth-child(3) {
+  width: 22%;
 }
 
 /* ========== MAIN RESULT LAYOUT ========== */
@@ -1227,6 +1281,11 @@ select:focus {
 .card-back-content h3 {
   margin: 0 0 4px;
   font-size: 10px;
+}
+
+.card.controls-card {
+  position: relative;
+  overflow: visible;
 }
 
 .back-line {
@@ -1908,6 +1967,249 @@ select:focus {
 .badge-key-card.collapsed .badge-key-content {
   display: none;
 }
+
+/* ROUND DROPDOWN — FINAL OVERRIDE (keep at bottom) */
+.round-selector-wrap{
+  position: relative;
+  display: inline-block;
+  z-index: 500;
+  overflow: visible;
+}
+
+.round-dropdown{
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 160px;
+  z-index: 501;
+  max-height: 260px;      /* prevents off-screen clipping */
+  overflow-y: auto;
+}
+
+.controls-card,
+.top-bar{
+  overflow: visible;
+  position: relative;
+  z-index: 10;
+}
+
+/* Match Identity tile height to the Resume/Marks tiles */
+.identity-tile .flip-tile-inner {
+  min-height: 90px;   /* or 100px if you want even more room */
+}
+
+/* ===== INTERACTIONS: 2-tile grid ===== */
+.interactions-card { padding: 12px; }
+
+.interactions-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+  margin-top: 8px;
+}
+
+.interactions-left { width: 100%; }
+
+.interactions-explain-tile{
+  background: rgba(9, 9, 15, 0.96);
+  border: 1px solid rgba(75, 85, 99, 0.9);
+  border-radius: 12px;
+  padding: 12px;
+  min-height: 100%;
+}
+
+.interactions-explain-tile h4{
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.interactions-explain-tile ul{
+  font-size: 12px;
+  line-height: 1.5;
+  padding-left: 16px;
+  margin: 0 0 10px 0;
+  color: #d6dbe6;
+}
+
+.interactions-explain-tile .explain-note{
+  font-size: 11.5px;
+  color: #aeb6c6;
+  background: rgba(15,23,42,0.6);
+  border-radius: 10px;
+  padding: 8px;
+}
+
+/* ===== TABLE: cohesive width + hierarchy ===== */
+.interaction-table{
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: rgba(7, 8, 12, 0.98);
+  border: 1px solid rgba(75, 85, 99, 0.9);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 12px;
+}
+
+.interaction-table thead th{
+  background: rgba(15, 23, 42, 0.95);
+  color: #e5e7eb;
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(148, 163, 253, 0.35);
+}
+
+.interaction-table td{
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(30, 41, 59, 0.9);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.interaction-table tbody tr:last-child td{ border-bottom: none; }
+
+.interaction-table .int-name{
+  text-align: left;
+  padding-left: 10px;
+  width: 30%;
+  font-weight: 700;
+  color: #f3f4f6;
+}
+
+.interaction-table .col-domain{ width: 14%; color: #aab3c5; font-weight: 700; }
+.interaction-table .int-edge{ width: 22%; }
+.interaction-table .col-intensity{ width: 12%; font-weight: 800; }
+.interaction-table .int-adj{ width: 11%; font-weight: 700; }
+
+/* Row striping / hover */
+.int-row-even{ background: rgba(8, 12, 20, 0.9); }
+.int-row-odd{ background: rgba(10, 15, 26, 0.9); }
+.interaction-table tbody tr:hover{
+  background: rgba(56, 189, 248, 0.06);
+}
+
+/* ===== RESTORED EDGE PILLS ===== */
+.int-edge-pill{
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.int-edge-A{
+  color: #67e8f9;
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.20);
+}
+
+.int-edge-B{
+  color: #fdba74;
+  background: rgba(249, 115, 22, 0.12);
+  border-color: rgba(249, 115, 22, 0.6);
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.20);
+}
+
+.int-edge-even{
+  color: #e5e7eb;
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.6);
+}
+
+/* Adj coloring */
+.int-adj.pos{ color: #86efac; }
+.int-adj.neg{ color: #fda4af; }
+
+/* ===== BIG TOTALS BAR (matchup-edge style) ===== */
+.interaction-totals-bar{
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background:
+    radial-gradient(1200px 200px at -10% -50%, rgba(56,189,248,0.18), transparent),
+    radial-gradient(1200px 200px at 110% 150%, rgba(249,115,22,0.18), transparent),
+    rgba(9, 9, 15, 0.98);
+  border: 1px solid rgba(148, 163, 253, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+.interaction-totals-bar .totals-title{
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f3f4f6;
+}
+
+.interaction-totals-bar .totals-favored{
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #cbd5e1;
+}
+
+.interaction-totals-bar .totals-favored span{
+  color: #f9fafb;
+}
+
+.interaction-totals-bar .totals-right{
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.interaction-totals-bar .totals-val{
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+.interaction-totals-bar .totals-val.pos{ color: #86efac; }
+.interaction-totals-bar .totals-val.neg{ color: #fda4af; }
+.interaction-totals-bar .totals-sep{
+  opacity: 0.5;
+  font-weight: 700;
+}
+
+/* Responsive: stack tiles on small screens */
+@media (max-width: 900px){
+  .interactions-grid{ grid-template-columns: 1fr; }
+}
+
+.summary-footnotes{
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.summary-seed-note{
+  margin: 0;                 /* tighter UI */
+}
+
+/* Make the center MATCHUP EDGE tile wider */
+#summaryColA   { width: 1fr; }
+#summaryColMid { width: 2.4fr; }  /* increase to 2.6 or 3.0 for bigger */
+#summaryColB   { width: 1fr; }
 
 /* ========== FOOTER ========== */
 

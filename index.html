@@ -166,315 +166,382 @@
         </div>
       </div> <!-- end .card.controls-card (Select Matchup) -->
     </section> <!-- end .top-bar -->
+<!-- ================ CORE TRAITS & TEAM SCORECARDS ================ -->
+<main id="result" class="result-layout">
 
-       <!-- ================ CORE TRAITS & TEAM SCORECARDS ================ -->
-    <main id="result" class="result-layout">
-      <!-- LEFT: CINDERELLA CARD -->
-<section id="cindCard" class="team-card card">
-  <div class="flip-inner">
-    <!-- FRONT FACE -->
-    <div class="card-face card-front">
-      <header class="team-card-header">
-        <div class="team-label-wrap">
-          <span class="role-tag cind-tag" data-copy="card.cinderella_label">Cinderella</span>
-          <h2 id="teamATitle">Team A</h2>
-        </div>
-        <div class="seed-label">
-          <span id="teamASeed"></span>
-        </div>
-      </header>
+  <!-- ============================================================= -->
+  <!-- ===================== CINDERELLA CARD ======================= -->
+  <!-- ============================================================= -->
+  <section id="cindCard" class="team-card card">
+    <div class="flip-inner">
 
-     <section class="profile-section flip-tile">
+      <!-- ===================== FRONT FACE ====================== -->
+      <div class="card-face card-front">
+
+        <!-- Header -->
+        <header class="team-card-header">
+          <div class="team-label-wrap">
+            <span class="role-tag cind-tag" data-copy="card.cinderella_label">Cinderella</span>
+            <h2 id="teamATitle">Team A</h2>
+          </div>
+          <div class="seed-label"><span id="teamASeed"></span></div>
+        </header>
+
+        <!-- Core Traits Mini Flip Tile -->
+        <section class="profile-section flip-tile">
+          <div class="flip-tile-inner">
+
+            <!-- Tile FRONT -->
+            <div class="tile-face tile-front">
+              <div class="section-header">
+                <h3 data-copy="card.cind_profile_title">Cinderella Profile (Core Traits)</h3>
+                <button
+                  id="explainCindA"
+                  class="link-btn explain-toggle"
+                  data-target="#cindProfileExplainA"
+                  data-copy="card.explain_btn"
+                >Explain</button>
+              </div>
+
+              <table id="cindProfileTableA" class="explain-table"></table>
+              <div id="cindProfileExplainA" class="explain-panel"></div>
+
+              <div class="subtotal-row">
+                <span data-copy="card.profile_subtotal">Profile Subtotal (incl. Breadth)</span>
+                <span id="cindSubtotalA" class="subtotal-value">0.00</span>
+              </div>
+            </div>
+
+            <!-- Tile BACK -->
+            <div class="tile-face tile-back">
+              <h4>Core Traits Explained</h4>
+              <p id="backCoreTileA" class="back-line"></p>
+              <p id="backBreadthTileA" class="back-line"></p>
+              <p class="back-helper">Tap again to return to the full Core Traits table.</p>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Identity Tile -->
+        <div id="identityTileA" class="context-tile context-neutral flip-tile identity-tile">
+          <div class="flip-tile-inner">
+
+            <!-- FRONT -->
+            <div class="tile-face tile-front">
+              <div class="context-header">
+                <span class="context-label">Tournament Identity</span>
+                <span id="identityScoreA" class="context-score">—</span>
+              </div>
+              <div class="context-subrow identity-subrow">
+                <span id="identityRoleA" class="context-tier">Neutral</span>
+                <span id="identityDetailA" class="context-desc">CIS 0 • FAS 0</span>
+              </div>
+            </div>
+
+            <!-- BACK -->
+            <div class="tile-face tile-back">
+              <h4>Identity Explained</h4>
+              <p id="backIdentityA" class="back-line"></p>
+              <p class="back-helper">Tap again to see the identity tile.</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Bottom Tiles -->
+        <div class="team-card-bottom">
+
+          <!-- Résumé Tile -->
+          <div id="resumeTileA" class="context-tile context-neutral flip-tile">
+            <div class="flip-tile-inner">
+
+              <div class="tile-face tile-front">
+                <div class="context-header">
+                  <span class="context-label">Résumé Context</span>
+                  <span id="resumeAdjA" class="context-score">0.000</span>
+                </div>
+                <div class="context-subrow">
+                  <span id="resumeTierA" class="context-tier">Average</span>
+                  <span class="context-desc">Record vs schedule strength</span>
+                </div>
+              </div>
+
+              <div class="tile-face tile-back">
+                <h4>Résumé Context Explained</h4>
+                <p id="backResumeTileA" class="back-line"></p>
+                <p class="back-helper">Tap again to see the résumé tile.</p>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Profile Marks -->
+          <div id="marksTileA" class="context-tile context-neutral inline-marks-tile flip-tile">
+            <div class="flip-tile-inner">
+
+              <div class="tile-face tile-front">
+                <div class="context-header">
+                  <span class="context-label">Profile Marks</span>
+                  <span class="context-score">&nbsp;</span>
+                </div>
+                <div class="context-subrow">
+                  <div id="inlineMarksA" class="inline-marks-strip"></div>
+                </div>
+              </div>
+
+              <div class="tile-face tile-back">
+                <h4>Profile Marks Explained</h4>
+                <p id="backMarksTileA" class="back-line"></p>
+                <p class="back-helper">Tap again to see the badges.</p>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Team Total -->
+        <footer class="team-total-row">
+          <span data-copy="card.team_total">Baseline Madness Index</span>
+          <span id="teamTotalA" class="team-total-value">0.00</span>
+        </footer>
+
+      </div><!-- END FRONT FACE -->
+
+
+      <!-- ===================== BACK FACE ====================== -->
+      <div class="card-face card-back">
+        <div class="card-back-content">
+          <h3>How This Scorecard Works</h3>
+
+          <p id="backFormulaA" class="back-line"></p>
+          <p id="backCoreA" class="back-line"></p>
+          <p id="backBreadthA" class="back-line"></p>
+          <p id="backResumeA" class="back-line"></p>
+          <p id="backMarksA" class="back-line"></p>
+
+          <p class="back-helper">Click this card again to flip back to the full stat view.</p>
+        </div>
+      </div>
+
+    </div><!-- END flip-inner -->
+  </section>
+
+
+
+  <!-- ============================================================= -->
+  <!-- ======================= FAVORITE CARD ======================= -->
+  <!-- ============================================================= -->
+  <section id="favCard" class="team-card card">
+    <div class="flip-inner">
+
+      <!-- ===================== FRONT FACE ====================== -->
+      <div class="card-face card-front">
+
+        <!-- Header -->
+        <header class="team-card-header">
+          <div class="team-label-wrap">
+            <span class="role-tag fav-tag" data-copy="card.favorite_label">Favorite</span>
+            <h2 id="teamBTitle">Team B</h2>
+          </div>
+          <div class="seed-label"><span id="teamBSeed"></span></div>
+        </header>
+
+     <!-- Favorite Profile (Core Traits + Breadth) — MINI FLIP TILE -->
+<section class="profile-section flip-tile">
   <div class="flip-tile-inner">
-    <!-- FRONT: existing content -->
+
+    <!-- FRONT: existing Favorite Core Traits table -->
     <div class="tile-face tile-front">
       <div class="section-header">
-        <h3 data-copy="card.cind_profile_title">Cinderella Profile (Core Traits)</h3>
+        <h3 data-copy="card.fav_profile_title">Favorite Profile (Core Traits)</h3>
         <button
-          id="explainCindA"
+          id="explainFavB"
           class="link-btn explain-toggle"
-          data-target="#cindProfileExplainA"
+          data-target="#favProfileExplainB"
           data-copy="card.explain_btn"
         >
           Explain
         </button>
       </div>
-      <table id="cindProfileTableA" class="explain-table"></table>
-      <div id="cindProfileExplainA" class="explain-panel"></div>
+
+      <table id="favProfileTableB" class="explain-table"></table>
+      <div id="favProfileExplainB" class="explain-panel"></div>
+
       <div class="subtotal-row">
         <span data-copy="card.profile_subtotal">Profile Subtotal (incl. Breadth)</span>
-        <span id="cindSubtotalA" class="subtotal-value">0.00</span>
+        <span id="favSubtotalB" class="subtotal-value">0.00</span>
       </div>
     </div>
 
-    <!-- BACK: explanation for this box only -->
+    <!-- BACK: explanation for Favorite Core Traits only -->
     <div class="tile-face tile-back">
       <h4>Core Traits Explained</h4>
-      <p id="backCoreA" class="back-line"></p>
-      <p id="backBreadthA" class="back-line"></p>
+      <p id="backCoreB" class="back-line"></p>
+      <p id="backBreadthB" class="back-line"></p>
       <p class="back-helper">
         Tap again to return to the full Core Traits table.
       </p>
     </div>
+
   </div>
 </section>
 
-<!-- Identity Tile (CIS / FAS) -->
-<div id="identityTileA" class="context-tile context-neutral flip-tile identity-tile">
-  <div class="flip-tile-inner">
-    <!-- FRONT: identity summary -->
-    <div class="tile-face tile-front">
-      <div class="context-header">
-        <span class="context-label">Tournament Identity</span>
-        <span id="identityScoreA" class="context-score">—</span>
-      </div>
-      <div class="context-subrow identity-subrow">
-        <span id="identityRoleA" class="context-tier">Neutral</span>
-        <span id="identityDetailA" class="context-desc">CIS 0 • FAS 0</span>
-      </div>
-    </div>
-    <!-- BACK: identity explanation -->
-    <div class="tile-face tile-back">
-      <h4>Identity Explained</h4>
-      <p id="backIdentityA" class="back-line"></p>
-      <p class="back-helper">Tap again to see the identity tile.</p>
-    </div>
-  </div>
-</div>
+        <!-- Identity Tile -->
+        <div id="identityTileB" class="context-tile context-neutral flip-tile identity-tile">
+          <div class="flip-tile-inner">
 
-     <!-- Bottom row: résumé (left) + profile marks (right) -->
-    <div class="team-card-bottom">
-      <!-- Résumé Context: left tile -->
-      <div id="resumeTileA" class="context-tile context-neutral flip-tile">
-        <div class="flip-tile-inner">
-          <!-- FRONT résumé tile -->
-          <div class="tile-face tile-front">
-            <div class="context-header">
-              <span class="context-label">Résumé Context</span>
-              <span id="resumeAdjA" class="context-score">0.000</span>
+            <div class="tile-face tile-front">
+              <div class="context-header">
+                <span class="context-label">Tournament Identity</span>
+                <span id="identityScoreB" class="context-score">—</span>
+              </div>
+              <div class="context-subrow identity-subrow">
+                <span id="identityRoleB" class="context-tier">Neutral</span>
+                <span id="identityDetailB" class="context-desc">CIS 0 • FAS 0</span>
+              </div>
             </div>
-            <div class="context-subrow">
-              <span id="resumeTierA" class="context-tier">Average</span>
-              <span class="context-desc">Record vs schedule strength</span>
+
+            <div class="tile-face tile-back">
+              <h4>Identity Explained</h4>
+              <p id="backIdentityB" class="back-line"></p>
+              <p class="back-helper">Tap again to see the identity tile.</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Bottom Tiles -->
+        <div class="team-card-bottom">
+
+          <!-- Résumé -->
+          <div id="resumeTileB" class="context-tile context-neutral flip-tile">
+            <div class="flip-tile-inner">
+
+              <div class="tile-face tile-front">
+                <div class="context-header">
+                  <span class="context-label">Résumé Context</span>
+                  <span id="resumeAdjB" class="context-score">0.000</span>
+                </div>
+                <div class="context-subrow">
+                  <span id="resumeTierB" class="context-tier">Average</span>
+                  <span class="context-desc">Record vs schedule strength</span>
+                </div>
+              </div>
+
+              <div class="tile-face tile-back">
+                <h4>Résumé Context Explained</h4>
+                <p id="backResumeTileB" class="back-line"></p>
+                <p class="back-helper">Tap again to see the résumé tile.</p>
+              </div>
+
             </div>
           </div>
-          <!-- BACK résumé explanation -->
-          <div class="tile-face tile-back">
-            <h4>Résumé Context Explained</h4>
-            <p id="backResumeA" class="back-line"></p>
-            <p class="back-helper">Tap again to see the résumé tile.</p>
+
+          <!-- Profile Marks -->
+          <div id="marksTileB" class="context-tile context-neutral inline-marks-tile flip-tile">
+            <div class="flip-tile-inner">
+
+              <div class="tile-face tile-front">
+                <div class="context-header">
+                  <span class="context-label">Profile Marks</span>
+                  <span class="context-score">&nbsp;</span>
+                </div>
+                <div class="context-subrow">
+                  <div id="inlineMarksB" class="inline-marks-strip"></div>
+                </div>
+              </div>
+
+              <div class="tile-face tile-back">
+                <h4>Profile Marks Explained</h4>
+                <p id="backMarksTileB" class="back-line"></p>
+                <p class="back-helper">Tap again to see the badges.</p>
+              </div>
+
+            </div>
           </div>
+
+        </div>
+
+        <!-- Team Total -->
+        <footer class="team-total-row">
+          <span data-copy="card.team_total">Baseline Madness Index</span>
+          <span id="teamTotalB" class="team-total-value">0.00</span>
+        </footer>
+
+      </div><!-- END FRONT -->
+
+
+      <!-- ===================== BACK FACE ====================== -->
+      <div class="card-face card-back">
+        <div class="card-back-content">
+          <h3>How This Scorecard Works</h3>
+
+          <p id="backFormulaB" class="back-line"></p>
+          <p id="backCoreB" class="back-line"></p>
+          <p id="backBreadthB" class="back-line"></p>
+          <p id="backResumeB" class="back-line"></p>
+          <p id="backMarksB" class="back-line"></p>
+
+          <p class="back-helper">Click this card again to flip back to the full stat view.</p>
         </div>
       </div>
 
-      <!-- Profile Marks: right tile -->
-      <div id="marksTileA" class="context-tile context-neutral inline-marks-tile flip-tile">
-        <div class="flip-tile-inner">
-          <!-- FRONT profile marks strip -->
-          <div class="tile-face tile-front">
-            <div class="context-header">
-              <span class="context-label">Profile Marks</span>
-              <span class="context-score">&nbsp;</span>
-            </div>
-            <div class="context-subrow">
-              <div id="inlineMarksA" class="inline-marks-strip"></div>
-            </div>
-          </div>
-          <!-- BACK profile marks explanation -->
-          <div class="tile-face tile-back">
-            <h4>Profile Marks Explained</h4>
-            <p id="backMarksA" class="back-line"></p>
-            <p class="back-helper">Tap again to see the badges.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+    </div><!-- END flip-inner -->
+  </section>
 
-      <!-- Team Total -->
-      <footer class="team-total-row">
-        <span data-copy="card.team_total">Baseline Madness Index</span>
-        <span id="teamTotalA" class="team-total-value">0.00</span>
-      </footer>
-    </div>
-
-   <!-- BACK FACE (Cinderella) -->
-<div class="card-face card-back">
-  <div class="card-back-content">
-    <h3>How This Scorecard Works</h3>
-
-    <!-- Overall formula explanation -->
-    <p id="backFormulaA" class="back-line"></p>
-
-    <!-- Core traits explanation -->
-    <p id="backCoreA" class="back-line"></p>
-
-    <!-- Breadth bonus explanation -->
-    <p id="backBreadthA" class="back-line"></p>
-
-    <!-- Résumé tile explanation -->
-    <p id="backResumeA" class="back-line"></p>
-
-    <!-- Profile marks explanation -->
-    <p id="backMarksA" class="back-line"></p>
-
-    <p class="back-helper">
-      Click this card again to flip back to the full stat view.
-    </p>
-  </div>
-</div>
-</section>
-
-      <!-- RIGHT: FAVORITE CARD -->
-<section id="favCard" class="team-card card">
-  <div class="flip-inner">
-    <!-- FRONT FACE -->
-    <div class="card-face card-front">
-      <header class="team-card-header">
-        <div class="team-label-wrap">
-          <span class="role-tag fav-tag" data-copy="card.favorite_label">Favorite</span>
-          <h2 id="teamBTitle">Team B</h2>
-        </div>
-        <div class="seed-label">
-          <span id="teamBSeed"></span>
-        </div>
-      </header>
-
-      <!-- Favorite Profile (Core Traits + Breadth) -->
-<section class="profile-section">
-  <div class="section-header">
-    <h3 data-copy="card.fav_profile_title">Favorite Profile (Core Traits)</h3>
-    <button
-      id="explainFavB"
-      class="link-btn explain-toggle"
-      data-target="#favProfileExplainB"
-      data-copy="card.explain_btn"
-    >
-      Explain
-    </button>
-  </div>
-  <table id="favProfileTableB" class="explain-table">
-    <!-- JS: rows for each Core Trait + Breadth row -->
-  </table>
-  <div id="favProfileExplainB" class="explain-panel"></div>
-  <div class="subtotal-row">
-    <span data-copy="card.profile_subtotal">Profile Subtotal (incl. Breadth)</span>
-    <span id="favSubtotalB" class="subtotal-value">0.00</span>
-  </div>
-</section>
-
-<!-- Identity Tile (CIS / FAS) -->
-<div id="identityTileB" class="context-tile context-neutral flip-tile identity-tile">
-  <div class="flip-tile-inner">
-    <!-- FRONT: identity summary -->
-    <div class="tile-face tile-front">
-      <div class="context-header">
-        <span class="context-label">Tournament Identity</span>
-        <span id="identityScoreB" class="context-score">—</span>
-      </div>
-      <div class="context-subrow identity-subrow">
-        <span id="identityRoleB" class="context-tier">Neutral</span>
-        <span id="identityDetailB" class="context-desc">CIS 0 • FAS 0</span>
-      </div>
-    </div>
-    <!-- BACK: identity explanation -->
-    <div class="tile-face tile-back">
-      <h4>Identity Explained</h4>
-      <p id="backIdentityB" class="back-line"></p>
-      <p class="back-helper">Tap again to see the identity tile.</p>
-    </div>
-  </div>
-</div>
-
-     <!-- Bottom row: résumé + marks -->
-    <div class="team-card-bottom">
-      <!-- Résumé Context (left) -->
-      <div id="resumeTileB" class="context-tile context-neutral flip-tile">
-        <div class="flip-tile-inner">
-          <div class="tile-face tile-front">
-            <div class="context-header">
-              <span class="context-label">Résumé Context</span>
-              <span id="resumeAdjB" class="context-score">0.000</span>
-            </div>
-            <div class="context-subrow">
-              <span id="resumeTierB" class="context-tier">Average</span>
-              <span class="context-desc">Record vs schedule strength</span>
-            </div>
-          </div>
-          <div class="tile-face tile-back">
-            <h4>Résumé Context Explained</h4>
-            <p id="backResumeB" class="back-line"></p>
-            <p class="back-helper">Tap again to see the résumé tile.</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Profile Marks (right) -->
-      <div id="marksTileB" class="context-tile context-neutral inline-marks-tile flip-tile">
-        <div class="flip-tile-inner">
-          <div class="tile-face tile-front">
-            <div class="context-header">
-              <span class="context-label">Profile Marks</span>
-              <span class="context-score">&nbsp;</span>
-            </div>
-            <div class="context-subrow">
-              <div id="inlineMarksB" class="inline-marks-strip"></div>
-            </div>
-          </div>
-          <div class="tile-face tile-back">
-            <h4>Profile Marks Explained</h4>
-            <p id="backMarksB" class="back-line"></p>
-            <p class="back-helper">Tap again to see the badges.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-      <!-- Team Total -->
-      <footer class="team-total-row">
-        <span data-copy="card.team_total">Baseline Madness Index</span>
-        <span id="teamTotalB" class="team-total-value">0.00</span>
-      </footer>
-    </div>
-
-    <!-- BACK FACE (Favorite) -->
-<div class="card-face card-back">
-  <div class="card-back-content">
-    <h3>How This Scorecard Works</h3>
-
-    <p id="backFormulaB" class="back-line"></p>
-    <p id="backCoreB" class="back-line"></p>
-    <p id="backBreadthB" class="back-line"></p>
-    <p id="backResumeB" class="back-line"></p>
-    <p id="backMarksB" class="back-line"></p>
-
-    <p class="back-helper">
-      Click this card again to flip back to the full stat view.
-    </p>
-  </div>
-</div>
-</section>
+</main>
 
     <!-- ================ INTERACTION METRICS TABLE ================ -->
-    <section id="interactionsSection" class="card legend-card">
-      <div class="legend-header">
-        <h3>4. Interaction Metrics</h3>
-      </div>
-      <p class="summary-help">
-        Matchup-specific leverage from 3PT Tension, FT Pressure, Paint Tension, Turnover Pressure, Glass Tension, and Résumé Pressure.
-      </p>
+<section id="interactionsSection" class="card interactions-card">
+  <div class="legend-header">
+    <h3>4. Interaction Metrics</h3>
+  </div>
+
+  <p class="summary-help">
+    Matchup-specific leverage from 3PT Tension, FT Pressure, Paint Tension, Turnover Pressure,
+    Glass Tension, Résumé Pressure, Physicality, Shot Quality, and Variance Sensitivity.
+  </p>
+
+  <div class="interactions-grid">
+    <!-- LEFT: TABLE -->
+    <div class="interactions-left">
       <table id="interactionsTable" class="interaction-table">
-  <thead>
-    <tr>
-      <th>Interaction</th>
-      <th>Edge</th>
-      <th id="adjAHeader">Adj to Team A</th>
-      <th id="adjBHeader">Adj to Team B</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+        <thead>
+          <tr>
+            <th>Interaction</th>
+            <th class="col-domain">Domain</th>
+            <th>Edge</th>
+            <th class="col-intensity">Intensity</th>
+            <th id="adjAHeader">Adj to Team A</th>
+            <th id="adjBHeader">Adj to Team B</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <!-- TOTAL BAR (big, matchup-edge style) -->
+      <div id="interactionTotalsBar" class="interaction-totals-bar"></div>
+    </div>
+
+    <!-- RIGHT: EXPLAINER TILE -->
+    <div class="interactions-right interactions-explain-tile">
+      <h4>How to Read These</h4>
+      <ul>
+        <li><strong>Edge</strong> shows which team the matchup trait favors.</li>
+        <li><strong>Intensity</strong> = how strong that leverage is (Minor / Moderate / Major).</li>
+        <li><strong>Adj to Team A/B</strong> is the exact MI leverage applied to each side.</li>
+        <li>Totals below roll directly into <strong>MI_matchup</strong>.</li>
+      </ul>
+
+      <div class="explain-note">
+        Think of this like your “matchup chessboard”: each row is one pressure point.
+        The totals tell you who wins that board overall.
+      </div>
+    </div>
+  </div>
+</section>
 
     <section id="summarySection" class="card summary-card">
         <div class="summary-header">
@@ -483,15 +550,6 @@
       Final Madness Index scores for each team, the MI gap, and the model’s predicted lean.
     </p>
   </div>
-
-  <!-- Round pill -->
-  <div class="summary-row summary-round-row">
-    <span class="summary-round-label" data-copy="summary.round">Round:</span>
-    <span id="currentRoundLabel" class="summary-round-pill">Round of 64</span>
-  </div>
-
-  <!-- Seed / bracket compatibility note (filled by JS) -->
-  <p id="summarySeedNote" class="summary-seed-note helper-text"></p>
 
   <!-- Clean matchup summary table -->
   <table id="summaryTable" class="explain-table summary-table">
@@ -506,6 +564,14 @@
       <!-- JS will inject the matchup row here -->
     </tbody>
   </table>
+<!-- Round pill -->
+  <div class="summary-row summary-round-row">
+    <span class="summary-round-label" data-copy="summary.round">Round:</span>
+    <span id="currentRoundLabel" class="summary-round-pill">Round of 64</span>
+  </div>
+
+  <!-- Seed / bracket compatibility note (filled by JS) -->
+  <p id="summarySeedNote" class="summary-seed-note helper-text"></p>
     </section>
 
     <!-- ================ DEBUG PANEL ================ -->
