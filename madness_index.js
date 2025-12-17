@@ -17,6 +17,1206 @@ let FIELD_STATS = {};    // key: metric -> { mean, sd }
 let TEAM_LIST = [];
 let CURRENT_ROUND = null;
 let SANDBOX_MODE = false;
+let MI_ROUND_NUDGE_SHOWN = false;
+let MI_ROUND_TOUCHED = false;
+
+// Default Profile Mark descriptions (fallback if JSON not present)
+const DEFAULT_MARK_DESCRIPTIONS = {
+  "Offensive Rigidity":         "Predictable, inflexible offense.",
+  "Unstable Perimeter": "Volatile 3-point identity.",
+  "Cold Arc Team":              "Translation risk from deep.",
+  "Undisciplined Defense":      "Foul-prone, mistake-heavy defense.",
+  "Soft Interior":              "Weak rim protection / deterrence.",
+  "Perimeter Leakage":          "Allows clean perimeter looks.",
+  "Tempo Strain":               "Pace identity strains possessions.",
+  "Turnover Fragility":         "High-risk ball security profile."
+};
+
+// getMarkDescription Looks up the description text for a profile mark (e.g., Offensive Rigidity), preferring copy.marks.descriptions (including severity-specific text) and falling back to DEFAULT_MARK_DESCRIPTIONS.
+
+function getMarkDescription(baseName, severity) {
+  const copy = window.MI_COPY;
+
+  if (copy && copy.marks && copy.marks.descriptions) {
+    const entry = copy.marks.descriptions[baseName];
+
+    if (entry && typeof entry === 'object') {
+      const sevKey = (severity || '').toLowerCase(); // "moderate" / "severe"
+      if (entry[sevKey]) return entry[sevKey];
+      if (entry.base) return entry.base; // optional fallback if you add "base"
+    }
+
+    // OLD: simple string fallback
+    if (typeof entry === 'string') return entry;
+  }
+
+  // DEFAULT fallback
+  return DEFAULT_MARK_DESCRIPTIONS[baseName] || '';
+}
+
+// applyCopyToDOM(copy) Walks all elements with data-copy="..." and fills their text (or HTML) from the nested keys in the copy JSON object.
+
+function applyCopyToDOM(copy) {
+  if (!copy) return;
+
+  const elements = document.querySelectorAll('[data-copy]');
+  elements.forEach(el => {
+    const key = el.getAttribute('data-copy'); // e.g. "controls.data_title"
+    if (!key) return;
+
+    // Walk nested keys: "controls.data_title" → copy.controls.data_title
+    const parts = key.split('.');
+    let value = copy;
+    for (const part of parts) {
+      if (value && Object.prototype.hasOwnProperty.call(value, part)) {
+        value = value[part];
+      } else {
+        value = null;
+        break;
+      }
+    }
+
+    if (typeof value === 'string') {
+      el.textContent = value;
+    }
+  });
+}
+
+// ========== PRE-MATCHUP COPY ADAPTER (pre_matchup → prematch.*) ==========
+// Your HTML expects data-copy="prematch.*" but copy.json uses pre_matchup.*
+// This adapter creates a prematch block so applyCopyToDOM can populate the hub.
+
+function normalizePreMatchupCopy(data) {
+  if (!data) return;
+
+  if (data.prematch && data.prematch.progress) return;
+
+  if (!data.pre_matchup) return;
+
+  const pm = data.pre_matchup;
+
+  const intro   = pm.intro   || {};
+  const steps   = Array.isArray(pm.steps) ? pm.steps : [];
+  const cta     = pm.cta     || {};
+
+  const clean = (s) => (typeof s === 'string' ? s.replace(/\*/g, '') : '');
+
+  const stepLine = (i) => {
+    const row = steps[i] || {};
+    const t = clean(row.title);
+    const d = clean(row.description);
+    if (t && d) return `${t} — ${d}`;
+    return clean(t || d);
+  };
+
+  // Build the object your current HTML is asking for
+  data.prematch = {
+    title:    clean(intro.title) || 'Start a matchup',
+    subtitle: [clean(intro.lead), clean(intro.secondary)].filter(Boolean).join(' '),
+    step1:    stepLine(0),
+    step2:    stepLine(1),
+    step3:    stepLine(2),
+    note:     clean(cta.hint)
+  };
+}
+
+// loadCopyJSON() { Fetches copy.json, stores it on window.MI_COPY, then calls applyCopyToDOM, buildGlossaryFromCopy, populateBackExplanations, and populateInteractionsHowToList. Handles fetch/parse errors.
+
+function loadCopyJSON() {
+  fetch('copy.json')
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    })
+    .then(data => {
+      window.MI_COPY = data;
+      applyCopyToDOM(data);
+      buildGlossaryFromCopy(data);
+      populateBackExplanations(data);
+      populateInteractionsHowToList(data);
+    })
+    .catch(err => {
+      console.error('Error loading copy.json:', err);
+    });
+}
+
+// populateBackExplanations(copy) { Uses copy.back to fill the big back-of-card explainer paragraphs and the smaller “mini-tile” explanations for Core, Breadth, Résumé, Marks, Identity, and formula.
+
+function populateBackExplanations(copy) {
+  if (!copy || !copy.back) return;
+
+  const b = copy.back;
+
+  const setText = (id, text) => {
+    if (!text) return;
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  };
+
+  // ----- Whole-card backs: Cinderella (A) & Favorite (B) -----
+  setText('backFormulaA', b.formula && b.formula.card);
+  setText('backFormulaB', b.formula && b.formula.card);
+
+  setText('backBreadthA', b.breadth && b.breadth.card);
+  setText('backBreadthB', b.breadth && b.breadth.card);
+
+  setText('backResumeA',  b.resume  && b.resume.card);
+  setText('backResumeB',  b.resume  && b.resume.card);
+
+  setText('backMarksA',   b.marks   && b.marks.card);
+  setText('backMarksB',   b.marks   && b.marks.card);
+
+  // ----- Mini flip tiles (Core / Breadth / Résumé / Marks / Identity) -----
+
+  // Breadth mini-tiles
+  setText('backBreadthTileA', b.breadth && b.breadth.tile);
+  setText('backBreadthTileB', b.breadth && b.breadth.tile);
+
+  // Résumé mini-tiles
+  setText('backResumeTileA',  b.resume  && b.resume.tile);
+  setText('backResumeTileB',  b.resume  && b.resume.tile);
+
+  // Profile Marks mini-tiles
+  setText('backMarksTileA',   b.marks   && b.marks.tile);
+  setText('backMarksTileB',   b.marks   && b.marks.tile);
+}
+
+// ========== CORE TRAITS TILE — BULLETED LAYOUT ==========
+
+// bulletizeCoreTile(tileId) Takes a long paragraph from a core back-of-card element, splits it into sentences, and rebuilds it as a vertical bullet list container (optionally keeping a “Breadth Bonus:” line separate).
+
+function bulletizeCoreTile(tileId) {
+  const el = document.getElementById(tileId);
+  if (!el) return;
+
+  // Don't re-bulletize if we've already done it
+  if (el.dataset.bulletized === '1') return;
+
+  const raw = (el.textContent || '').trim();
+  if (!raw) return;
+
+  // Optional: keep "Breadth Bonus: ..." as a separate line at the bottom
+  let mainText = raw;
+  let breadthText = null;
+
+  const bbIndex = raw.indexOf('Breadth Bonus:');
+  if (bbIndex !== -1) {
+    mainText = raw.slice(0, bbIndex).trim();
+    breadthText = raw.slice(bbIndex).trim();
+  }
+
+  // Split the main text into sentences
+  const sentences = mainText
+    .split('.')
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+
+  if (!sentences.length) return;
+
+  // Build the new structure
+  const container = document.createElement('div');
+  container.className = 'core-back-container';
+
+  const list = document.createElement('ul');
+  list.className = 'core-back-list';
+
+  sentences.forEach(sentence => {
+    const li = document.createElement('li');
+    li.className = 'core-back-item';
+
+    const body = document.createElement('div');
+    body.className = 'core-back-text';
+    // Put the period back for readability
+    body.textContent = sentence.endsWith('.') ? sentence : sentence + '.';
+
+    li.appendChild(body);
+    list.appendChild(li);
+  });
+
+  container.appendChild(list);
+
+  if (breadthText) {
+    const bb = document.createElement('p');
+    bb.className = 'core-back-breadth';
+    bb.textContent = breadthText;
+    container.appendChild(bb);
+  }
+
+  // Replace the old paragraph content
+  el.textContent = '';
+  el.appendChild(container);
+  el.dataset.bulletized = '1';
+}
+
+function nudgeRoundSelector() {
+  const roundBtn = document.getElementById("roundSelectBtn");
+  if (!roundBtn) return;
+
+  const wrap = roundBtn.closest(".round-selector-wrap");
+  if (!wrap) return;
+
+  wrap.classList.remove("is-nudged"); // reset animation
+  void wrap.offsetWidth;              // reflow to restart animation
+  wrap.classList.add("is-nudged");
+
+  // auto-clear the class after the pulse finishes
+  setTimeout(() => wrap.classList.remove("is-nudged"), 2400);
+}
+
+function clearRoundNudge() {
+  const roundBtn = document.getElementById("roundSelectBtn");
+  const wrap = roundBtn?.closest(".round-selector-wrap");
+  if (wrap) wrap.classList.remove("is-nudged");
+}
+
+// populateInteractionsHowToList(copy) Populates the “How this works” list in the Interactions explainer tile (#interactionsHowToList) from copy.interactions.howto_items.
+
+function populateInteractionsHowToList(copy) {
+  if (!copy || !copy.interactions) return;
+
+  const listEl = document.getElementById('interactionsHowToList');
+  if (!listEl) return;
+
+  const items = copy.interactions.howto_items;
+  if (!Array.isArray(items) || !items.length) {
+    // If nothing is defined, leave whatever is in the HTML (or empty)
+    return;
+  }
+
+  // Clear any existing items
+  listEl.innerHTML = '';
+
+  items.forEach(text => {
+    if (!text) return;
+    const li = document.createElement('li');
+    li.textContent = text;
+    listEl.appendChild(li);
+  });
+}
+
+// buildGlossaryFromCopy(copy) Builds the glossary section from copy.glossary.entries, creating a clean list of glossary items with term, category tag, abbreviation, and definition.
+
+function buildGlossaryFromCopy(copy) {
+  const container = document.getElementById('glossaryContent');
+  if (!container || !copy || !copy.glossary || !Array.isArray(copy.glossary.entries)) {
+    return;
+  }
+
+  const entries = copy.glossary.entries;
+
+  // Clear anything that might already be there
+  container.innerHTML = '';
+
+  // Build a simple, clean list of items
+  entries.forEach(entry => {
+    const term = entry.term || '';
+    const abbr = entry.abbr || '';
+    const category = entry.category || '';
+    const definition = entry.definition || '';
+
+    const item = document.createElement('div');
+    item.className = 'glossary-item';
+
+    item.innerHTML = `
+      <div class="glossary-header-row">
+        <span class="glossary-term">${term}</span>
+        ${category ? `<span class="glossary-tag">${category}</span>` : ''}
+      </div>
+      <div class="glossary-meta">
+        ${abbr ? `Abbrev: <strong>${abbr}</strong>` : ''}
+      </div>
+      <p class="glossary-def">${definition}</p>
+    `;
+
+    container.appendChild(item);
+  });
+}
+
+// Map internal core keys to the keys we store in JSON (core_explain.metrics)
+// All 8 core traits from team.coreDetails:
+const CORE_KEYS_FOR_EXPLAIN = [
+  'offeff',   // Offensive Efficiency
+  'defeff',   // Defensive Efficiency
+  'adjem',    // Adjusted Efficiency Margin
+  'ts',       // True Shooting %
+  'efg',      // Effective FG %
+  'def_efg',  // Defensive eFG %
+  'epr',      // Effective Possession Ratio
+  'to'        // Turnover %
+];
+
+// getCoreTierForMetric(team, key) { Reads team.coreDetails to find the row for a given core metric key and returns its tier label (“Elite”, “Strong”, etc.), or null if missing.
+
+function getCoreTierForMetric(team, key) {
+ 
+  if (!team.coreDetails) return null;
+  const row = team.coreDetails.find(r => r.key === key);
+  return row ? row.tier : null;
+}
+
+// Generates the full core-traits scouting paragraph for one team by looping through the 8 core metrics and stitching together tier-aware back_phrases (plus the breadth sentence).
+
+function buildCoreBackTextForTeam(team, copy, variantMap) {
+  if (!team || !copy || !copy.core_explain) return '';
+
+  const cx = copy.core_explain;
+  const metricsConfig = cx.metrics || {};
+
+  // Prefer explicit ordering from JSON if present, otherwise fall back
+  const metricKeys = Array.isArray(cx.metric_order) && cx.metric_order.length
+    ? cx.metric_order
+    : CORE_KEYS_FOR_EXPLAIN;
+
+  const sentences = [];
+
+  metricKeys.forEach(key => {
+    const cfg = metricsConfig[key];
+    if (!cfg) return;
+
+    const tier = getCoreTierForMetric(team, key); // "Elite", "Strong", etc.
+    if (!tier) return;
+
+    // Should this metric use the alt phrase for this team?
+    const useAlt = !!(variantMap && Object.prototype.hasOwnProperty.call(variantMap, key) && variantMap[key]);
+
+    const sentence = selectCoreBackSentence(cfg, tier, useAlt);
+    if (sentence) {
+      sentences.push(sentence);
+    }
+  });
+
+  // Nothing resolved → fallback template
+  if (!sentences.length) {
+    const fallback = cx.fallback_template ||
+      '{{team}} shows a generally balanced core profile with no extreme strengths or weaknesses.';
+    return fallback.replace('{{team}}', team.name || 'This team');
+  }
+
+  // Optional paragraph prefix (includes team name once)
+  let paragraph = sentences.join(' ');
+  if (cx.paragraph_prefix) {
+    const prefix = cx.paragraph_prefix.replace('{{team}}', team.name || 'This team');
+    paragraph = prefix + ' ' + paragraph;
+  }
+
+  return paragraph.trim();
+}
+
+// For a given metric config, tier, and variant flag, returns the appropriate back-phrase string. Handles primary vs. alternate phrases and fallback behavior.
+
+function selectCoreBackSentence(cfg, tier, useAltVariant) {
+  if (!cfg || !tier) return '';
+
+  const baseMap = cfg.back_phrases || {};
+  const altMap  = cfg.back_phrases_alt || {};
+
+  let sentence = '';
+
+  // 1) Try alternate phrase if flagged and available
+  if (useAltVariant && altMap && typeof altMap[tier] === 'string') {
+    const trimmed = altMap[tier].trim();
+    if (trimmed) {
+      sentence = trimmed;
+    }
+  }
+
+  // 2) Fallback to primary back_phrases
+  if (!sentence && baseMap && typeof baseMap[tier] === 'string') {
+    sentence = baseMap[tier];
+  }
+
+  // 3) Final fallback: short tier phrase as a sentence
+  if (!sentence && cfg.phrases && typeof cfg.phrases[tier] === 'string') {
+    sentence = cfg.phrases[tier];
+    if (!/[.!?]\s*$/.test(sentence)) {
+      sentence += '.';
+    }
+  }
+
+  return sentence;
+}
+
+// Builds a structured representation of the team’s core explanation: an array of { key, label, tier, text } objects for the UI bullet layout instead of one long string.
+
+function buildCoreBackStructured(team, copy) {
+  if (!team || !copy || !copy.core_explain) return [];
+
+  const cx = copy.core_explain;
+  const metricsConfig = cx.metrics || {};
+
+  // Use JSON ordering if present, otherwise fall back to the hard-coded array
+  const metricKeys = Array.isArray(cx.metric_order) && cx.metric_order.length
+    ? cx.metric_order
+    : CORE_KEYS_FOR_EXPLAIN;
+
+  const out = [];
+
+  metricKeys.forEach(key => {
+    const cfg = metricsConfig[key];
+    if (!cfg) return;
+
+    const tier = getCoreTierForMetric(team, key); // "Elite", "Strong", etc.
+    if (!tier) return;
+
+    // Prefer the long back phrase; fall back to the short phrase if needed
+    const phrase =
+      (cfg.back_phrases && cfg.back_phrases[tier]) ||
+      (cfg.phrases && cfg.phrases[tier]);
+
+    if (!phrase) return;
+
+    out.push({
+      label: cfg.label || key, // e.g. "Offensive Efficiency"
+      text: phrase             // the sentence you already wrote in JSON
+    });
+  });
+
+  return out;
+}
+
+// Convenience wrapper: calls buildCoreBackStructured for a team and tile, then pipes that into renderCoreBackList to render the list inside the specified element.
+
+function renderStructuredCoreBack(el, items) {
+  if (!el) return;
+
+  // Clear anything that was there before
+  el.innerHTML = "";
+
+  items.forEach(item => {
+    const block = document.createElement("div");
+    block.className = "core-back-block";
+
+    block.innerHTML = `
+      <div class="core-back-label">${item.label}</div>
+      <div class="core-back-text">${item.text}</div>
+    `;
+
+    el.appendChild(block);
+  });
+}
+
+// Core worker for structured backs: uses getCoreTierForMetric + JSON config to return the array of items { key, label, tier, text } in display order.
+
+function buildCoreBackItemsForTeam(team, copy, variantMap) {
+  if (!team || !copy || !copy.core_explain) return [];
+
+  const cx = copy.core_explain;
+  const metricsConfig = cx.metrics || {};
+
+  // Prefer explicit JSON ordering if present, fall back to CORE_KEYS_FOR_EXPLAIN
+  const metricKeys = Array.isArray(cx.metric_order) && cx.metric_order.length
+    ? cx.metric_order
+    : CORE_KEYS_FOR_EXPLAIN;
+
+  const items = [];
+
+  metricKeys.forEach(key => {
+    const cfg = metricsConfig[key];
+    if (!cfg) return;
+
+    const tier = getCoreTierForMetric(team, key); // "Elite", "Strong", etc.
+    if (!tier) return;
+
+    // Prefer label from team.coreDetails (matches Core Traits table UI)
+    let label = key;
+    if (Array.isArray(team.coreDetails)) {
+      const row = team.coreDetails.find(r => r.key === key);
+      if (row && row.label) {
+        label = row.label;
+      }
+    } else if (cfg.label) {
+      // Optional: if you later store a label in JSON
+      label = cfg.label;
+    }
+
+    // Decide whether to use the alt phrase for this metric
+    const useAlt = !!(
+      variantMap &&
+      Object.prototype.hasOwnProperty.call(variantMap, key) &&
+      variantMap[key]
+    );
+
+    // Try to pull the tiered back phrase (primary/alt) using the same helper
+    let text = selectCoreBackSentence(cfg, tier, useAlt);
+
+    // Fallback: if no back_phrases exist, use the shorter "phrases" map
+    if (!text) {
+      const baseMap = cfg.phrases || {};
+      text = (baseMap[tier] || '').trim();
+    }
+
+    // If we still don't have anything, skip this metric
+    if (!text) return;
+
+    // Ensure each row ends with punctuation
+    if (!/[.!?]\s*$/.test(text)) {
+      text += '.';
+    }
+
+    items.push({
+      key,
+      label,
+      tier,
+      text
+    });
+  });
+
+  return items;
+}
+
+// Given a DOM container and the structured core items, builds a <ul> where each item shows metric label, tier pill, and explanation text.
+
+function renderCoreBackList(containerId, items, fallbackText) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  // Clear any previous content
+  container.innerHTML = '';
+
+  // If for some reason we have no items, fall back to the paragraph version
+  if (!items || !items.length) {
+    if (fallbackText) {
+      container.textContent = fallbackText;
+    }
+    return;
+  }
+
+  const ul = document.createElement('ul');
+  ul.className = 'core-back-list';
+
+  items.forEach(item => {
+    const li = document.createElement('li');
+    li.className = 'core-back-item';
+    li.innerHTML = `
+      <div class="core-back-header">
+        <span class="core-back-metric">${item.label}</span>
+        <span class="core-back-tier">${item.tier}</span>
+      </div>
+      <div class="core-back-text">${item.text}</div>
+    `;
+    ul.appendChild(li);
+  });
+
+  container.appendChild(ul);
+}
+
+function pickCoreSupportPhraseKey(team) {
+  if (!team || !team.coreZ) return 'balanced';
+
+  const vals = Object.values(team.coreZ).filter(v => typeof v === 'number');
+  if (!vals.length) return 'balanced';
+
+  const eliteCount  = vals.filter(v => v >= 1.0).length;
+  const strongCount = vals.filter(v => v >= 0.8 && v < 1.0).length;
+
+  // FIXED: spread the array into Math.min / Math.max
+  const worst = Math.min(...vals);
+  const best  = Math.max(...vals);
+
+  if (eliteCount >= 2) return 'two_plus_elite';
+  if (eliteCount >= 1 && (eliteCount + strongCount) >= 3) return 'one_elite_plus_depth';
+  if (best - worst >= 1.5) return 'polarized';
+  return 'balanced';
+}
+
+function buildCoreVariantMaps(result, copy) {
+  const cx = copy.core_explain;
+  const metricsConfig = cx.metrics || {};
+
+  const metricKeys = Array.isArray(cx.metric_order) && cx.metric_order.length
+    ? cx.metric_order
+    : CORE_KEYS_FOR_EXPLAIN;
+
+  const variantsA = {};
+  const variantsB = {};
+
+  metricKeys.forEach(key => {
+    const cfg = metricsConfig[key];
+    if (!cfg) return;
+
+    const tierA = getCoreTierForMetric(result.a, key);
+    const tierB = getCoreTierForMetric(result.b, key);
+    if (!tierA || !tierB) return;
+
+    // Only care when both teams are in the same tier for this metric
+    if (tierA !== tierB) return;
+
+    const altMap = cfg.back_phrases_alt || {};
+    const alt = altMap && typeof altMap[tierA] === 'string' ? altMap[tierA].trim() : '';
+
+    // If no alt is provided for this tier, just skip – both sides use primary
+    if (!alt) return;
+
+    // Design choice: Team A uses primary, Team B uses alt when both are same tier
+    variantsA[key] = false;
+    variantsB[key] = true;
+  });
+
+  return { variantsA, variantsB };
+}
+
+function updateCoreBacksForResult(result) {
+  const copy = window.MI_COPY;
+  if (!copy || !copy.core_explain || !result || !result.a || !result.b) return;
+
+  // 1) Decide which metrics use alt phrases for each team
+  const { variantsA, variantsB } = buildCoreVariantMaps(result, copy);
+
+  // 2) Build the long paragraph text for each team (full-card backs)
+  const textA = buildCoreBackTextForTeam(result.a, copy, variantsA);
+  const textB = buildCoreBackTextForTeam(result.b, copy, variantsB);
+
+  const cardBackA = document.getElementById('backCoreA');
+  const cardBackB = document.getElementById('backCoreB');
+
+  if (cardBackA) cardBackA.textContent = textA || '';
+  if (cardBackB) cardBackB.textContent = textB || '';
+
+  // 3) Build metric-aware rows for the flip tiles
+  const itemsA = buildCoreBackItemsForTeam(result.a, copy, variantsA);
+  const itemsB = buildCoreBackItemsForTeam(result.b, copy, variantsB);
+
+  // These use the new metric/tier layout:
+  // - metric label top-left
+  // - tier pill top-right
+  // - JSON phrase underneath
+  renderCoreBackList('backCoreTileA', itemsA, textA);
+  renderCoreBackList('backCoreTileB', itemsB, textB);
+}
+
+function buildBreadthBackTextForTeam(team, copy) {
+  if (!team || !copy || !copy.breadth_explain) return '';
+
+  const bx = copy.breadth_explain;
+  const template = bx.template || "{{team}}’s breadth score reflects {{summary}}.";
+  const fallbackTemplate = bx.fallback_template || "{{team}} shows a narrow core profile.";
+
+  const lanesCfg = bx.lanes || {};
+
+  const effHits   = team.breadthEffHits   != null ? team.breadthEffHits   : 0;
+  const shootHits = team.breadthShootHits != null ? team.breadthShootHits : 0;
+  const possHits  = team.breadthPossHits  != null ? team.breadthPossHits  : 0;
+  const totalHits = team.breadthTotalHits != null ? team.breadthTotalHits : 0;
+
+  // Helper to pick key "0" / "1" / "2plus"
+  const laneKey = (hits, maxTwoPlus) => {
+    if (hits <= 0) return "0";
+    if (hits === 1) return "1";
+    if (maxTwoPlus && hits >= maxTwoPlus) return "2plus";
+    return "1";
+  };
+
+  const effLaneKey   = laneKey(effHits,   2); // 0–1–2+ for efficiency
+  const shootLaneKey = laneKey(shootHits, 2); // 0–1–2+ for shooting
+  const possLaneKey  = laneKey(possHits,  2); // 0–1–2+ for possession
+
+  const effPhrase =
+    lanesCfg.efficiency &&
+    lanesCfg.efficiency[effLaneKey] || '';
+
+  const shootPhrase =
+    lanesCfg.shooting &&
+    lanesCfg.shooting[shootLaneKey] || '';
+
+  const possPhrase =
+    lanesCfg.possession &&
+    lanesCfg.possession[possLaneKey] || '';
+
+  const parts = [effPhrase, shootPhrase, possPhrase].filter(Boolean);
+
+  if (!parts.length) {
+    return fallbackTemplate.replace('{{team}}', team.name);
+  }
+
+  // Build a natural-sounding summary string
+  let summary = '';
+  if (parts.length === 1) {
+    summary = parts[0];
+  } else if (parts.length === 2) {
+    summary = `${parts[0]} and ${parts[1]}`;
+  } else {
+    summary = `${parts[0]}, ${parts[1]}, and ${parts[2]}`;
+  }
+
+  // Choose support phrase based on total hits
+  const supportKey = pickBreadthSupportKey(totalHits);
+  const supportText =
+    bx.support_phrases &&
+    bx.support_phrases[supportKey] || '';
+
+  let text = template
+    .replace('{{team}}', team.name)
+    .replace('{{summary}}', summary);
+
+  if (supportText) {
+    // Ensure we only add a space if template didn't already end with punctuation
+    if (!/[.!?]\s*$/.test(text)) text += '.';
+    text += ' ' + supportText;
+  }
+
+  return text;
+}
+
+function pickBreadthSupportKey(totalHits) {
+  if (totalHits >= 5) return 'high';
+  if (totalHits >= 3) return 'medium';
+  if (totalHits >= 1) return 'low';
+  return 'none';
+}
+
+function updateBreadthBacksForResult(result) {
+  const copy = window.MI_COPY;
+  if (!copy || !copy.breadth_explain || !result || !result.a || !result.b) return;
+
+  const textA = buildBreadthBackTextForTeam(result.a, copy);
+  const textB = buildBreadthBackTextForTeam(result.b, copy);
+
+  const elA = document.getElementById('backBreadthA');
+  const elB = document.getElementById('backBreadthB');
+
+  if (elA && textA) elA.textContent = textA;
+  if (elB && textB) elB.textContent = textB;
+}
+
+function buildResumeBackTextForTeam(team, copy) {
+  if (!team || !copy || !copy.resume_explain) return '';
+
+  const rx = copy.resume_explain;
+
+  const tier    = team.resumeRTier || 'Average';
+  const rIndex  = typeof team.resumeIndex === 'number' ? team.resumeIndex : 0;
+  const rAdjust = typeof team.resumeR     === 'number' ? team.resumeR     : 0;
+
+  const isPositive = rAdjust >= 0;
+
+  const template =
+    (isPositive ? rx.template_positive : rx.template_negative) ||
+    rx.fallback_template ||
+    "{{team}} shows a roughly average résumé once record and schedule are blended together.";
+
+  const recordPhrase =
+    rx.record_phrases && rx.record_phrases[tier]
+      ? rx.record_phrases[tier]
+      : '';
+
+  const schedulePhrase =
+    rx.schedule_phrases && rx.schedule_phrases[tier]
+      ? rx.schedule_phrases[tier]
+      : '';
+
+  const impactPhrase =
+    rx.impact_phrases && rx.impact_phrases[tier]
+      ? rx.impact_phrases[tier]
+      : '';
+
+  // If we somehow have nothing to say, fall back to generic
+  if (!recordPhrase && !schedulePhrase) {
+    return (rx.fallback_template || '').replace('{{team}}', team.name);
+  }
+
+  const text = template
+    .replace('{{team}}', team.name)
+    .replace('{{tier}}', tier)
+    .replace('{{record}}', recordPhrase)
+    .replace('{{schedule}}', schedulePhrase)
+    .replace('{{impact}}', impactPhrase);
+
+  return text;
+}
+
+function updateResumeBacksForResult(result) {
+  const copy = window.MI_COPY;
+  if (!copy || !copy.resume_explain || !result || !result.a || !result.b) return;
+
+  const textA = buildResumeBackTextForTeam(result.a, copy);
+  const textB = buildResumeBackTextForTeam(result.b, copy);
+
+  const elA = document.getElementById('backResumeA');
+  const elB = document.getElementById('backResumeB');
+
+  if (elA && textA) elA.textContent = textA;
+  if (elB && textB) elB.textContent = textB;
+}
+
+// ========== PROFILE MARKS EXPLANATION (from profileMarks + copy.json) ==========
+
+function parseProfileMark(markStr) {
+  // Expects strings like "Soft Interior — Severe"
+  if (!markStr || typeof markStr !== 'string') return null;
+  const parts = markStr.split('—');
+  const base = parts[0] ? parts[0].trim() : '';
+  const severity = parts[1] ? parts[1].trim() : 'Moderate';
+  if (!base) return null;
+  return { base, severity };
+}
+
+function niceList(names) {
+  if (!names || !names.length) return '';
+  if (names.length === 1) return names[0];
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  const allButLast = names.slice(0, -1);
+  const last = names[names.length - 1];
+  return `${allButLast.join(', ')}, and ${last}`;
+}
+
+function pickMarksImpactKey(severeCount, moderateCount) {
+  if (severeCount >= 2) return 'Severe_heavy';
+  if (severeCount >= 1 && moderateCount >= 1) return 'Mixed';
+  if (severeCount === 1 && moderateCount === 0) return 'Mixed';          // one Severe is still a big deal
+  if (severeCount === 0 && moderateCount >= 1) return 'Moderate_light';
+  return 'None';
+}
+
+function buildMarksBackTextForTeam(team, copy) {
+  if (!team || !copy || !copy.marks_explain) return '';
+
+  const mx = copy.marks_explain;
+
+  const marks = Array.isArray(team.profileMarks) ? team.profileMarks : [];
+  if (!marks.length) {
+    const tplNone = mx.template_none || "{{team}} has no active Profile Marks.";
+    return tplNone.replace('{{team}}', team.name);
+  }
+
+  const severityOrder = Array.isArray(mx.severity_order) ? mx.severity_order : ['Severe', 'Moderate'];
+  const severityPhrases = mx.severity_phrases || {};
+  const impactPhrases   = mx.impact_phrases   || {};
+
+  // Group marks by severity
+  const grouped = {};
+  marks.forEach(m => {
+    const parsed = parseProfileMark(m);
+    if (!parsed) return;
+    const sev = parsed.severity || 'Moderate';
+    if (!grouped[sev]) grouped[sev] = [];
+    grouped[sev].push(parsed.base);
+  });
+
+  const parts = [];
+  let severeCount = 0;
+  let moderateCount = 0;
+
+  severityOrder.forEach(sev => {
+    const list = grouped[sev];
+    if (!list || !list.length) return;
+
+    const count = list.length;
+    if (sev === 'Severe') severeCount = count;
+    if (sev === 'Moderate') moderateCount = count;
+
+    const cfg = severityPhrases[sev];
+    if (!cfg) return;
+
+    const key = count === 1 ? 'singular' : 'plural';
+    const tpl = cfg[key];
+    if (!tpl) return;
+
+    const listText = niceList(list);
+    const phrase = tpl
+      .replace('{{count}}', String(count))
+      .replace('{{list}}', listText);
+
+    parts.push(phrase);
+  });
+
+  if (!parts.length) {
+    // No recognizable marks despite array not being empty
+    const tplNone = mx.template_none || "{{team}} has no active Profile Marks.";
+    return tplNone.replace('{{team}}', team.name);
+  }
+
+  // "one Severe badge: A" AND "one Moderate badge: B"
+  let summary = '';
+  if (parts.length === 1) {
+    summary = parts[0];
+  } else if (parts.length === 2) {
+    summary = `${parts[0]} and ${parts[1]}`;
+  } else {
+    summary = `${parts[0]}, ${parts[1]}, and ${parts[2]}`;
+  }
+
+  const impactKey = pickMarksImpactKey(severeCount, moderateCount);
+  const impactText = impactPhrases[impactKey] || '';
+
+  const template = mx.template_some || "{{team}} currently carries {{summary}}.";
+  let text = template
+    .replace('{{team}}', team.name)
+    .replace('{{summary}}', summary);
+
+  if (impactText) {
+    if (!/[.!?]\s*$/.test(text)) text += '.';
+    text += ' ' + impactText;
+  }
+
+  return text;
+}
+
+function updateMarksBacksForResult(result) {
+  const copy = window.MI_COPY;
+  if (!copy || !copy.marks_explain || !result || !result.a || !result.b) return;
+
+  const textA = buildMarksBackTextForTeam(result.a, copy);
+  const textB = buildMarksBackTextForTeam(result.b, copy);
+
+  const elTileA = document.getElementById('backMarksTileA');
+  const elTileB = document.getElementById('backMarksTileB');
+
+  if (elTileA && textA) elTileA.textContent = textA;
+  if (elTileB && textB) elTileB.textContent = textB;
+}
+
+function buildFormulaBackTextForSide(side, result, copy) {
+  const team = side === 'A' ? result.a : result.b;
+  if (!team || !result) return '';
+
+  const tpl =
+    (copy && copy.formula_explain && copy.formula_explain.template) ||
+    "Team Total ({{total}}) = Core Traits ({{core}}) + Breadth Bonus ({{breadth}}) + Résumé Context ({{resume}}) + Matchup Interactions ({{interactions}}).";
+
+  const core = team.mibs || 0;
+  const breadth = team.breadth || 0;
+  const resume = team.resumeR || 0;
+  const total = side === 'A' ? (result.miA ?? 0) : (result.miB ?? 0);
+  const interactions = side === 'A'
+    ? (result.interactions?.a ?? 0)
+    : (result.interactions?.b ?? 0);
+
+  return miFillTemplate(tpl, {
+    total: fmt(total, 3),
+    core: fmt(core, 3),
+    breadth: fmt(breadth, 3),
+    resume: fmt(resume, 3),
+    interactions: fmt(interactions, 3)
+  });
+}
+
+function updateFormulaBacksForResult(result) {
+  const copy = window.MI_COPY;
+  if (!copy || !result) return;
+
+  const elA = document.getElementById('backFormulaA');
+  const elB = document.getElementById('backFormulaB');
+
+  if (elA) elA.textContent = buildFormulaBackTextForSide('A', result, copy) || '';
+  if (elB) elB.textContent = buildFormulaBackTextForSide('B', result, copy) || '';
+}
+
+function updateIdentityBacksForResult(result) {
+  const copy = window.MI_COPY;
+  if (!copy || !copy.identity_explain || !result || !result.a || !result.b) return;
+
+  const roundCode = result.round || CURRENT_ROUND || "R64";
+
+  const buildTeam = (team, opponent) => {
+    const roleCode = getIdentityRoleForGame(team, opponent, roundCode);
+    const role =
+      roleCode === 'FAVORITE' ? 'Favorite' :
+      roleCode === 'CINDERELLA' ? 'Cinderella' : 'Neutral';
+
+    return {
+      name: team.name,
+      identity: {
+        CIS_static: (typeof team.cisStatic === 'number') ? team.cisStatic : 0,
+        FAS_static: (typeof team.fasStatic === 'number') ? team.fasStatic : 0
+      },
+      role
+    };
+  };
+
+  const aObj = buildTeam(result.a, result.b);
+  const bObj = buildTeam(result.b, result.a);
+
+  const elA = document.getElementById('backIdentityA');
+  const elB = document.getElementById('backIdentityB');
+
+  if (elA) elA.textContent = buildIdentityBackTextForTeam(aObj, copy) || '';
+  if (elB) elB.textContent = buildIdentityBackTextForTeam(bObj, copy) || '';
+}
+
+// ========== IDENTITY — BACK-OF-CARD BUILDER ==========
+//
+// Pulls CIS/FAS static identity, determines band, selects the appropriate
+// template from copy.identity_explain, fills placeholders, and returns a
+// final back-of-card explanation string.
+//
+
+function buildIdentityBackTextForTeam(team, copy) {
+  if (!team || !copy || !copy.identity_explain) return "";
+
+  const id = team.identity || {};
+  const cis = id.CIS_static ?? 0;
+  const fas = id.FAS_static ?? 0;
+
+  const x = copy.identity_explain;
+
+  // -------- Determine identity band (CIS or FAS side) --------
+  const cisBand =
+    cis >= 8 ? "Live Cinderella" :
+    cis >= 5 ? "Potential Cinderella" :
+    cis >= 2 ? "Mild Upset Signal" :
+               "Low Cinderella Identity";
+
+  const fasBand =
+    fas >= 8 ? "True Favorite" :
+    fas >= 5 ? "Strong Favorite" :
+    fas >= 2 ? "Questionable Favorite" :
+               "Fragile Favorite";
+
+  // Decide whether team is being treated as Cinderella or Favorite based on role
+  const role = team.role;   // "Cinderella" or "Favorite"
+  let template = "";
+  let band = "";
+  let support = "";
+
+  if (role === "Cinderella") {
+    template = x.template_cinderella || x.fallback_template;
+    band = cisBand;
+    support = x.support_phrases?.aligned || "";
+  } else if (role === "Favorite") {
+    template = x.template_favorite || x.fallback_template;
+    band = fasBand;
+    support = x.support_phrases?.aligned || "";
+  } else {
+    template = x.template_neutral || x.fallback_template;
+    band = "";
+    support = x.support_phrases?.ambiguous || "";
+  }
+
+  // -------- String assembly --------
+  let out = template
+    .replace("{{team}}", team.name || "This team")
+    .replace("{{band}}", band)
+    .replace("{{support}}", support);
+
+  return out.trim();
+}
+
+// ---------- Madness Index Back-of-Card Explanation ----------
+
+function buildMadnessBackTextForTeam(side, result, copy, roleMode) {
+  if (!copy || !copy.madness_explain || !result) return '';
+
+  const cfg = copy.madness_explain;
+
+  const team  = side === 'A' ? result.a   : result.b;
+  const mi    = side === 'A' ? result.miA : result.miB;
+  const diff  = (result.miA ?? 0) - (result.miB ?? 0);
+  const roundCode = result.round || CURRENT_ROUND || 'R64';
+
+  if (!team) return cfg.fallback_template
+    ? cfg.fallback_template.replace('{{team}}', 'This team')
+    : '';
+
+  // 1) MI tier (from 1–99 cosmetic rating)
+  const rating   = typeof team.mi_rating === 'number' ? team.mi_rating : null;
+  const tierKey  = getMITierKeyForRating(rating);
+  const tierDesc = (cfg.mi_tiers && cfg.mi_tiers[tierKey]) || '';
+  const miTierText = tierDesc
+    ? `${tierKey} tier — ${tierDesc}`
+    : `${tierKey} tier`;
+
+  // 2) Role clause (Favorite / Cinderella / Neutral + optional Auto note)
+  let roleKey;
+  if (diff === 0) {
+    roleKey = 'Neutral';
+  } else {
+    const isFavoriteByModel = side === 'A' ? diff > 0 : diff < 0;
+    roleKey = isFavoriteByModel ? 'Favorite' : 'Cinderella';
+  }
+
+  const rolePhrases = cfg.role_phrases || {};
+  let roleClause = rolePhrases[roleKey] || '';
+
+  // If Role Mode is Auto, append the Auto clause if present
+  if (roleMode === 'auto' && rolePhrases.Auto) {
+    roleClause = roleClause
+      ? roleClause + ' ' + rolePhrases.Auto
+      : rolePhrases.Auto;
+  }
+
+  // 3) Gap clause (map existing lean band → gap band)
+  let gapKey = 'None';
+  if (typeof getLeanBand === 'function') {
+    const bandName = getLeanBand(diff) || '';
+    const lower = bandName.toLowerCase();
+
+    if (diff === 0) {
+      gapKey = 'None';
+    } else if (lower.includes('major')) {
+      gapKey = 'Major';
+    } else if (lower.includes('moderate')) {
+      gapKey = 'Moderate';
+    } else {
+      gapKey = 'Thin';
+    }
+  }
+
+  const gapClause = (cfg.gap_phrases && cfg.gap_phrases[gapKey]) || '';
+
+  // 4) Round clause
+  const roundClause =
+    (cfg.round_phrases && cfg.round_phrases[roundCode]) || '';
+
+  // 5) Fill template
+  const tpl = cfg.template || cfg.fallback_template || '';
+  const text = tpl
+    .replace('{{team}}', team.name || 'This team')
+    .replace('{{mi_tier}}', miTierText)
+    .replace('{{role_clause}}', roleClause)
+    .replace('{{gap_clause}}', gapClause)
+    .replace('{{round_clause}}', roundClause);
+
+  return text.trim();
+}
+
+function updateMadnessBacksForResult(result, copy, roleMode) {
+  if (!copy || !copy.madness_explain || !result) return;
+
+  const elA = document.getElementById('backMadnessTileA');
+  const elB = document.getElementById('backMadnessTileB');
+
+  if (elA) {
+    const textA = buildMadnessBackTextForTeam('A', result, copy, roleMode);
+    if (textA) elA.textContent = textA;
+  }
+
+  if (elB) {
+    const textB = buildMadnessBackTextForTeam('B', result, copy, roleMode);
+    if (textB) elB.textContent = textB;
+  }
+}
+
+function miGetCopy(path, fallback = null) {
+  const root = window.MI_COPY || {};
+  const parts = String(path).split('.');
+  let cur = root;
+  for (const p of parts) {
+    if (!cur || typeof cur !== 'object') return fallback;
+    cur = cur[p];
+  }
+  return (cur == null ? fallback : cur);
+}
+
+function miFillTemplate(tpl, vars) {
+  if (!tpl) return '';
+  return String(tpl).replace(/{{\s*([\w]+)\s*}}/g, (_, key) => {
+    const v = vars && Object.prototype.hasOwnProperty.call(vars, key) ? vars[key] : '';
+    return (v == null ? '' : String(v));
+  });
+}
+
+// ---------- Madness Index Tier Helper (1–99 cosmetic rating) ----------
+
+function getMITierKeyForRating(rating) {
+  if (rating == null || isNaN(rating)) return 'Balanced';
+
+  if (rating >= 90) return 'Top';
+  if (rating >= 75) return 'High';
+  if (rating >= 60) return 'Solid';
+  if (rating >= 40) return 'Balanced';
+  if (rating >= 25) return 'Low';
+  return 'Fragile';
+}
 
 // ========== SEED / BRACKET LOGIC HELPERS ==========
 //
@@ -296,7 +1496,7 @@ function getTierPointsFromZ(z) {
   if (z >= 1.00) return 2.0;                  // Elite
   if (z >= 0.80) return 1.5;                  // Strong
   if (z >= 0.60) return 1.0;                  // Above Average
-  if (z >= 0.00) return 0.5;                  // Slightly Above / Average
+  if (z >= 0.00) return 0.5;                  // Average
   if (z >= -0.80) return 0.0;                 // Weak
   return 0.0;                                 // Fragile (z < -0.80)
 }
@@ -306,7 +1506,7 @@ function getTierLabelFromZ(z) {
   if (z >= 1.00) return 'Elite';
   if (z >= 0.80) return 'Strong';
   if (z >= 0.60) return 'Above Average';
-  if (z >= 0.00) return 'Slightly Above / Average';
+  if (z >= 0.00) return 'Average';
   if (z >= -0.80) return 'Weak';
   return 'Fragile';
 }
@@ -856,9 +2056,9 @@ function computeResumeContextForTeam(team) {
   } else if (R >= 0.60) {
     adj = 0.05; tier = 'Above Average';
   } else if (R < -0.80) {
-    adj = -0.10; tier = 'Fragile';
+    adj = -0.25; tier = 'Fragile';
   } else if (R < 0.00) {
-    adj = -0.05; tier = 'Weak';
+    adj = -0.15; tier = 'Weak';
   }
 
   // 4) Store all résumé pieces on the team object
@@ -1147,8 +2347,8 @@ function interactionVariance(a, b) {
     const marks = Array.isArray(team.profileMarks) ? team.profileMarks : [];
     let bonus = 0;
 
-    if (marks.includes('Unstable Perimeter Profile — Severe')) bonus += 0.10;
-    else if (marks.includes('Unstable Perimeter Profile — Moderate')) bonus += 0.05;
+    if (marks.includes('Unstable Perimeter — Severe')) bonus += 0.10;
+    else if (marks.includes('Unstable Perimeter — Moderate')) bonus += 0.05;
 
     if (marks.includes('Cold Arc Team — Severe')) bonus += 0.10;
     else if (marks.includes('Cold Arc Team — Moderate')) bonus += 0.05;
@@ -1272,8 +2472,8 @@ function computeProfileMarks(team) {
     const acc = team.threepp;
     const gap = Math.abs(vol - acc);
     if (vol >= 0.40) {
-      if (gap >= 0.10) marks.push('Unstable Perimeter Profile — Severe');
-      else if (gap >= 0.06) marks.push('Unstable Perimeter Profile — Moderate');
+      if (gap >= 0.10) marks.push('Unstable Perimeter — Severe');
+      else if (gap >= 0.06) marks.push('Unstable Perimeter — Moderate');
     }
   }
 
@@ -1311,25 +2511,28 @@ function computeProfileMarks(team) {
   if (FIELD_STATS.tempo && FIELD_STATS.epr && FIELD_STATS.to &&
       team.tempo != null && team.epr != null && team.to != null) {
 
-    const zTempo = getZ(team, 'tempo');      // pace identity (fast/slow)
-    const zEPR   = getZ(team, 'epr');        // possession resilience
-    const zInvTO = getZ(team, 'to', true);   // inverted TO% (higher = safer)
+    const zTempo = getZ(team, 'tempo');
+    const zEPR   = getZ(team, 'epr');
+    const zInvTO = getZ(team, 'to', true);
 
-    // Step 1 — Tempo extremity (fast OR slow)
     const tempoExtremity = Math.abs(zTempo);
+    if (tempoExtremity < 0.80) {
+      // no mark
+    } else {
+      const si = (zEPR + zInvTO) / 2;
+      const vulnerability = Math.max(0, -si);
 
-    // Step 2 — Possession fragility (positive when fundamentals are poor)
-    const possFragRaw = (-zEPR + -zInvTO) / 2;   // penalize low EPR and low -TO
-    const possFrag = Math.max(0, possFragRaw);   // ignore if possession is actually solid
+      const tempoStrain = tempoExtremity * vulnerability;
 
-    // Step 3 — Tempo Strain Index
-    const strainIndex = tempoExtremity + possFrag;
-
-    // Step 4 — Thresholds (aligned with global z-tier bands)
-    if (strainIndex >= 1.00) {
-      marks.push('Tempo Strain — Severe');
-    } else if (strainIndex >= 0.60) {
-      marks.push('Tempo Strain — Moderate');
+      if (tempoExtremity >= 1.20 &&
+          vulnerability >= 0.75 &&
+          tempoStrain   >= 0.90) {
+        marks.push('Tempo Strain — Severe');
+      } else if (tempoExtremity >= 0.80 &&
+                 vulnerability >= 0.40 &&
+                 tempoStrain   >= 0.40) {
+        marks.push('Tempo Strain — Moderate');
+      }
     }
   }
 
@@ -1502,21 +2705,51 @@ function computeMIBase(team) {
   return miBase;
 }
 
+// Scale interaction leverage by résumé quality.
+// Stronger résumés "cash in" more of their matchup leverage.
+function getResumeInteractionFactor(team) {
+  const tier = team.resumeRTier || 'Average';
+
+  switch (tier) {
+    case 'Elite':
+      return 1.00;
+    case 'Strong':
+      return 0.95;
+    case 'Above Average':
+      return 0.90;
+    case 'Average':
+      return 0.85;
+    case 'Weak':
+      return 0.70;
+    case 'Fragile':
+      return 0.50;
+    default:
+      return 0.85; // treat unknown as roughly Average
+  }
+}
+
 // ---------- Matchup Madness Index (MI_matchup) ----------
 
 function computeFinalMI(team, interactionAdj) {
   // Safeguard: ensure MI_base exists
   const base = (typeof team.mi_base === 'number')
     ? team.mi_base
-    : ((team.mibs || 0) + (team.breadth || 0) + (team.resumeR || 0));
+    : computeMIBase(team);
 
-  const intAdj = interactionAdj || 0;
+  // Raw interaction total from the interaction engine
+  const intRaw = (typeof interactionAdj === 'number') ? interactionAdj : 0;
+
+  // Scale by résumé quality
+  const rFactor = getResumeInteractionFactor(team);
+  const intAdj  = intRaw * rFactor;
 
   const mi_matchup = base + intAdj;
 
   // Optional: store for debugging / Explain Mode
-  team.mi_matchup = mi_matchup;
-  team.mi_int     = intAdj;   // total INT for this matchup direction
+  team.mi_matchup   = mi_matchup;
+  team.mi_int_raw   = intRaw;   // pre-scaling leverage
+  team.mi_int       = intAdj;   // effective leverage after résumé scaling
+  team.mi_int_rFact = rFactor;  // which factor was applied
 
   return mi_matchup;
 }
@@ -1525,7 +2758,7 @@ function getTeamByName(name) {
   return TEAMS[name] || null;
 }
 
-function compareTeams(teamAName, teamBName) {
+function compareTeams(teamAName, teamBName, roleMode = 'auto') {
   const a = getTeamByName(teamAName);
   const b = getTeamByName(teamBName);
 
@@ -1534,31 +2767,27 @@ function compareTeams(teamAName, teamBName) {
     return;
   }
 
-  // Interactions first
   const interactions = computeInteractions(a, b);
 
-  // 🔹 Active round from the global selector
-  const activeRound = CURRENT_ROUND;  // e.g., "R64", "S16", etc.
-
-  // 🔹 Seed-aware bracket metadata
-  const seedMeta = getSeedRoundMeta(a.seed, b.seed, activeRound);
+  const activeRound = CURRENT_ROUND;  // e.g. "R64", "S16", etc.
+  const seedMeta    = getSeedRoundMeta(a.seed, b.seed, activeRound);
 
   const miA = computeFinalMI(a, interactions.a);
   const miB = computeFinalMI(b, interactions.b);
 
-  const diff = miA - miB;
+  const diff      = miA - miB;
   const predicted = diff > 0 ? a.name : (diff < 0 ? b.name : 'Push');
 
-  const result = { 
-    a, 
-    b, 
-    miA, 
-    miB, 
-    diff, 
-    predicted, 
+  const result = {
+    a,
+    b,
+    miA,
+    miB,
+    diff,
+    predicted,
     interactions,
     round: activeRound,
-    seedMeta,          // 🔹 bracket-aware metadata travels with the result
+    seedMeta,
   };
 
   window.LAST_RESULT = result;
@@ -1569,6 +2798,19 @@ function compareTeams(teamAName, teamBName) {
   renderInteractionsTable(result);
   renderSummary(result);
   updateMatchupBarFromDOM();
+  updateCoreBacksForResult(result);
+  updateBreadthBacksForResult(result);
+  updateResumeBacksForResult(result);
+  updateMarksBacksForResult(result);
+  updateFormulaBacksForResult(result);
+  updateIdentityBacksForResult(result);
+
+
+  // New: pull copy.json from the global and feed it into the MI back-of-card builder
+  const copy = window.MI_COPY;
+  if (copy) {
+    updateMadnessBacksForResult(result, window.MI_COPY, roleMode);
+  }
 
   console.log(result);
   return result;
@@ -1588,8 +2830,8 @@ function populateTeamDropdowns() {
 
   if (!selectA || !selectB) return;
 
-  selectA.innerHTML = '';
-  selectB.innerHTML = '';
+  selectA.innerHTML = '<option value="" disabled selected>Select Team A</option>';
+  selectB.innerHTML = '<option value="" disabled selected>Select Team B</option>';
 
   TEAM_LIST.sort().forEach(name => {
     const optA = document.createElement('option');
@@ -1603,17 +2845,31 @@ function populateTeamDropdowns() {
     selectB.appendChild(optB);
   });
 
-  // When teams change, re-calc which rounds are possible
+  let lastTeamsOk = false;
+
   const onTeamChange = () => {
     updateRoundOptionsForCurrentSeeds();
     updateInteractionHeadersFromSelections();
-  };
+    updatePreMatchupHubProgress();
+    refreshCompareButtonState();
+
+  const teamsOk = getSelectedTeams().ok;
+  const roundReady = isRoundSelected();
+
+  if (!lastTeamsOk && teamsOk && !roundReady && !MI_ROUND_TOUCHED && !MI_ROUND_NUDGE_SHOWN) {
+    MI_ROUND_NUDGE_SHOWN = true;
+    nudgeRoundSelector();
+  }
+
+  lastTeamsOk = teamsOk;
+};
 
   selectA.addEventListener('change', onTeamChange);
   selectB.addEventListener('change', onTeamChange);
 
-  // Also run once after initial population (if dropdowns have default values)
+  updatePreMatchupHubProgress();
   updateRoundOptionsForCurrentSeeds();
+  refreshCompareButtonState();
 }
 
 function getRoundLabelFromCode(code) {
@@ -1717,6 +2973,14 @@ function getLeanBand(diff) {
   return 'Heavy Lean';
 }
 
+function getSummaryGapKey(diff) {
+  const d = Math.abs(typeof diff === 'number' ? diff : 0);
+  if (d < 0.10) return 'tiny_gap';   // "Coin flip"
+  if (d < 0.25) return 'small_gap';  // "Slight lean"
+  if (d < 0.50) return 'medium_gap'; // "Clear lean"
+  return 'large_gap';                // "Strong favorite"
+}
+
 function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, seedMeta }) {
   const table = document.getElementById('summaryTable');
   if (!table) return;
@@ -1724,18 +2988,97 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
   const tbody = table.querySelector('tbody');
   if (!tbody) return;
 
-  // Lean band + text
-  const band = getLeanBand(diff);
+  // ----- JSON wiring for labels + gap phrases -----
+  const copy        = window.MI_COPY || {};
+  const summaryCopy = copy.summary || {};
+  const tableLabels = summaryCopy.table_labels || {};
+  const phrases     = copy.summary_phrases || {};
+
+  const cTeamLabel = tableLabels.cinderella_label
+    || (copy.card && copy.card.cinderella_label)
+    || 'Cinderella';
+
+  const fTeamLabel = tableLabels.favorite_label
+    || (copy.card && copy.card.favorite_label)
+    || 'Favorite';
+
+  const baselineLabel    = tableLabels.baseline_label    || 'Baseline MI';
+  const matchupLabel     = tableLabels.matchup_label     || 'Matchup MI';
+  const interactionLabel = tableLabels.interaction_label || 'Interaction Leverage';
+  const predictedLabel   = tableLabels.predicted_label   || 'Predicted Winner';
+
+  const neutralText = summaryCopy.neutral_matchup || 'Neutral matchup';
+  const towardWord  = summaryCopy.toward_phrase   || 'toward';
+
+  const gapKey    = getSummaryGapKey(diff);
+  const gapCfg    = phrases[gapKey] || {};
+  const bandLabel = gapCfg.label || '';
+  const bandDesc  = gapCfg.description || '';
+
+  // ----- Build lean text (also feeds the hero HUD) -----
   let leanText;
 
   if (diff === 0) {
-    leanText = 'Toss-Up (Even Matchup)';
+    // Pure coin flip / neutral case
+    if (bandLabel && bandDesc) {
+      leanText = bandLabel + ' — ' + bandDesc;
+    } else {
+      leanText = bandDesc || neutralText;
+    }
   } else {
     const winnerName = diff > 0 ? a.name : b.name;
-    leanText = `${band} toward ${winnerName}`;
+
+    if (bandLabel && bandDesc) {
+      // "Slight lean toward TEAM. A modest edge, but upset risk is very live."
+      leanText = bandLabel + ' ' + towardWord + ' ' + winnerName + '. ' + bandDesc;
+    } else if (bandDesc) {
+      leanText = bandDesc + ' ' + towardWord + ' ' + winnerName + '.';
+    } else if (bandLabel) {
+      leanText = bandLabel + ' ' + towardWord + ' ' + winnerName;
+    } else {
+      // Fallback to legacy band names if JSON is missing
+      const fallbackBand = getLeanBand(diff);
+      leanText = fallbackBand
+        ? (fallbackBand + ' ' + towardWord + ' ' + winnerName)
+        : (towardWord + ' ' + winnerName);
+    }
   }
 
-  // Update header cells to show team names
+  // ----- Hero HUD updates -----
+  const hudCName   = document.getElementById('hudCinderName');
+  const hudFName   = document.getElementById('hudFavoriteName');
+  const hudDelta   = document.getElementById('hudDeltaValue');
+  const hudLean    = document.getElementById('hudLeanText');
+  const hudCRating = document.getElementById('hudCinderRating');
+  const hudFRating = document.getElementById('hudFavoriteRating');
+
+  if (hudCName)  hudCName.textContent  = a.name;
+  if (hudFName)  hudFName.textContent  = b.name;
+  if (hudDelta)  hudDelta.textContent  = `ΔMI ${fmt(diff, 3)}`;
+  if (hudLean)   hudLean.textContent   = leanText;
+
+  const deriveRating = (team) => {
+    let rating = (typeof team.mi_rating === 'number') ? team.mi_rating : null;
+
+    if (rating == null) {
+      const P = (typeof team.performancePercentile === 'number')
+        ? team.performancePercentile
+        : 0.5;
+      rating = Math.round(P * 100);
+    }
+
+    if (rating < 1) rating = 1;
+    if (rating > 99) rating = 99;
+    return rating;
+  };
+
+  const ratingA = deriveRating(a);
+  const ratingB = deriveRating(b);
+
+  if (hudCRating) hudCRating.textContent = `MI ${ratingA.toString().padStart(2, '0')}`;
+  if (hudFRating) hudFRating.textContent = `MI ${ratingB.toString().padStart(2, '0')}`;
+
+  // ----- Summary table headers -----
   const headA = document.getElementById('summaryTeamAHeader');
   const headB = document.getElementById('summaryTeamBHeader');
   if (headA) headA.textContent = a.name;
@@ -1747,18 +3090,20 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
   const intA  = interactions?.a || 0;
   const intB  = interactions?.b || 0;
 
-  // Single clean matchup row using "mini cards" in each cell
+  const centerHeaderLabel = summaryCopy.matchup_header || 'Matchup Edge';
+
+  // ----- Single clean matchup row using "mini cards" in each cell -----
   tbody.innerHTML = `
     <tr>
       <!-- Team A summary -->
       <td>
         <div class="summary-block">
-          <div class="summary-team-label">Cinderella</div>
+          <div class="summary-team-label">${cTeamLabel}</div>
           <div class="summary-team-name">${a.name}</div>
-          <div class="summary-mi-line">Baseline MI: ${fmt(baseA, 3)}</div>
-          <div class="summary-mi-line">Matchup MI: ${fmt(miA, 3)}</div>
+          <div class="summary-mi-line">${baselineLabel}: ${fmt(baseA, 3)}</div>
+          <div class="summary-mi-line">${matchupLabel}: ${fmt(miA, 3)}</div>
           <div class="summary-int-line">
-            Interaction Leverage: ${fmt(intA, 3)}
+            ${interactionLabel}: ${fmt(intA, 3)}
           </div>
         </div>
       </td>
@@ -1766,10 +3111,10 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
       <!-- Center ΔMI + prediction card -->
       <td>
         <div class="summary-block summary-lean">
-          <div class="summary-delta-label">Matchup Edge</div>
+          <div class="summary-delta-label">${centerHeaderLabel}</div>
           <div class="summary-delta-value">ΔMI: ${fmt(diff, 3)}</div>
           <div class="summary-pred-line">
-            Predicted Winner: <strong>${predicted}</strong>
+            ${predictedLabel}: <strong>${predicted}</strong>
           </div>
           <div class="summary-lean-text">
             ${leanText}
@@ -1780,31 +3125,31 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
       <!-- Team B summary -->
       <td>
         <div class="summary-block">
-          <div class="summary-team-label">Favorite</div>
+          <div class="summary-team-label">${fTeamLabel}</div>
           <div class="summary-team-name">${b.name}</div>
-          <div class="summary-mi-line">Baseline MI: ${fmt(baseB, 3)}</div>
-          <div class="summary-mi-line">Matchup MI: ${fmt(miB, 3)}</div>
+          <div class="summary-mi-line">${baselineLabel}: ${fmt(baseB, 3)}</div>
+          <div class="summary-mi-line">${matchupLabel}: ${fmt(miB, 3)}</div>
           <div class="summary-int-line">
-            Interaction Leverage: ${fmt(intB, 3)}
+            ${interactionLabel}: ${fmt(intB, 3)}
           </div>
         </div>
       </td>
     </tr>
   `;
 
-  // Update round pill
+  // ----- Round pill -----
   const roundSpan = document.getElementById('currentRoundLabel');
   if (roundSpan) {
     roundSpan.textContent = getRoundLabelFromCode(round || CURRENT_ROUND);
   }
 
   // Legacy spans (safe no-ops if not present)
-  const miASpan = document.getElementById('miA');
-  const miBSpan = document.getElementById('miB');
+  const miASpan  = document.getElementById('miA');
+  const miBSpan  = document.getElementById('miB');
   const predSpan = document.getElementById('predictedWinner');
 
-  if (miASpan) miASpan.textContent = miA.toFixed(3);
-  if (miBSpan) miBSpan.textContent = miB.toFixed(3);
+  if (miASpan)  miASpan.textContent  = miA.toFixed(3);
+  if (miBSpan)  miBSpan.textContent  = miB.toFixed(3);
   if (predSpan) predSpan.textContent = predicted;
 
   const summarySection = document.getElementById('summarySection');
@@ -1818,19 +3163,17 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
     const { seedA, seedB, possible, isAllowed, earliest } = seedMeta;
 
     const friendlyRounds = possible.map(getRoundLabelFromCode);
-    const currentLabel = getRoundLabelFromCode(round || CURRENT_ROUND);
-    const earliestLabel = earliest ? getRoundLabelFromCode(earliest) : null;
+    const currentLabel   = getRoundLabelFromCode(round || CURRENT_ROUND);
+    const earliestLabel  = earliest ? getRoundLabelFromCode(earliest) : null;
 
     if (!possible.length) {
       seedNoteEl.textContent = '';
     } else if (isAllowed) {
-      // Current round is compatible with these seeds
       seedNoteEl.textContent =
         `Bracket note: As seeds ${seedA} and ${seedB}, these teams ` +
         `can meet in ${friendlyRounds.join(', ')}. ` +
         `${currentLabel} is a valid meeting round.`;
     } else {
-      // Current round is *not* compatible with standard bracket structure
       seedNoteEl.textContent =
         `Bracket note: As seeds ${seedA} and ${seedB}, these teams ` +
         `can meet in ${friendlyRounds.join(', ')}. ` +
@@ -1966,8 +3309,8 @@ function renderProfileMarks(team, containerId) {
     "Offensive Rigidity — Moderate": "badge_offensive_rigidity_moderate.svg",
     "Offensive Rigidity — Severe":   "badge_offensive_rigidity_severe.svg",
 
-    "Unstable Perimeter Profile — Moderate": "badge_unstable_perimeter_moderate.svg",
-    "Unstable Perimeter Profile — Severe":   "badge_unstable_perimeter_severe.svg",
+    "Unstable Perimeter — Moderate": "badge_unstable_perimeter_moderate.svg",
+    "Unstable Perimeter — Severe":   "badge_unstable_perimeter_severe.svg",
 
     "Cold Arc Team — Moderate": "badge_cold_arc_moderate.svg",
     "Cold Arc Team — Severe":   "badge_cold_arc_severe.svg",
@@ -1991,11 +3334,52 @@ function renderProfileMarks(team, containerId) {
   team.profileMarks.forEach(mark => {
     const filename = BADGE_MAP[mark];
     if (!filename) return;
+
+    // Example mark string: "Tempo Strain — Severe"
+    const parts    = mark.split('—');
+    const baseName = (parts[0] || mark).trim();
+    const severity = mark.includes('Severe')   ? 'Severe'
+                    : mark.includes('Moderate') ? 'Moderate'
+                    : 'Neutral';
+
+    // Outer chip
+    const chip = document.createElement('div');
+    chip.className = 'mark-chip';
+    if (severity === 'Severe')   chip.classList.add('severe');
+    if (severity === 'Moderate') chip.classList.add('moderate');
+
+    // Icon plate + icon
+    const iconPlate = document.createElement('div');
+    iconPlate.className = 'mark-icon-plate';
+
     const img = document.createElement('img');
     img.src = filename;
-    img.className = 'mark-badge';
-    img.title = mark;
-    el.appendChild(img);
+    img.alt = baseName;
+    img.className = 'mark-badge';   // still reuse this class
+    iconPlate.appendChild(img);
+
+    // Text block
+    const info = document.createElement('div');
+    info.className = 'mark-info';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'mark-title';
+    titleEl.textContent = baseName;
+
+    const subEl = document.createElement('div');
+    subEl.className = 'mark-subtext';
+    subEl.textContent = getMarkDescription(baseName, severity);
+
+    info.appendChild(titleEl);
+    info.appendChild(subEl);
+
+    chip.appendChild(iconPlate);
+    chip.appendChild(info);
+
+    // Full string including severity as tooltip
+    chip.title = mark;
+
+    el.appendChild(chip);
   });
 }
 
@@ -2006,6 +3390,16 @@ function fmt(val, digits) {
   return Number(val).toFixed(digits);
 }
 
+function showFooter() {
+  const f = document.getElementById('appFooter');
+  if (f) f.classList.remove('hidden');
+}
+
+function hideFooter() {
+  const f = document.getElementById('appFooter');
+  if (f) f.classList.add('hidden');
+}
+
 // ========== MATCHUP BAR TOGGLING ==========
 
 function updateMatchupBarFromDOM() {
@@ -2013,10 +3407,10 @@ function updateMatchupBarFromDOM() {
   const topBar     = document.querySelector('.top-bar');
   if (!matchupBar || !topBar) return;
 
-  const teamANameEl = document.getElementById('teamATitle');
-  const teamBNameEl = document.getElementById('teamBTitle');
-  const seedAEl     = document.getElementById('teamASeed');
-  const seedBEl     = document.getElementById('teamBSeed');
+  const teamANameEl  = document.getElementById('teamATitle');
+  const teamBNameEl  = document.getElementById('teamBTitle');
+  const seedAEl      = document.getElementById('teamASeed');
+  const seedBEl      = document.getElementById('teamBSeed');
   const roundLabelEl = document.getElementById('currentRoundLabel');
 
   const cName = teamANameEl ? teamANameEl.textContent.trim() : 'Team A';
@@ -2039,6 +3433,13 @@ function updateMatchupBarFromDOM() {
 
   matchupBar.classList.add('visible');
   topBar.classList.add('collapsed');
+
+  const appShell = document.querySelector('.app-shell');
+   if (appShell) {
+   appShell.classList.add('has-matchup');
+   appShell.classList.remove('pre-matchup');
+   showFooter();
+  }
 }
 
 function hideMatchupBar() {
@@ -2048,6 +3449,34 @@ function hideMatchupBar() {
 
   matchupBar.classList.remove('visible');
   topBar.classList.remove('collapsed');
+
+  const appShell = document.querySelector('.app-shell');
+  if (appShell) {
+    appShell.classList.remove('has-matchup');
+    appShell.classList.add('pre-matchup');
+    hideFooter();
+  }
+}
+
+function showAnalysisShell() {
+  const shell = document.getElementById('analysisShell');
+  if (!shell) return;
+
+  shell.classList.remove('hidden');
+  // next frame so the transition actually runs
+  requestAnimationFrame(() => shell.classList.add('analysis-visible'));
+}
+
+function hideAnalysisShell() {
+  const shell = document.getElementById('analysisShell');
+  if (!shell) return;
+
+  shell.classList.remove('analysis-visible');
+
+  // wait for the fade/slide transition, then remove from layout
+  window.setTimeout(() => {
+    shell.classList.add('hidden');
+  }, 280);
 }
 
 function renderCoreProfileTable(team, tableId) {
@@ -2106,15 +3535,20 @@ function renderCoreProfileTable(team, tableId) {
   const hits    = team.breadthHits != null ? team.breadthHits : 0;
   const breadth = team.breadth     != null ? team.breadth     : 0;
 
+  const brConfig = window.MI_COPY?.core_profile?.breadth_row || {};
+  const thresholdText =
+    brConfig.threshold_text ||
+    "Bonus scales with total 'hits' across Efficiency, Shooting, Possession, Tempo";
+  const tierText =
+    brConfig.tier_text ||
+    "Tier placement skipped";
+
   const breadthRow = `
     <tr class="breadth-row">
       <td>Breadth Bonus</td>
-      <td>
-        Bonus scales with total "hits"<br/>
-        across Efficiency, Shooting, Possession, Tempo
-      </td>
+      <td>${thresholdText}</td>
       <td>${hits} hits</td>
-      <td>Tier placement skipped</td>
+      <td>${tierText}</td>
       <td>${fmt(breadth, 3)}</td>
     </tr>
   `;
@@ -2265,10 +3699,47 @@ function renderTeamSide(side, result) {
     ? team.mi_base
     : computeMIBase(team);
 
-  if (titleEl)           titleEl.textContent           = team.name || (isA ? 'Team A' : 'Team B');
-  if (seedEl)            seedEl.textContent            = (team.seed != null && team.seed !== '') ? `Seed ${team.seed}` : '';
-  if (profileSubtotalEl) profileSubtotalEl.textContent = fmt(profileSubtotal, 3);
-  if (teamTotalEl)       teamTotalEl.textContent       = fmt(miBase, 3);
+  // Build display name with seed prefix (e.g., "#1 Seed Florida")
+  const baseName = team.name || (isA ? 'Team A' : 'Team B');
+  const seedStr  = (team.seed != null && team.seed !== '') ? String(team.seed) : '';
+
+  if (titleEl) {
+    titleEl.textContent = seedStr
+      ? `#${seedStr} Seed ${baseName}`
+      : baseName;
+  }
+
+  // Keep the raw numeric seed in the hidden span so the matchup HUD
+  // can still read it and display "(1)" etc. if desired.
+  if (seedEl) {
+    seedEl.textContent = seedStr;
+  }
+
+  if (profileSubtotalEl) {
+    profileSubtotalEl.textContent = fmt(profileSubtotal, 3);
+  }
+
+  if (teamTotalEl) {
+    // Prefer the precomputed 1–99 cosmetic rating
+    let rating = (typeof team.mi_rating === 'number') ? team.mi_rating : null;
+
+    // If somehow missing, derive from performancePercentile or mi_base
+    if (rating == null) {
+      const P = (typeof team.performancePercentile === 'number')
+        ? team.performancePercentile
+        : 0.5;
+      rating = Math.round(P * 100);
+    }
+
+    if (rating < 1)  rating = 1;
+    if (rating > 99) rating = 99;
+
+    // Optional: keep the raw MI_base accessible for debugging
+    teamTotalEl.setAttribute('title', `Baseline MI: ${fmt(miBase, 3)}`);
+
+    // Display as a two-digit badge
+    teamTotalEl.textContent = rating.toString().padStart(2, '0');
+  }
 
   // Résumé context mini-tile
   const resumeTile   = document.getElementById(isA ? 'resumeTileA' : 'resumeTileB');
@@ -2278,21 +3749,50 @@ function renderTeamSide(side, result) {
   if (resumeTile && resumeAdjEl && resumeTierEl) {
     resumeAdjEl.textContent = fmt(resume, 3);
 
-    const tier = team.resumeRTier ||
-      (resume >= 0.10 ? 'Strong' :
-       resume >= 0.05 ? 'Above Average' :
-       resume <= -0.10 ? 'Fragile' :
-       resume <= -0.05 ? 'Weak' : 'Average');
+    let tier = team.resumeRTier;
+
+    if (!tier) {
+     const rules = miGetCopy('resume_tile_ui.tier_rules', null);
+     if (Array.isArray(rules) && rules.length) {
+       const hit = rules.find(r => typeof r.min === 'number' && resume >= r.min);
+       tier = hit?.label || 'Average';
+     } else {
+       tier =
+        (resume >= 0.10 ? 'Strong' :
+         resume >= 0.05 ? 'Above Average' :
+         resume <= -0.10 ? 'Fragile' :
+         resume <= -0.05 ? 'Weak' : 'Average');
+     }
+   }
 
     resumeTierEl.textContent = tier;
 
-    resumeTile.classList.remove('context-positive', 'context-negative', 'context-neutral');
+    // Reset state + tier classes
+    resumeTile.classList.remove(
+      'context-positive',
+      'context-negative',
+      'context-neutral',
+      'resume-tier-strong',
+      'resume-tier-above',
+      'resume-tier-average',
+      'resume-tier-weak',
+      'resume-tier-fragile'
+    );
 
+    // Sign-based state (existing behavior)
     let stateClass = 'context-neutral';
     if (resume > 0.0001) stateClass = 'context-positive';
     else if (resume < -0.0001) stateClass = 'context-negative';
 
-    resumeTile.classList.add(stateClass);
+   // Tier-based color class (JSON-driven)
+  let tierClass = 'resume-tier-average';
+  const rules = miGetCopy('resume_tile_ui.tier_rules', []);
+  if (Array.isArray(rules)) {
+    const rule = rules.find(r => r.label === tier);
+    if (rule?.class) tierClass = rule.class;
+  }
+
+    resumeTile.classList.add(stateClass, tierClass);
   }
 
     // Identity tile (CIS / FAS)
@@ -2303,6 +3803,7 @@ function renderTeamSide(side, result) {
   const backIdentityEl  = document.getElementById(isA ? 'backIdentityA'    : 'backIdentityB');
 
   if (identityTile && identityScoreEl && identityRoleEl && identityDetailEl) {
+    const identityLabelEl = identityTile.querySelector('.context-label');
     const opponent = isA ? result.b : result.a;
     const roundCode = result.round || CURRENT_ROUND || "R64";
     const role = getIdentityRoleForGame(team, opponent, roundCode);
@@ -2314,27 +3815,35 @@ function renderTeamSide(side, result) {
     let label       = 'Neutral';
     let desc        = '';
     let tileClass   = 'identity-neutral';
+    let headerText  = 'Tournament Identity';
 
     const roundLabel = (typeof getRoundLabelFromCode === 'function')
       ? getRoundLabelFromCode(roundCode)
       : roundCode;
 
-    if (role === 'FAVORITE') {
-      activeScore = fas;
-      label       = 'Favorite';
-      desc        = `Favorite Authenticity: ${Math.round(fas)} • Cinderella Identity: ${Math.round(cis)}`;
-      tileClass   = 'identity-favorite';
-    } else if (role === 'CINDERELLA') {
-      activeScore = cis;
-      label       = 'Cinderella';
-      desc        = `Cinderella Identity: ${Math.round(cis)} • Favorite Authenticity: ${Math.round(fas)}`;
-      tileClass   = 'identity-cinderella';
-    } else {
-      activeScore = null;
-      label       = 'Neutral';
-      desc        = `CIS: ${Math.round(cis)} • FAS: ${Math.round(fas)}`;
-      tileClass   = 'identity-neutral';
-    }
+        if (role === 'FAVORITE') {
+    activeScore = fas;
+    label       = 'Favorite';
+    // Only show FAS in the detail line
+    desc        = `Favorite Authenticity: ${Math.round(fas)}`;
+    tileClass   = 'identity-favorite';
+    headerText  = 'Favorite Authenticity Score';
+
+  } else if (role === 'CINDERELLA') {
+    activeScore = cis;
+    label       = 'Cinderella';
+    // Only show CIS in the detail line
+    desc        = `Cinderella Identity: ${Math.round(cis)}`;
+    tileClass   = 'identity-cinderella';
+    headerText  = 'Cinderella Identity Score';
+
+  } else {
+    // No clear identity → keep both as background profile metrics
+    activeScore = null; // keeps the big number as "—"
+    label       = 'Neutral';
+    desc        = `CIS: ${Math.round(cis)} • FAS: ${Math.round(fas)}`;
+    tileClass   = 'identity-neutral';
+  }
 
     identityScoreEl.textContent = (activeScore != null)
       ? fmt(activeScore, 0)
@@ -2343,199 +3852,205 @@ function renderTeamSide(side, result) {
     identityRoleEl.textContent   = label;
     identityDetailEl.textContent = desc;
 
+    if (identityLabelEl) {
+      identityLabelEl.textContent = headerText;
+    }
+
     identityTile.classList.remove('identity-favorite', 'identity-cinderella', 'identity-neutral');
     identityTile.classList.add('identity-tile', tileClass);
 
-    if (backIdentityEl) {
-      let expl;
-      if (role === 'FAVORITE') {
-        expl =
-          `${team.name} is treated as the Favorite in this ${roundLabel} matchup `
-          + `based on seeding and context. The highlighted score (${Math.round(fas)}) `
-          + `is this team's Favorite Authenticity (FAS). Cinderella Identity `
-          + `(CIS = ${Math.round(cis)}) is shown for context only.`;
-      } else if (role === 'CINDERELLA') {
-        expl =
-          `${team.name} is treated as the Cinderella in this ${roundLabel} matchup. `
-          + `The highlighted score (${Math.round(cis)}) is this team's Cinderella `
-          + `Identity (CIS). Favorite Authenticity (FAS = ${Math.round(fas)}) remains `
-          + `visible for reference.`;
-      } else {
-        expl =
-          `In this matchup, neither team has a clear Cinderella or Favorite `
-          + `identity for this round (for example, an 8 vs 9 game in the Round of 64). `
-          + `Both CIS (${Math.round(cis)}) and FAS (${Math.round(fas)}) are shown as `
-          + `background profile metrics.`;
-      }
-      backIdentityEl.textContent = expl;
+    if (backIdentityEl && window.MI_COPY) {
+      const identityRole =
+        role === 'FAVORITE'   ? 'Favorite'   :
+        role === 'CINDERELLA' ? 'Cinderella' :
+                                'Neutral';
+
+      const identityTeam = {
+        name: team.name,
+        identity: {
+          CIS_static: cis,
+          FAS_static: fas
+        },
+        role: identityRole
+      };
+
+      const expl = buildIdentityBackTextForTeam(identityTeam, window.MI_COPY);
+
+      backIdentityEl.textContent = expl || '';
     }
   }
-
   // Core Traits big table
   renderCoreProfileTable(team, coreTableId);
 
   // Neutral Modifiers table (Résumé + Interactions)
   renderNeutralTable(team, mi, intTot, neutralTableId, neutralSubtotalId);
-    // ----- Back-of-card EXPLANATION content -----
-  const formulaEl  = document.getElementById(isA ? 'backFormulaA'  : 'backFormulaB');
-  const coreEl     = document.getElementById(isA ? 'backCoreA'     : 'backCoreB');
-  const breadthEl  = document.getElementById(isA ? 'backBreadthA'  : 'backBreadthB');
-  const resumeEl   = document.getElementById(isA ? 'backResumeA'   : 'backResumeB');
-  const marksEl    = document.getElementById(isA ? 'backMarksA'    : 'backMarksB');
-
-  const coreScore   = core;
-  const breadthScore= breadth;
-  const resumeScore = resume;
-  const totalMI     = mi;
-  const intScore    = intTot || 0;
-  const baseForBack = miBase; // reuse the already computed MI_base
-
-  // 1) Overall formula explanation
-  if (formulaEl) {
-    formulaEl.textContent =
-      `Team Total (${fmt(totalMI, 3)}) = Core Traits (${fmt(coreScore, 3)}) `
-      + `+ Breadth Bonus (${fmt(breadthScore, 3)}) `
-      + `+ Résumé Context (${fmt(resumeScore, 3)}) `
-      + `+ Matchup Interactions (${fmt(intScore, 3)}).`;
-  }
-
-  // 2) Core Traits explanation (the big table on the front)
-  if (coreEl) {
-    const rows = team.coreDetails || [];
-    let strongest = null;
-    let weakest   = null;
-
-    if (rows.length) {
-      strongest = rows.reduce((best, r) => (r.points > (best?.points ?? -Infinity) ? r : best), null);
-      weakest   = rows.reduce((worst, r) => (r.points < (worst?.points ?? Infinity) ? r : worst), null);
-    }
-
-    if (strongest && weakest) {
-      coreEl.textContent =
-        `The Core Traits table shows the eight field-normalized strength metrics. `
-        + `Here, ${strongest.label} contributes the most positive value to the scorecard, `
-        + `while ${weakest.label} is this team’s weakest core area.`;
-    } else {
-      coreEl.textContent =
-        `The Core Traits table summarizes eight field-normalized strength metrics that combine into the Core score shown on the front.`;
-    }
-  }
-
-  // 3) Breadth Bonus explanation (Breadth row at the bottom of the table)
-  if (breadthEl) {
-    const hits = team.breadthHits != null ? team.breadthHits : 0;
-
-    if (breadthScore > 0) {
-      breadthEl.textContent =
-        `The Breadth Bonus rewards this team for having ${hits} Above-Average strengths `
-        + `across Efficiency, Shooting, and Possession Stability, adding +${fmt(breadthScore, 3)} on top of the Core score.`;
-    } else {
-      breadthEl.textContent =
-        `No Breadth Bonus is applied here, which means this team’s strengths are more concentrated instead of spread across multiple domains.`;
-    }
-  }
-
-  // 4) Résumé Context tile explanation (the small tile under the profile section)
-  if (resumeEl) {
-    const tier = team.resumeRTier || 'Average';
-    if (resumeScore > 0) {
-      resumeEl.textContent =
-        `The Résumé Context tile reflects how the win–loss record holds up against schedule strength. `
-        + `A ${tier} résumé adds a small positive adjustment (${fmt(resumeScore, 3)}) to the baseline Madness Index.`;
-    } else if (resumeScore < 0) {
-      resumeEl.textContent =
-        `The Résumé Context tile suggests this record is a bit inflated relative to schedule. `
-        + `A ${tier} résumé subtracts a small amount (${fmt(resumeScore, 3)}) from the baseline Madness Index.`;
-    } else {
-      resumeEl.textContent =
-        `The Résumé Context tile is neutral here. This record and schedule balance out to an ${tier} résumé with no extra adjustment.`;
-    }
-  }
-
-  // 5) Profile Marks explanation (the strip of badges under the résumé)
-  if (marksEl) {
-    const marks = Array.isArray(team.profileMarks) ? team.profileMarks : [];
-
-    if (!marks.length) {
-      marksEl.textContent =
-        `The Profile Marks strip is empty, meaning this team has no flagged structural weaknesses based on the v3.2 Profile Marks system.`;
-    } else {
-      const severeCount   = marks.filter(m => m.includes('Severe')).length;
-      const moderateCount = marks.filter(m => m.includes('Moderate')).length;
-
-      let levelText = '';
-      if (severeCount > 0) {
-        levelText = `${severeCount} Severe and ${moderateCount} Moderate marks highlight higher volatility or structural risk areas.`;
-      } else {
-        levelText = `${moderateCount} Moderate marks highlight some style- or matchup-sensitive weaknesses.`;
-      }
-
-      marksEl.textContent =
-        `Each icon in the Profile Marks strip represents a non-scoring diagnostic flag. `
-        + levelText;
-    }
-  }
-  // ============================================================
-  // MINI-TILE BACKS (Core mini tile, Résumé mini tile, Marks mini tile)
-  // ============================================================
-
-  // ----- Core Traits Mini Tile Back -----
-  const coreTileBackEl     = document.getElementById(isA ? 'backCoreTileA'     : 'backCoreTileB');
-  const breadthTileBackEl  = document.getElementById(isA ? 'backBreadthTileA'  : 'backBreadthTileB');
-
-  if (coreTileBackEl) {
-    const rows = team.coreDetails || [];
-    let strongest = null;
-    let weakest   = null;
-
-    if (rows.length) {
-      strongest = rows.reduce(
-        (best, r) => (r.points > (best?.points ?? -Infinity) ? r : best),
-        null
-      );
-      weakest = rows.reduce(
-        (worst, r) => (r.points < (worst?.points ??  Infinity) ? r : worst),
-        null
-      );
-    }
-
-    if (strongest && weakest) {
-      coreTileBackEl.textContent =
-        `${strongest.label} is this team's strongest Core Trait, while ` +
-        `${weakest.label} is the weakest.`;
-    } else {
-      coreTileBackEl.textContent =
-        `Core Traits summarize eight field-normalized strengths that form the Core score.`;
-    }
-  }
-
-  if (breadthTileBackEl) {
-    const hits = team.breadthHits != null ? team.breadthHits : 0;
-    if (breadthScore > 0) {
-      breadthTileBackEl.textContent =
-        `Breadth Bonus: ${hits} Above-Average strengths → +${fmt(breadthScore, 3)}.`;
-    } else {
-      breadthTileBackEl.textContent =
-        `No Breadth Bonus: strengths are more concentrated in fewer areas.`;
-    }
-  }
-
-  // ----- Résumé Mini Tile Back -----
-  const resumeTileBackEl = document.getElementById(isA ? 'backResumeTileA' : 'backResumeTileB');
-  if (resumeTileBackEl) {
-    resumeTileBackEl.textContent = resumeEl?.textContent || '';
-  }
-
-  // ----- Profile Marks Mini Tile Back -----
-  const marksTileBackEl = document.getElementById(isA ? 'backMarksTileA' : 'backMarksTileB');
-  if (marksTileBackEl) {
-    marksTileBackEl.textContent = marksEl?.textContent || '';
-  }
 }
 
 function renderTeamCards(result) {
   renderTeamSide('A', result);
   renderTeamSide('B', result);
+}
+
+function setCompareButtonEnabled(isEnabled) {
+  const btn =
+    document.getElementById('compareBtn') ||
+    document.getElementById('runCompare');
+
+  if (!btn) return;
+
+  btn.disabled = !isEnabled;
+  btn.setAttribute('aria-disabled', isEnabled ? 'false' : 'true');
+
+  btn.classList.toggle('compare-btn-disabled', !isEnabled);
+  btn.classList.toggle('compare-btn-enabled',  isEnabled);
+}
+
+function miGetPreHubEls() {
+  return {
+    step1: document.getElementById('preStep1'),
+    step2: document.getElementById('preStep2'),
+    step3: document.getElementById('preStep3'),
+    text1: document.getElementById('preStepText1'),
+    text2: document.getElementById('preStepText2'),
+    text3: document.getElementById('preStepText3'),
+    st1: document.getElementById('preStepStatus1'),
+    st2: document.getElementById('preStepStatus2'),
+    st3: document.getElementById('preStepStatus3'),
+  };
+}
+
+function isCSVLoaded() {
+  return Array.isArray(RAW_ROWS) && RAW_ROWS.length > 0 && Array.isArray(TEAM_LIST) && TEAM_LIST.length > 0;
+}
+
+function getSelectedTeams() {
+  const a = document.getElementById('teamA')?.value || '';
+  const b = document.getElementById('teamB')?.value || '';
+  return { a, b, ok: !!a && !!b && a !== b };
+}
+
+function isRoundSelected() {
+  return !!CURRENT_ROUND;
+}
+
+function refreshCompareButtonState() {
+  const ready = isCSVLoaded() && getSelectedTeams().ok && isRoundSelected();
+  setCompareButtonEnabled(ready);
+  return ready;
+}
+
+function updatePreMatchupHubProgress() {
+  const copy = window.MI_COPY && window.MI_COPY.prematch && window.MI_COPY.prematch.progress
+    ? window.MI_COPY.prematch.progress
+    : null;
+
+  const hub = document.getElementById('preMatchupHub');
+  if (!hub) return;
+
+  const els = {
+    statusWrap: document.querySelector('#preHubStatusWrap .pre-hub-status'),
+    statusText: document.getElementById('preStatusText'),
+    step1: document.getElementById('preStep1'),
+    step2: document.getElementById('preStep2'),
+    step3: document.getElementById('preStep3'),
+    s1: document.getElementById('preStepStatus1'),
+    s2: document.getElementById('preStepStatus2'),
+    s3: document.getElementById('preStepStatus3')
+  };
+
+  // Inputs / state
+  const csvLoaded = Array.isArray(TEAM_LIST) && TEAM_LIST.length > 0;
+  const sel = getSelectedTeams();
+  const hasA = !!sel.a;
+  const hasB = !!sel.b && sel.b !== sel.a;
+  const teamsOk = !!sel.ok;
+  const roundChosen = !!CURRENT_ROUND;
+
+  // Progress milestones (per-click)
+  let pct = 0;
+  if (csvLoaded) pct = 25;
+  if (csvLoaded && hasA) pct = 50;
+  if (csvLoaded && hasA && hasB) pct = 75;
+  if (csvLoaded && teamsOk && roundChosen) pct = 100;
+
+  // Status message (granular)
+  const fallback = {
+    waiting_csv:  'Waiting for tournament dataset.',
+    pick_team_a:  'Select Team A to continue.',
+    pick_team_b:  'Select Team B to continue.',
+    choose_round: 'Choose a round to unlock Compare.',
+    ready:        'Ready. Press Compare to generate results.'
+  };
+
+  let statusMsg = fallback.waiting_csv;
+
+  if (!csvLoaded) {
+    statusMsg = (copy && copy.status_waiting_csv) || fallback.waiting_csv;
+  } else if (!hasA) {
+    statusMsg = (copy && (copy.status_pick_team_a || copy.status_pick_teams)) || fallback.pick_team_a;
+  } else if (!hasB) {
+    statusMsg = (copy && (copy.status_pick_team_b || copy.status_pick_teams)) || fallback.pick_team_b;
+  } else if (!roundChosen) {
+    statusMsg = (copy && copy.status_choose_round) || fallback.choose_round;
+  } else {
+    statusMsg = (copy && copy.status_ready) || fallback.ready;
+  }
+
+  if (els.statusText) els.statusText.textContent = statusMsg;
+
+  // Progress bar classes (for CSS widths)
+  if (els.statusWrap) {
+    els.statusWrap.classList.remove('is-idle', 'is-25', 'is-50', 'is-75', 'is-100');
+    const cls =
+      pct >= 100 ? 'is-100' :
+      pct >= 75  ? 'is-75'  :
+      pct >= 50  ? 'is-50'  :
+      pct >= 25  ? 'is-25'  : 'is-idle';
+    els.statusWrap.classList.add(cls);
+  }
+
+  // Step readiness (keep your 3-step structure, but update on partial progress)
+  const setStepState = (el, state) => {
+    if (!el) return;
+    el.classList.remove('is-done', 'is-next', 'is-locked');
+    el.classList.add(state);
+  };
+
+  // Step 1
+  if (csvLoaded) {
+    setStepState(els.step1, 'is-done');
+    if (els.s1) els.s1.textContent = (copy && copy.step1_ready) || 'Field loaded and teams unlocked.';
+  } else {
+    setStepState(els.step1, 'is-next');
+    if (els.s1) els.s1.textContent = (copy && copy.step1_pending) || 'Tournament field not loaded.';
+  }
+
+  // Step 2
+  if (!csvLoaded) {
+    setStepState(els.step2, 'is-locked');
+    if (els.s2) els.s2.textContent = (copy && copy.status_pending) || 'Pending';
+  } else if (teamsOk) {
+    setStepState(els.step2, 'is-done');
+    if (els.s2) els.s2.textContent = (copy && copy.step2_ready) || 'Teams selected. Matchup is queued.';
+  } else {
+    setStepState(els.step2, 'is-next');
+    const msg = !hasA ? ((copy && copy.step2_pending) || 'Select two teams to compare.')
+              : !hasB ? 'Select Team B to continue.'
+              : ((copy && copy.step2_pending) || 'Select two teams to compare.');
+    if (els.s2) els.s2.textContent = msg;
+  }
+
+  // Step 3
+  if (!csvLoaded || !teamsOk) {
+    setStepState(els.step3, 'is-locked');
+    if (els.s3) els.s3.textContent = (copy && copy.status_pending) || 'Pending';
+  } else if (roundChosen) {
+    setStepState(els.step3, 'is-done');
+    if (els.s3) els.s3.textContent = (copy && copy.step3_ready) || 'Briefing complete. Run Compare when ready.';
+  } else {
+    setStepState(els.step3, 'is-next');
+    if (els.s3) els.s3.textContent = (copy && copy.step3_pending) || 'Choose a round, then run Compare to generate analysis.';
+  }
 }
 
 // Dynamically filter which rounds are available based on selected teams' seeds
@@ -2563,6 +4078,9 @@ function updateRoundOptionsForCurrentSeeds() {
     });
     CURRENT_ROUND = null;
     roundBtn.textContent = "Select Round";
+
+    // 🔒 No round selected → disable Compare
+    setCompareButtonEnabled(false);
   };
 
   // Sandbox = no restrictions
@@ -2594,6 +4112,67 @@ function updateRoundOptionsForCurrentSeeds() {
   // Force user to pick a compatible round
   CURRENT_ROUND = null;
   roundBtn.textContent = "Select Round";
+  setCompareButtonEnabled(false);   // 🔒 reset whenever allowed-round set changes
+}
+
+async function loadOfficialDatasetFromUrl(url, filename) {
+  const statusEl = document.getElementById('status');
+  const appShell = document.querySelector('.app-shell');
+
+  try {
+    if (statusEl) {
+      statusEl.className = 'status warn';
+      statusEl.textContent = 'Loading dataset…';
+    }
+
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`Fetch failed (${res.status})`);
+
+    const text = await res.text();
+
+    // 1) Load into the app (no user upload required)
+    const { headers, rows } = parseCSV(text);
+    RAW_ROWS = rows;
+
+    buildTeamsFromCSV(headers, rows);
+
+    const count = (TEAM_LIST || []).length;
+    updatePreMatchupHubProgress();
+    refreshCompareButtonState();
+
+    if (appShell) {
+      if (count > 0) appShell.classList.add('csv-loaded');
+      else appShell.classList.remove('csv-loaded');
+    }
+
+    if (statusEl) {
+      if (count > 0) {
+        statusEl.className = 'status ok';
+        statusEl.textContent = `Loaded ${count} teams (${filename || 'dataset'})`;
+      } else {
+        statusEl.className = 'status warn';
+        statusEl.textContent = 'Dataset loaded, but 0 teams detected.';
+      }
+    }
+
+    // 2) Also trigger a download (as requested)
+    const blob = new Blob([text], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename || 'MadnessIndex_Dataset.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+
+  } catch (err) {
+    console.error('[MI] Dataset load error:', err);
+    if (statusEl) {
+      statusEl.className = 'status error';
+      statusEl.textContent = `Dataset load error: ${err.message}`;
+    }
+    if (appShell) appShell.classList.remove('csv-loaded');
+  }
 }
 
 // ========== EVENT WIRING & DOM READY ==========
@@ -2607,6 +4186,17 @@ function setupEventListeners() {
     document.querySelector('input[type="file"]');
 
   const statusEl = document.getElementById('status');
+
+  const datasetSelect = document.getElementById('datasetSelect');
+  if (datasetSelect) {
+    datasetSelect.addEventListener('change', () => {
+      const url = datasetSelect.value;
+      const opt = datasetSelect.options[datasetSelect.selectedIndex];
+      const filename = opt?.getAttribute('data-filename') || 'MadnessIndex_Dataset.csv';
+      if (!url) return;
+      loadOfficialDatasetFromUrl(url, filename);
+    });
+  }
 
   if (!fileInput) {
     console.warn('[MI] No file input found.');
@@ -2630,6 +4220,14 @@ function setupEventListeners() {
 
           const count = (TEAM_LIST || []).length;
           console.log('[MI] Teams parsed:', count);
+          updatePreMatchupHubProgress();
+          refreshCompareButtonState();
+
+          const appShell = document.querySelector('.app-shell');
+          if (appShell) {
+            if (count > 0) appShell.classList.add('csv-loaded');
+            else appShell.classList.remove('csv-loaded');
+          }
 
           if (statusEl) {
             if (count > 0) {
@@ -2652,86 +4250,100 @@ function setupEventListeners() {
     });
   }
 
-    // ---- Compare button ----
   const compareBtn =
     document.getElementById('compareBtn') ||
     document.getElementById('runCompare');
 
   if (compareBtn) {
-  compareBtn.addEventListener('click', () => {
-    console.log('[MI] Compare button clicked');
+    setCompareButtonEnabled(false);
+    
+    compareBtn.addEventListener('click', () => {
+      console.log('[MI] Compare button clicked');
 
-    if (!RAW_ROWS || RAW_ROWS.length === 0) {
-      alert('Please upload the tournament CSV first.');
-      return;
-    }
-
-    const selectA = document.getElementById('teamA');
-    const selectB = document.getElementById('teamB');
-
-    if (!selectA || !selectB || !selectA.value || !selectB.value) {
-      alert('Please select both teams before comparing.');
-      return;
-    }
-
-    const teamA = getTeamByName(selectA.value);
-    const teamB = getTeamByName(selectB.value);
-
-    if (!teamA || !teamB) {
-      alert('Selected teams are not recognized. Try reloading the data.');
-      return;
-    }
-
-    if (!CURRENT_ROUND) {
-      alert('Please select a round before comparing.');
-      return;
-    }
-
-    // 🔥 ONLY enforce legal rounds when Sandbox mode is OFF
-    if (!SANDBOX_MODE) {
-      const allowedRounds = getPossibleRoundsForSeeds(teamA.seed, teamB.seed);
-      if (!allowedRounds.includes(CURRENT_ROUND)) {
-        alert(
-          `As seeds ${teamA.seed} and ${teamB.seed}, these teams can only meet in: ` +
-          allowedRounds.map(getRoundLabelFromCode).join(', ') +
-          `. Please choose one of those rounds.`
-        );
+      if (!RAW_ROWS || RAW_ROWS.length === 0) {
+        alert('Please load tournament dataset first.');
         return;
       }
-    }
 
-      console.log('[MI] Running compareTeams...');
-      compareTeams(selectA.value, selectB.value);
+      const selectA = document.getElementById('teamA');
+      const selectB = document.getElementById('teamB');
+
+      if (!selectA || !selectB || !selectA.value || !selectB.value) {
+        alert('Please select both teams before comparing.');
+        return;
+      }
+
+      const teamA = getTeamByName(selectA.value);
+      const teamB = getTeamByName(selectB.value);
+
+      if (!teamA || !teamB) {
+        alert('Selected teams are not recognized. Try reloading the data.');
+        return;
+      }
+
+      if (!CURRENT_ROUND) {
+        alert('Please select a round before comparing.');
+        return;
+      }
+
+      // 🔥 ONLY enforce legal rounds when Sandbox mode is OFF
+      if (!SANDBOX_MODE) {
+        const allowedRounds = getPossibleRoundsForSeeds(teamA.seed, teamB.seed);
+        if (!allowedRounds.includes(CURRENT_ROUND)) {
+          alert(
+            `As seeds ${teamA.seed} and ${teamB.seed}, these teams can only meet in: ` +
+            allowedRounds.map(getRoundLabelFromCode).join(', ') +
+            `. Please choose one of those rounds.`
+          );
+          return;
+        }
+      }
+
+// ----- Role routing: who goes on Cinderella vs Favorite card? -----
+// We now always auto-assign by seed.
+  const roleMode = 'auto';
+
+  let cinderellaName;
+  let favoriteName;
+
+  // Auto (by seed): lower seed number = Favorite
+  const seedA = Number(teamA.seed);
+  const seedB = Number(teamB.seed);
+
+  if (Number.isFinite(seedA) && Number.isFinite(seedB) && seedA !== seedB) {
+    if (seedA < seedB) {
+      favoriteName   = teamA.name;
+      cinderellaName = teamB.name;
+    } else {
+      favoriteName   = teamB.name;
+      cinderellaName = teamA.name;
+    }
+  } else {
+    // Same seed or weird data: fall back to dropdown order
+    cinderellaName = teamA.name;
+    favoriteName   = teamB.name;
+  }
+
+      console.log(
+        `[MI] Running compareTeams (auto by seed) ` +
+        `Cinderella = ${cinderellaName} Favorite = ${favoriteName}`
+      );
+      compareTeams(cinderellaName, favoriteName, roleMode);
+
+      // reveal analysis mode UI
+      showAnalysisShell();
+
+      const appShell = document.querySelector('.app-shell');
+      if (appShell) appShell.classList.remove('pre-matchup');
     });
   }
 
   const editMatchupBtn = document.getElementById('editMatchupBtn');
-   if (editMatchupBtn) {
-     editMatchupBtn.addEventListener('click', (e) => {
+  if (editMatchupBtn) {
+    editMatchupBtn.addEventListener('click', (e) => {
       e.preventDefault();
       hideMatchupBar();
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }
-
-  // ---- Swap Teams button ----
-  const swapBtn = document.getElementById('swapBtn');
-  if (swapBtn) {
-    swapBtn.addEventListener('click', () => {
-      const A =
-        document.getElementById('teamA') ||
-        document.getElementById('teamASelect') ||
-        document.getElementById('cindTeamSelect');
-
-      const B =
-        document.getElementById('teamB') ||
-        document.getElementById('teamBSelect') ||
-        document.getElementById('favTeamSelect');
-
-      if (!A || !B) return;
-      const tmp = A.value;
-      A.value = B.value;
-      B.value = tmp;
     });
   }
 
@@ -2754,7 +4366,7 @@ function setupEventListeners() {
     });
   }
 
-    // ---- Badge Legend collapsible toggle ----
+  // ---- Badge Legend collapsible toggle ----
   const badgeCard    = document.getElementById('badgeKeyCard');
   const badgeContent = document.getElementById('badgeKeyContent');
   const badgeToggle  = document.getElementById('toggleBadgeKey');
@@ -2771,92 +4383,150 @@ const roundBtn = document.getElementById("roundSelectBtn");
 const roundDropdown = document.getElementById("roundDropdown");
 
 if (roundBtn && roundDropdown) {
-  // Initialize button label from CURRENT_ROUND
-  roundBtn.textContent = getRoundLabelFromCode(CURRENT_ROUND);
+  // Initialize button label safely
+  roundBtn.textContent = CURRENT_ROUND
+    ? getRoundLabelFromCode(CURRENT_ROUND)
+    : (miGetCopy("controls.step2_label") ? "Select Round" : "Select Round");
 
   // Open/close dropdown
-  roundBtn.addEventListener("click", () => {
+  roundBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    MI_ROUND_TOUCHED = true;
+    clearRoundNudge();
     roundDropdown.classList.toggle("hidden");
   });
 
   // Handle selecting a round
-  roundDropdown.querySelectorAll(".round-option").forEach(opt => {
-    opt.addEventListener("click", () => {
+  roundDropdown.querySelectorAll(".round-option").forEach((opt) => {
+    opt.addEventListener("click", (e) => {
+      e.stopPropagation();
       const value = opt.getAttribute("data-round");
+      if (!value) return;
 
-      CURRENT_ROUND = value;  // 🔥 Global is updated here
+      CURRENT_ROUND = value;
 
-      // Update button label
+      MI_ROUND_TOUCHED = true;
+      clearRoundNudge();
+
       roundBtn.textContent = opt.textContent;
-
-      // Hide dropdown
       roundDropdown.classList.add("hidden");
+
+      refreshCompareButtonState();
+      updatePreMatchupHubProgress();
 
       console.log("[MI] Round selected:", CURRENT_ROUND);
     });
   });
 
   // Close dropdown if clicking outside
-   document.addEventListener("click", (e) => {
+  document.addEventListener("click", (e) => {
     if (!roundDropdown.contains(e.target) && e.target !== roundBtn) {
       roundDropdown.classList.add("hidden");
     }
   });
 
-  // ---- Click-to-flip for team cards ----
-  const teamCards = document.querySelectorAll('.team-card');
 
-  teamCards.forEach(card => {
-    card.addEventListener('click', (e) => {
-      // Ignore clicks on buttons / links so Explain etc. still work normally
-      if (
-        e.target.closest('button') ||
-        e.target.closest('a') ||
-        e.target.closest('.link-btn')
-      ) {
-        return;
-      }
-      card.classList.toggle('flipped');
+    // v3.3: we no longer flip the entire team card.
+    // Only the inner mini flip-tiles (Core, Résumé, Marks, Madness Index) are interactive.
+
+    // const teamCards = document.querySelectorAll('.team-card');
+    // teamCards.forEach(card => {
+    //   card.addEventListener('click', (e) => {
+    //     // Ignore clicks that originate inside mini flip tiles or buttons/links
+    //     if (
+    //       e.target.closest('.flip-tile') ||
+    //       e.target.closest('button') ||
+    //       e.target.closest('a') ||
+    //       e.target.closest('.link-btn')
+    //     ) {
+    //       return;
+    //     }
+    //     card.classList.toggle('flipped');
+    //   });
+    // });
+
+    // ---- Click-to-flip for individual tiles (Core, Résumé, Marks, Madness) ----
+       const flipTiles = document.querySelectorAll('.flip-tile');
+
+       flipTiles.forEach(tile => {
+       tile.addEventListener('click', (e) => {
+    // Don’t trigger on buttons/links
+        if (
+          e.target.closest('button') ||
+          e.target.closest('a') ||
+          e.target.closest('.link-btn')
+        ) {
+          return;
+        }
+
+        e.stopPropagation();
+        tile.classList.toggle('flipped');
+      }); 
     });
-  });
+  }
 
-  // ---- Click-to-flip for individual tiles (Core, Résumé, Marks) ----
-  const flipTiles = document.querySelectorAll('.flip-tile');
+  const moreBtn  = document.getElementById('prematchMoreBtn');
+  const preview  = document.getElementById('preMatchupPreview');
 
-  flipTiles.forEach(tile => {
-    tile.addEventListener('click', (e) => {
-      // Don’t trigger on buttons/links and don’t bubble up to flip whole card
-      if (
-        e.target.closest('button') ||
-        e.target.closest('a') ||
-        e.target.closest('.link-btn')
-      ) {
-        return;
-      }
-      e.stopPropagation();
-      tile.classList.toggle('flipped');
+  if (moreBtn && preview) {
+    // Ensure closed on boot
+    preview.classList.remove('is-open');
+    preview.setAttribute('aria-hidden', 'true');
+    moreBtn.setAttribute('aria-expanded', 'false');
+
+    moreBtn.addEventListener('click', () => {
+      const open = preview.classList.toggle('is-open');
+      moreBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      preview.setAttribute('aria-hidden', open ? 'false' : 'true');
+
+      // Keep your JSON-driven label swap (if you already implemented it)
+      const labelOpen   = miGetCopy('prematch.progress.more_hide') || 'Hide details';
+      const labelClosed = miGetCopy('prematch.progress.more_show') || 'What you’ll get (optional)';
+      moreBtn.textContent = open ? labelOpen : labelClosed;
     });
-  });
- }
+  }
 
   // ---- Sandbox Mode toggle ----
   const sandboxToggle = document.getElementById('sandboxModeToggle');
-if (sandboxToggle) {
-  SANDBOX_MODE = sandboxToggle.checked;
-
-  sandboxToggle.addEventListener('change', () => {
+  if (sandboxToggle) {
     SANDBOX_MODE = sandboxToggle.checked;
-    console.log('[MI] Sandbox mode:', SANDBOX_MODE ? 'ON' : 'OFF');
 
-    // here we should re-evaluate round options:
-    updateRoundOptionsForCurrentSeeds();
-  });
-}
+    sandboxToggle.addEventListener('change', () => {
+      SANDBOX_MODE = sandboxToggle.checked;
+      console.log('[MI] Sandbox mode:', SANDBOX_MODE ? 'ON' : 'OFF');
+
+      updateRoundOptionsForCurrentSeeds();
+      updatePreMatchupHubProgress();
+      refreshCompareButtonState();
+    });
+  }
+     // ===== CSV spec (optional) toggle =====
+  const csvSpecBtn  = document.getElementById('csvSpecBtn');
+  const csvSpecHelp = document.getElementById('csvSpecHelp');
+
+  if (csvSpecBtn && csvSpecHelp) {
+    csvSpecHelp.classList.add('hidden');
+    csvSpecBtn.setAttribute('aria-expanded', 'false');
+
+    csvSpecBtn.addEventListener('click', () => {
+      const isNowHidden = csvSpecHelp.classList.toggle('hidden');
+      const expanded = !isNowHidden;
+
+      csvSpecBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      csvSpecBtn.textContent = expanded
+       ? (miGetCopy('controls.csv_spec_hide') || 'Hide data format')
+       : (miGetCopy('controls.csv_spec_show') || 'Data format (optional)');
+    });
+  }
 }
 
 // ---- ONE dom-ready block (outside the function) ----
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', setupEventListeners);
+  document.addEventListener('DOMContentLoaded', () => {
+    setupEventListeners();
+    loadCopyJSON();
+  });
 } else {
   setupEventListeners();
+  loadCopyJSON();
 }
