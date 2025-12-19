@@ -3404,7 +3404,7 @@ function hideFooter() {
 
 function updateMatchupBarFromDOM() {
   const matchupBar = document.getElementById('matchupBar');
-  const topBar     = document.querySelector('.top-bar');
+  const topBar = document.querySelector('.top-bar') || document.getElementById('preSetupRow');
   if (!matchupBar || !topBar) return;
 
   const teamANameEl  = document.getElementById('teamATitle');
@@ -3444,7 +3444,7 @@ function updateMatchupBarFromDOM() {
 
 function hideMatchupBar() {
   const matchupBar = document.getElementById('matchupBar');
-  const topBar     = document.querySelector('.top-bar');
+  const topBar = document.querySelector('.top-bar') || document.getElementById('preSetupRow');
   if (!matchupBar || !topBar) return;
 
   matchupBar.classList.remove('visible');
@@ -3456,6 +3456,90 @@ function hideMatchupBar() {
     appShell.classList.add('pre-matchup');
     hideFooter();
   }
+}
+
+// ===== MATCHUP BAR QUICK EDIT (INLINE) =====
+let __MI_QUICK_EDIT_HOME = null;
+
+function enterMatchupQuickEdit() {
+  const matchupBar = document.getElementById('matchupBar');
+  if (!matchupBar) return;
+
+  const slotA = document.getElementById('matchupQuickA');
+  const slotB = document.getElementById('matchupQuickB');
+  const slotR = document.getElementById('matchupQuickRound');
+  if (!slotA || !slotB || !slotR) return;
+
+  const aWrap = document.getElementById('teamASelectWrap');
+  const bWrap = document.getElementById('teamBSelectWrap');
+  const rWrap = document.getElementById('roundSelectorWrap');
+
+  if (!aWrap || !bWrap || !rWrap) {
+    console.warn('[MI] Quick edit could not find select wrappers (teamASelectWrap/teamBSelectWrap/roundSelectorWrap).');
+    return;
+  }
+
+  // Cache original locations once
+  if (!__MI_QUICK_EDIT_HOME) {
+    __MI_QUICK_EDIT_HOME = {
+      aParent: aWrap.parentElement,
+      bParent: bWrap.parentElement,
+      rParent: rWrap.parentElement,
+      aNext: aWrap.nextSibling,
+      bNext: bWrap.nextSibling,
+      rNext: rWrap.nextSibling
+    };
+  }
+
+  matchupBar.classList.add('is-editing');
+  slotA.setAttribute('aria-hidden', 'false');
+  slotB.setAttribute('aria-hidden', 'false');
+  slotR.setAttribute('aria-hidden', 'false');
+
+  // Show actions container
+  const actions = matchupBar.querySelector('.matchup-quick-actions');
+  if (actions) actions.setAttribute('aria-hidden', 'false');
+
+  // Move existing controls into the bar
+  slotA.appendChild(aWrap);
+  slotR.appendChild(rWrap);
+  slotB.appendChild(bWrap);
+
+  // Focus Team A for speed
+  const teamASelect = document.getElementById('teamA');
+  if (teamASelect) teamASelect.focus();
+}
+
+function exitMatchupQuickEdit() {
+  const matchupBar = document.getElementById('matchupBar');
+  if (!matchupBar) return;
+
+  const slotA = document.getElementById('matchupQuickA');
+  const slotB = document.getElementById('matchupQuickB');
+  const slotR = document.getElementById('matchupQuickRound');
+
+  matchupBar.classList.remove('is-editing');
+  slotA?.setAttribute('aria-hidden', 'true');
+  slotB?.setAttribute('aria-hidden', 'true');
+  slotR?.setAttribute('aria-hidden', 'true');
+
+  const actions = matchupBar.querySelector('.matchup-quick-actions');
+  if (actions) actions.setAttribute('aria-hidden', 'true');
+
+  const aWrap = document.getElementById('teamASelectWrap');
+  const bWrap = document.getElementById('teamBSelectWrap');
+  const rWrap = document.getElementById('roundSelectorWrap');
+
+  if (__MI_QUICK_EDIT_HOME && aWrap && bWrap && rWrap) {
+    const { aParent, bParent, rParent, aNext, bNext, rNext } = __MI_QUICK_EDIT_HOME;
+    aParent?.insertBefore(aWrap, aNext || null);
+    bParent?.insertBefore(bWrap, bNext || null);
+    rParent?.insertBefore(rWrap, rNext || null);
+  }
+
+  // Close round dropdown if open (avoids weird floating menu)
+  const roundDropdown = document.getElementById('roundDropdown');
+  if (roundDropdown) roundDropdown.classList.add('hidden');
 }
 
 function showAnalysisShell() {
@@ -3953,6 +4037,9 @@ function updatePreMatchupHubProgress() {
     step1: document.getElementById('preStep1'),
     step2: document.getElementById('preStep2'),
     step3: document.getElementById('preStep3'),
+    t1: document.getElementById('preStepText1'),
+    t2: document.getElementById('preStepText2'),
+    t3: document.getElementById('preStepText3'),
     s1: document.getElementById('preStepStatus1'),
     s2: document.getElementById('preStepStatus2'),
     s3: document.getElementById('preStepStatus3')
@@ -3965,6 +4052,68 @@ function updatePreMatchupHubProgress() {
   const hasB = !!sel.b && sel.b !== sel.a;
   const teamsOk = !!sel.ok;
   const roundChosen = !!CURRENT_ROUND;
+
+  // ---- Active step visibility (show ONLY the current step) ----
+  const stepsWrap = hub.querySelector('.pre-hub-steps');
+
+  // Decide which step is "active"
+  let activeStep = 1;
+
+  // Step 1 until a dataset is loaded
+  if (!csvLoaded) {
+    activeStep = 1;
+
+  // Step 2 until BOTH teams are valid
+  } else if (!teamsOk) {
+    activeStep = 2;
+
+  // Step 3 as soon as teams are valid (round selection happens here)
+  } else {
+    activeStep = 3;
+  }
+
+  // Force the visible step to reflect the *current* instruction
+  if (activeStep === 1 && els.t1) {
+    els.t1.textContent = (copy && copy.step1_pending) || 'Load tournament data to unlock team   selection.';
+  }
+
+  if (activeStep === 2 && els.t2) {
+    if (!hasA) els.t2.textContent = (copy && copy.step2_pending) || 'Select Team A to continue.';
+    else if (!hasB) els.t2.textContent = (copy && copy.step2_pending) || 'Select Team B to continue.';
+    else els.t2.textContent = (copy && copy.step2_ready) || 'Teams selected.';
+  }
+
+  if (activeStep === 3 && els.t3) {
+    els.t3.textContent = !roundChosen
+      ? ((copy && copy.step3_pending) || 'Choose a round to unlock Compare.')
+      : ((copy && copy.step3_ready) || 'Ready. Press Compare to generate results.');
+  }
+
+    // ---- SHOW ONLY ONE STEP (activeStep) ----
+  const steps = [
+    { el: els.step1, n: 1 },
+    { el: els.step2, n: 2 },
+    { el: els.step3, n: 3 }
+  ];
+
+  // Ensure the wrapper uses the single-column layout when only one step is visible
+  if (stepsWrap) stepsWrap.classList.add('is-single');
+
+  steps.forEach(({ el, n }) => {
+    if (!el) return;
+    const isActive = n === activeStep;
+
+    el.classList.toggle('is-hidden', !isActive);
+    el.setAttribute('aria-hidden', String(!isActive));
+
+    // Optional: keep keyboard focus out of hidden steps
+    el.querySelectorAll('button, a, input, select, textarea').forEach((node) => {
+      node.tabIndex = isActive ? 0 : -1;
+    });
+  });
+
+  // Optional styling hook: single-step layout mode (always true now)
+  if (stepsWrap) stepsWrap.classList.add('is-single');
 
   // Progress milestones (per-click)
   let pct = 0;
@@ -3996,7 +4145,7 @@ function updatePreMatchupHubProgress() {
     statusMsg = (copy && copy.status_ready) || fallback.ready;
   }
 
-  if (els.statusText) els.statusText.textContent = statusMsg;
+  if (els.statusText) els.statusText.textContent = '';
 
   // Progress bar classes (for CSS widths)
   if (els.statusWrap) {
@@ -4115,6 +4264,19 @@ function updateRoundOptionsForCurrentSeeds() {
   setCompareButtonEnabled(false);   // 🔒 reset whenever allowed-round set changes
 }
 
+function syncNextHalo(isCsvLoaded) {
+  const datasetCard = document.querySelector('.controls-card.is-primary-entry');
+  const stepsCard = document.getElementById('matchupSetupCard');
+
+  if (isCsvLoaded) {
+    datasetCard?.classList.remove('mi-halo');
+    stepsCard?.classList.add('mi-halo');
+  } else {
+    datasetCard?.classList.add('mi-halo');
+    stepsCard?.classList.remove('mi-halo');
+  }
+}
+
 async function loadOfficialDatasetFromUrl(url, filename) {
   const statusEl = document.getElementById('status');
   const appShell = document.querySelector('.app-shell');
@@ -4155,16 +4317,6 @@ async function loadOfficialDatasetFromUrl(url, filename) {
       }
     }
 
-    // 2) Also trigger a download (as requested)
-    const blob = new Blob([text], { type: 'text/csv;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename || 'MadnessIndex_Dataset.csv';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(a.href);
-
   } catch (err) {
     console.error('[MI] Dataset load error:', err);
     if (statusEl) {
@@ -4172,7 +4324,45 @@ async function loadOfficialDatasetFromUrl(url, filename) {
       statusEl.textContent = `Dataset load error: ${err.message}`;
     }
     if (appShell) appShell.classList.remove('csv-loaded');
+    syncNextHalo(false);
   }
+}
+
+function triggerCsvDownload(csvText, filename) {
+  const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename || 'MadnessIndex_Dataset.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(a.href);
+}
+
+async function downloadDatasetFromUrl(url, filename) {
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error(`Fetch failed (${res.status})`);
+  const text = await res.text();
+  triggerCsvDownload(text, filename);
+}
+
+function buildCsvTemplateText() {
+  // Headers chosen to align with your HEADER_MAP normalizer expectations.
+  // (Don’t add extra commas/spaces; keep these stable.)
+  const headers = [
+    'Team','Seed',
+    'Off Eff','Def Eff','Efficiency Margin','True Shooting %','eFG','Tempo','Effective Possession Ratio','TO%',
+    'Def. eFG%',
+    '% of points from 2','% of points from 3','% of points from FT',
+    '3P %','3P Rate','FTR',
+    'Extra Scoring Chances Game','Non Blocked 2pt %','ORB %','DRB %','Block %','Steals per possession',
+    'Opp Asst Poss','Opp TO Poss','Opp FTA FGA','Opp 3pt %','Opp 3P Rate',
+    'FT_PCT',
+    'Close game win pct','Wins','Losses','Strength of Schedule'
+  ];
+
+  // Header row only (clean template)
+  return headers.join(',') + '\n';
 }
 
 // ========== EVENT WIRING & DOM READY ==========
@@ -4188,13 +4378,63 @@ function setupEventListeners() {
   const statusEl = document.getElementById('status');
 
   const datasetSelect = document.getElementById('datasetSelect');
+  const datasetDownloadBtn = document.getElementById('datasetDownloadBtn');
+
+  // --- Helper: sync download button (only if it exists) ---
+  const syncDatasetDownloadState = () => {
+    if (!datasetDownloadBtn || !datasetSelect) return;
+
+    const hasSelection = !!datasetSelect.value;
+    datasetDownloadBtn.disabled = !hasSelection;
+    datasetDownloadBtn.classList.toggle('hidden', !hasSelection);
+
+    if (hasSelection) {
+      const opt = datasetSelect.options[datasetSelect.selectedIndex];
+      const niceName = opt?.textContent?.trim() || 'dataset';
+      datasetDownloadBtn.textContent = `Download: ${niceName}`;
+    }
+  };
+
+  // ✅ ALWAYS auto-load when a dataset is selected (download button not required)
   if (datasetSelect) {
     datasetSelect.addEventListener('change', () => {
       const url = datasetSelect.value;
       const opt = datasetSelect.options[datasetSelect.selectedIndex];
       const filename = opt?.getAttribute('data-filename') || 'MadnessIndex_Dataset.csv';
       if (!url) return;
+
+      // Load into app immediately
       loadOfficialDatasetFromUrl(url, filename);
+
+      // If a download button exists, update it
+      syncDatasetDownloadState();
+    });
+  }
+
+  // ✅ ONLY wire download behavior if the button exists
+  if (datasetSelect && datasetDownloadBtn) {
+    // initialize state (hidden until selection)
+    syncDatasetDownloadState();
+
+    datasetDownloadBtn.addEventListener('click', async () => {
+      const url = datasetSelect.value;
+      const opt = datasetSelect.options[datasetSelect.selectedIndex];
+      const filename = opt?.getAttribute('data-filename') || 'MadnessIndex_Dataset.csv';
+      if (!url) return;
+
+      try {
+        datasetDownloadBtn.disabled = true;
+        await downloadDatasetFromUrl(url, filename);
+      } catch (err) {
+        console.error('[MI] Dataset download error:', err);
+        const statusEl = document.getElementById('status');
+        if (statusEl) {
+          statusEl.className = 'status error';
+          statusEl.textContent = `Download error: ${err.message}`;
+        }
+      } finally {
+        datasetDownloadBtn.disabled = false;
+      }
     });
   }
 
@@ -4225,9 +4465,13 @@ function setupEventListeners() {
 
           const appShell = document.querySelector('.app-shell');
           if (appShell) {
-            if (count > 0) appShell.classList.add('csv-loaded');
+            const isLoaded = count > 0;
+
+            if (isLoaded) appShell.classList.add('csv-loaded');
             else appShell.classList.remove('csv-loaded');
-          }
+
+            syncNextHalo(isLoaded);
+          } 
 
           if (statusEl) {
             if (count > 0) {
@@ -4342,10 +4586,51 @@ function setupEventListeners() {
   if (editMatchupBtn) {
     editMatchupBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      hideMatchupBar();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const matchupBar = document.getElementById('matchupBar');
+      if (matchupBar && matchupBar.classList.contains('is-editing')) {
+        exitMatchupQuickEdit();
+      } else {
+        enterMatchupQuickEdit();
+      }
     });
   }
+
+  const quickRun = document.getElementById('matchupQuickRun');
+  if (quickRun) {
+    quickRun.addEventListener('click', () => {
+      exitMatchupQuickEdit();
+      const compareBtn = document.getElementById('compareBtn');
+      if (compareBtn) compareBtn.click();
+    });
+  }
+
+  const quickCancel = document.getElementById('matchupQuickCancel');
+  if (quickCancel) {
+    quickCancel.addEventListener('click', () => exitMatchupQuickEdit());
+  }
+
+  // Keyboard: Enter to Run, Escape to Cancel (only while editing)
+  document.addEventListener('keydown', (e) => {
+    const matchupBar = document.getElementById('matchupBar');
+    if (!matchupBar || !matchupBar.classList.contains('is-editing')) return;
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      exitMatchupQuickEdit();
+    }
+
+    if (e.key === 'Enter') {
+      // Don’t hijack Enter while the round dropdown is open
+      const roundDropdown = document.getElementById('roundDropdown');
+      const dropdownOpen = roundDropdown && !roundDropdown.classList.contains('hidden');
+      if (dropdownOpen) return;
+
+      e.preventDefault();
+      exitMatchupQuickEdit();
+      const compareBtn = document.getElementById('compareBtn');
+      if (compareBtn) compareBtn.click();
+    }
+  });
 
   // ---- Debug toggle button ----
   const toggleDebugBtn = document.getElementById('toggleDebugBtn');
@@ -4500,24 +4785,6 @@ if (roundBtn && roundDropdown) {
       refreshCompareButtonState();
     });
   }
-     // ===== CSV spec (optional) toggle =====
-  const csvSpecBtn  = document.getElementById('csvSpecBtn');
-  const csvSpecHelp = document.getElementById('csvSpecHelp');
-
-  if (csvSpecBtn && csvSpecHelp) {
-    csvSpecHelp.classList.add('hidden');
-    csvSpecBtn.setAttribute('aria-expanded', 'false');
-
-    csvSpecBtn.addEventListener('click', () => {
-      const isNowHidden = csvSpecHelp.classList.toggle('hidden');
-      const expanded = !isNowHidden;
-
-      csvSpecBtn.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-      csvSpecBtn.textContent = expanded
-       ? (miGetCopy('controls.csv_spec_hide') || 'Hide data format')
-       : (miGetCopy('controls.csv_spec_show') || 'Data format (optional)');
-    });
-  }
 }
 
 // ---- ONE dom-ready block (outside the function) ----
@@ -4525,8 +4792,10 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     loadCopyJSON();
+    updatePreMatchupHubProgress();
   });
 } else {
   setupEventListeners();
   loadCopyJSON();
+  updatePreMatchupHubProgress();
 }

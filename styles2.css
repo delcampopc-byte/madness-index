@@ -50,6 +50,10 @@ body {
   --mi-border-strong:        rgba(148, 163, 253, 0.45);
   --mi-border-card:          rgba(148, 163, 253, 0.12);
 
+  --mi-control-height: 44px;
+  --mi-control-radius: 999px;
+  --mi-control-padding-x: 18px;
+
   /* Text */
   --mi-text-primary:         #e5e7eb;
   --mi-text-muted:           #9ca3af;
@@ -114,6 +118,42 @@ body {
   padding: 20px 16px 32px;
 }
 
+/* ===== Utility: Hidden ===== */
+.hidden {
+  display: none !important;
+}
+
+/* =========================================
+   MI Halo — Next Action Highlight
+   ========================================= */
+
+.mi-halo{
+  border: 1px solid rgba(56, 189, 248, 0.75);
+
+  box-shadow:
+    /* crisp cyan edge */
+    0 0 0 1px rgba(56, 189, 248, 0.45),
+
+    /* primary glow */
+    0 0 28px rgba(56, 189, 248, 0.35),
+
+    /* secondary falloff */
+    0 0 60px rgba(56, 189, 248, 0.18),
+
+    /* depth */
+    0 20px 50px rgba(0, 0, 0, 0.55),
+
+    var(--mi-shadow-card-inset);
+
+  background:
+    radial-gradient(
+      140% 140% at 50% -25%,
+      rgba(56, 189, 248, 0.14),
+      transparent 65%
+    ),
+    var(--mi-grad-card);
+}
+
 /* ========== HERO / HEADER ========== */
 
 .app-header {
@@ -141,6 +181,46 @@ body {
   border: 1px solid var(--mi-border-subtle);
   background: var(--mi-grad-hero);
   box-shadow: var(--mi-shadow-header), var(--mi-shadow-card-inset);
+}
+
+/* Pre-matchup: slightly tighter hero to prioritize the workflow */
+.app-shell.pre-matchup .enhanced-header{
+  padding: 18px 18px 16px;
+  margin-bottom: 16px;
+}
+
+/* Pre-matchup: compact hero to prioritize setup cockpit */
+.app-shell.pre-matchup .enhanced-header{
+  padding: 10px 18px 8px;
+  margin-bottom: 10px;
+}
+
+.app-shell.pre-matchup .hero-logo{
+  max-height: 84px;
+}
+
+.app-shell.pre-matchup .hero-title{
+  font-size: 28px; /* was visually reading large */
+}
+
+.app-shell.pre-matchup .hero-subtitle{
+  margin-top: 6px;
+}
+
+.app-shell.pre-matchup .hero-logo{
+  max-height: 92px;
+}
+
+.app-shell.pre-matchup .hero-logo-wrap{
+  margin-bottom: 8px;
+}
+
+.app-shell.pre-matchup .hero-title{
+  font-size: 24px; /* slightly down from var(--mi-font-size-h1) */
+}
+
+.app-shell.pre-matchup .hero-subtitle{
+  margin-top: 2px;
 }
 
 .hero-overline {
@@ -288,7 +368,7 @@ body {
 
 /* Status bar lives between hero and tiles */
 .pre-header-status{
-  margin: -14px 0 12px; /* pulls it into the hero/tile gap */
+  margin: 10px 0 12px; /* pulls it into the hero/tile gap */
 }
 
 /* Hide it once matchup is active (since hub hides then anyway) */
@@ -335,40 +415,53 @@ body {
 }
 
 .pre-step {
-  display: grid;
+  display: flex;
   grid-template-columns: 28px minmax(0, 1fr);
   grid-template-rows: auto auto;
   grid-template-areas:
     "num status"
     "text text";
-  gap: 10px 12px;
-
+  gap: 14px;
+  align-items: center;
   padding: 14px 14px;
   border-radius: 14px;
   border: 1px solid rgba(148, 163, 184, 0.16);
   background: rgba(15, 23, 42, 0.55);
 }
 
-.pre-step-num {
+.pre-step-num{
   width: 28px;
-  grid-area: num;
   height: 28px;
+  grid-area: num;
   border-radius: 999px;
-  display: grid;
-  place-items: center;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  line-height: 1;          /* key: fixes vertical font-metric drift */
+  text-align: center;
+
   font-weight: 800;
   background: rgba(56, 189, 248, 0.14);
-  border: 1px solid rgba(56, 189, 248, 0.22);
+  border: 1px solid rgba(56, 189, 248, 0.35);
 }
 
 .pre-step-text {
   color: rgba(226, 232, 240, 0.92);
-  line-height: 1.25;
+  line-height: 1.3;
   min-width: 0;
   line-height: 1.25;
   grid-area: text;
   margin-top: 2px;
   max-width: 38ch;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.pre-step-text br {
+  display: none;
 }
 
 .pre-hub-note {
@@ -482,12 +575,19 @@ body {
 .pre-hub-status {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 10px 0 14px;
-  padding: 8px 12px;
-  border-radius: 10px;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  gap: 12px;
+
+  margin: 10px 0 12px;
+  padding: 10px 14px;
+
+  border-radius: 12px;
+
+  background: rgba(2, 6, 23, 0.68);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+
+  box-shadow:
+    0 0 0 1px rgba(56, 189, 248, 0.14),
+    0 10px 26px rgba(0, 0, 0, 0.35);
 }
 
 .pre-status-label {
@@ -498,9 +598,12 @@ body {
 }
 
 .pre-status-text {
-  font-size: 13px;
-  color: rgba(226, 232, 240, 0.95);
+  font-size: 14px;
+  color: rgba(241, 245, 249, 0.92);
 }
+
+/* Pre-matchup status: hide the changing instruction text */
+#preStatusText { display: none !important; }
 
 .pre-status-bar{
   position: relative;
@@ -526,7 +629,7 @@ body {
   box-shadow:
     0 0 18px rgba(56, 189, 248, 0.22),
     0 0 0 1px rgba(56, 189, 248, 0.35) inset;
-  transition: width 260ms ease;
+  transition: width 360ms cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 /* Progress-based moods (set on .pre-hub-status via JS) */
@@ -539,6 +642,102 @@ body {
 .pre-hub-status.is-100{
   border-color: rgba(34, 197, 94, 0.35);
   background: rgba(15, 23, 42, 0.68);
+}
+
+/* ================================
+   PROGRESS BAR — 100% "complete" animation
+   ================================ */
+
+.pre-hub-status.is-100 .pre-status-fill{
+  /* subtle green lift ONLY at 100% */
+  background:
+    linear-gradient(90deg,
+      rgba(34, 211, 238, 0.95),
+      rgba(56, 189, 248, 0.95),
+      rgba(34, 197, 94, 0.92)
+    );
+
+  animation: miProgressPulse 1.35s ease-in-out infinite;
+  will-change: filter, box-shadow;
+  filter: saturate(1.15);
+}
+
+/* moving sheen highlight */
+.pre-hub-status.is-100 .pre-status-fill::after{
+  content: "";
+  position: absolute;
+  inset: -2px;
+  width: 35%;
+  left: -40%;
+  border-radius: inherit;
+
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.22) 50%,
+    rgba(255,255,255,0) 100%
+  );
+
+  filter: blur(0.4px);
+  opacity: 0.85;
+  animation: miProgressSheen 1.6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes miProgressPulse{
+  0%, 100%{
+    filter: brightness(1.02) saturate(1.05);
+    box-shadow:
+      /* base cyan presence */
+      0 0 16px rgba(56, 189, 248, 0.18),
+
+      /* green aura (subtle at rest) */
+      0 0 22px rgba(34, 197, 94, 0.25),
+
+      /* inner edge */
+      0 0 0 1px rgba(56, 189, 248, 0.35) inset;
+  }
+
+  50%{
+    filter: brightness(1.28) saturate(1.35);
+    box-shadow:
+      /* cyan core */
+      0 0 18px rgba(56, 189, 248, 0.25),
+
+      /* PRIMARY green glow — this is what you were missing */
+      0 0 34px rgba(34, 197, 94, 0.55),
+      0 0 58px rgba(34, 197, 94, 0.35),
+
+      /* inner green edge */
+      0 0 0 1px rgba(34, 197, 94, 0.55) inset;
+  }
+}
+
+@keyframes miProgressSheen{
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(420%); }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .pre-hub-status.is-100 .pre-status-fill,
+  .pre-hub-status.is-100 .pre-status-fill::after{
+    animation: none !important;
+  }
+}
+
+.pre-step.is-hidden{
+  display: none;
+}
+
+/* When only one step is showing, keep it looking intentional */
+.pre-hub-steps.is-single{
+  grid-template-columns: 1fr;
+}
+
+/* Slightly tighten when in single mode */
+.pre-hub-steps.is-single .pre-step{
+  padding: 12px 14px;
 }
 
 /* ===== Prematch preview: premium expand/collapse ===== */
@@ -577,15 +776,14 @@ body {
 
 /* Compact hero when matchup active */
 .app-shell.has-matchup .enhanced-header {
-  padding: 14px 18px;
+  padding-top: 28px;
+  padding-bottom: 24px,
   margin-bottom: 14px;
-
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   column-gap: 20px;
   align-items: center;
   text-align: center;
-
   border-radius: var(--mi-radius-card);
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.8), var(--mi-shadow-card-inset);
 }
@@ -679,8 +877,7 @@ body {
    Everything is visible, but only CSV is interactive until loaded
 ========================================================= */
 
-.app-shell:not(.csv-loaded) .top-bar .controls-card:not(.is-primary-entry),
-.app-shell:not(.csv-loaded) #preMatchupHub {
+.app-shell:not(.csv-loaded) #preSetupRow .controls-card:not(.is-primary-entry) {
   opacity: 0.45;
   filter: saturate(0.85);
   pointer-events: none;
@@ -850,6 +1047,27 @@ body {
   gap: 10px;
 }
 
+.mc-row { 
+  padding-top: 2px; 
+}
+
+/* And in the 3-col cockpit, apply the “connected rows” look */
+.pre-setup-row .matchup-controls{
+  gap: 0;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.pre-setup-row .mc-row{
+  padding: 14px 14px;
+}
+
+.pre-setup-row .mc-row + .mc-row{
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
 /* ===========================
    CSV Primary Controls — Premium CTA
    (Option A: obvious + polished)
@@ -959,7 +1177,7 @@ body {
   border: 2px solid var(--border-light);
   border-radius: 14px;
   backdrop-filter: blur(8px);
-  box-sixing: border-box;
+  box-sizing: border-box;
   box-shadow:
     0 8px 20px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(56, 189, 248, 0.15) inset;
@@ -1148,8 +1366,6 @@ body {
 
 select {
   width: 100%;
-  padding: 6px 10px;
-  border-radius: 10px;
   border: 1px solid rgba(75, 85, 99, 0.9);
   background: rgba(9, 12, 23, 0.98);
   color: var(--mi-text-primary);
@@ -1162,7 +1378,11 @@ select {
   background-position: calc(100% - 13px) 9px, calc(100% - 8px) 9px;
   background-size: 4px 4px;
   background-repeat: no-repeat;
+  height: var(--mi-control-height);
+  border-radius: var(--mi-control-radius);
+  padding: 0 var(--mi-control-padding-x);
 }
+
 select:focus {
   border-color: var(--mi-accent-cyan);
   box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35);
@@ -1243,8 +1463,7 @@ select:focus {
 .matchup-bar {
   position: relative;
   display: none;
-  margin-bottom: 10px;
-  padding: 10px 20px;
+  margin: 18px auto 0;
   border-radius: 18px;
   background:
     radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%),
@@ -1254,6 +1473,7 @@ select:focus {
   opacity: 0;
   transform: translateY(-6px);
   transition: opacity 200ms ease-out, transform 200ms ease-out;
+  width: 100%;
 }
 
 .matchup-bar.visible {
@@ -1261,28 +1481,6 @@ select:focus {
   opacity: 1;
   transform: translateY(0);
 }
-
-.matchup-bar-main {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 32px;
-  max-width: 1320px;
-  margin: 0 auto;
-}
-
-.matchup-bar-left,
-.matchup-bar-right {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-  align-items: center;
-  text-align: center;
-}
-
-.matchup-bar-left  { align-items: flex-start; text-align: left; }
-.matchup-bar-right { align-items: flex-end;   text-align: right; }
 
 .matchup-bar-label {
   font-size: 0.7rem;
@@ -1294,7 +1492,6 @@ select:focus {
 .matchup-bar-team {
   font-size: 1.1rem;
   font-weight: 600;
-  white-space: nowrap;
 }
 
 .matchup-bar-seed { font-size: 0.85rem; opacity: 0.85; margin-left: 6px; }
@@ -1338,6 +1535,379 @@ select:focus {
   border-color: rgba(129, 140, 248, 0.9);
 }
 
+/* =========================
+   Matchup Bar — Quick Edit
+   ========================= */
+
+.matchup-quick-slot,
+.matchup-quick-actions {
+  display: none;
+}
+
+#matchupBar.is-editing .matchup-bar-team,
+#matchupBar.is-editing #matchupRoundPill,
+#matchupBar.is-editing #editMatchupBtn {
+  display: none;
+}
+
+#matchupBar.is-editing .matchup-quick-slot,
+#matchupBar.is-editing .matchup-quick-actions {
+  display: block;
+}
+
+.matchup-quick-slot {
+  margin-top: 8px;
+  width: 100%;
+  min-width: 0px;
+  max-width: 360px;
+}
+
+.matchup-quick-slot .select-wrap label,
+.matchup-quick-slot .round-step-label,
+.matchup-quick-slot .helper-text {
+  display: none !important;
+}
+
+.matchup-quick-slot select,
+.matchup-quick-slot .round-btn {
+  width: 100%;
+  min-height: 38px;
+}
+
+.matchup-quick-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* =========================
+   Matchup Bar — True Center Layout
+   ========================= */
+
+.matchup-bar {
+  width: 100%;
+  margin: 18px auto 22px;
+}
+
+.matchup-bar-main {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  column-gap: 26px;
+  padding: 6px 6px;
+}
+
+/* Make side columns behave like equal rails */
+.matchup-bar-left,
+.matchup-bar-right {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.matchup-bar-left  { align-items: flex-start; text-align: left; }
+.matchup-bar-right { align-items: flex-end;   text-align: right; }
+
+.matchup-bar-right {
+  align-items: flex-end;
+  text-align: right;
+}
+
+/* Center stack is truly centered */
+.matchup-bar-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 240px; /* stabilizes center */
+}
+
+/* Prevent long team names from shifting layout */
+.matchup-bar-team {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* =========================
+   Matchup Bar — Quick Edit Polish
+   ========================= */
+
+.matchup-quick-slot {
+  margin-top: 8px;
+  width: 100%;
+  max-width: 360px;     /* keeps the dropdown from dominating */
+  min-width: 0;         /* important: don't force the grid wider */
+}
+
+.matchup-bar-right .matchup-quick-slot {
+  display: flex;
+  justify-content: flex-end; /* right column stays right-aligned */
+}
+
+.matchup-quick-round {
+  max-width: 260px;
+}
+
+/* Make selects/buttons feel like "controls" not "content blocks" */
+.matchup-quick-slot select,
+.matchup-quick-slot .round-btn {
+  width: 100%;
+  min-height: 40px;
+}
+
+/* Actions sit centered and closer to controls */
+.matchup-quick-actions {
+  margin-top: 4px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.matchup-quick-actions .btn{
+  padding: 5px 14px;
+  font-size: 12px;
+}
+
+#matchupBar.is-editing{
+  position: relative;
+  z-index: 2000;
+}
+
+/* Make the round selector dropdown reliably float above everything */
+#matchupBar .round-selector-wrap{
+  position: relative;
+  z-index: 2100;
+}
+
+#matchupBar .round-dropdown{
+  z-index: 2200;
+}
+
+#matchupBar.is-editing .matchup-bar-label{
+  display: none;
+}
+
+#matchupBar.is-editing .matchup-bar-main{
+  grid-template-columns: 1fr auto 1fr;
+  column-gap: 32px;
+  align-items: center;
+}
+
+#matchupBar.is-editing .matchup-bar-left,
+#matchupBar.is-editing .matchup-bar-right{
+  align-items: center;
+  text-align: center;
+}
+
+#matchupBar.is-editing .matchup-quick-slot{
+  max-width: 520px;            /* pick a width that feels right */
+  width: min(520px, 100%);
+}
+
+#matchupBar.is-editing .matchup-quick-actions{
+  margin-top: 6px;
+}
+
+#matchupBar.is-editing .matchup-bar-center{
+  justify-self: center;     /* critical: centers the middle grid cell */
+  align-self: center;
+  min-width: 0;             /* remove your old stabilizer during editing */
+  width: max-content;       /* shrink-wrap the VS + round pill */
+}
+
+#matchupBar.is-editing #matchupRoundPill{
+  display: inline-flex;
+  justify-content: center;
+  text-align: center;
+}
+
+/* =========================
+   Matchup Bar — Quick Edit Typography Scaling
+   ========================= */
+
+#matchupBar.is-editing{
+  --mq-font: clamp(12px, 0.85vw, 14px);
+  --mq-pill: clamp(12px, 0.85vw, 13px);
+  --mq-btn:  clamp(12px, 0.85vw, 13px);
+}
+
+#matchupBar.is-editing .matchup-bar-vs{
+  display: none !important;
+}
+
+#matchupBar.is-editing .matchup-bar-round,
+#matchupBar.is-editing #matchupRoundPill{
+  font-size: var(--mq-pill);
+}
+
+#matchupBar.is-editing .matchup-quick-slot select{
+  font-size: var(--mq-font);
+}
+
+#matchupBar.is-editing .matchup-quick-actions .btn{
+  font-size: var(--mq-btn);
+}
+
+#matchupBar.is-editing #matchupRoundPill,
+#matchupBar.is-editing .matchup-bar-round {
+  display: none !important;
+}
+
+#matchupBar.is-editing .matchup-quick-round {
+  position: relative;
+  padding-top: 16px; /* space for the label */
+  text-align: center;
+}
+
+#matchupBar.is-editing .matchup-quick-round::before {
+  content: "ROUND";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.85);
+  width: max-content;
+  pointer-events: none;
+}
+
+#matchupBar.is-editing .matchup-quick-slot select{
+  min-height: 48px !important;
+  font-size: 15px !important;
+  padding: 10px 14px !important;
+  border-radius: 14px !important;
+}
+
+#matchupBar.is-editing .matchup-quick-slot .round-btn{
+  min-height: 44px !important;
+  font-size: 14px !important;
+  padding: 8px 16px !important;
+  border-radius: 999px !important;
+}
+
+/* Run / Cancel */
+#matchupBar.is-editing .matchup-quick-actions .btn{
+  min-height: 40px !important;
+  font-size: 13px !important;
+  padding: 8px 18px !important;
+}
+
+/* 1) Remove VS */
+#matchupBar:not(.is-editing) .matchup-bar-vs{
+  display: none !important;
+}
+
+/* 2) Remove redundant Cinderella/Favorite labels */
+#matchupBar:not(.is-editing) .matchup-bar-label{
+  display: none !important;
+}
+
+/* 3) Remove redundant trailing seed like "(13)" */
+#matchupBar:not(.is-editing) .matchup-bar-seed{
+  display: none !important;
+}
+
+/* 4) True center layout: pull side columns inward toward the center */
+#matchupBar:not(.is-editing) .matchup-bar-main{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 28px;
+  padding: 16px 18px; /* gives the bar real presence */
+}
+
+/* Left side hugs the CENTER (instead of the far left edge) */
+#matchupBar:not(.is-editing) .matchup-bar-left{
+  justify-self: end;          /* move the whole block toward center */
+  align-items: flex-end;      /* align text to the center-facing edge */
+  text-align: right;
+  gap: 6px;
+}
+
+/* Right side hugs the CENTER (instead of the far right edge) */
+#matchupBar:not(.is-editing) .matchup-bar-right{
+  justify-self: start;        /* move the whole block toward center */
+  align-items: flex-start;    /* align text to the center-facing edge */
+  text-align: left;
+  gap: 6px;
+}
+
+/* Keep long names from pushing layout */
+#matchupBar:not(.is-editing) .matchup-bar-team{
+  max-width: 46ch;            /* prevents super long names dominating */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 5) Scale up typography to match the box better */
+#matchupBar:not(.is-editing){
+  font-size: 1rem;            /* base bump */
+}
+
+#matchupBar:not(.is-editing) .matchup-bar-team{
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+}
+
+#matchupBar:not(.is-editing) .matchup-bar-round{
+  font-size: 0.95rem;
+  padding: 4px 14px;
+}
+
+#matchupBar:not(.is-editing) .matchup-bar-edit{
+  font-size: 0.9rem;
+  padding: 6px 12px;
+}
+
+/* Matchup Bar: hide Cancel unless editing */
+#matchupBar:not(.is-editing) .matchup-quick-actions .btn.ghost,
+#matchupBar:not(.is-editing) .matchup-quick-actions #cancelMatchupBtn{
+  display: none !important;
+}
+
+/* Matchup Bar: make Run bigger in non-edit state */
+#matchupBar:not(.is-editing) .matchup-quick-actions .btn.primary{
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 800;
+  min-height: 44px;
+  border-radius: 999px;
+}
+
+/* If your app adds .has-matchup after running, use that.
+   If not, see the alternate selector below. */
+.app-shell.has-matchup #matchupBar:not(.is-editing) .matchup-quick-actions{
+  display: none !important; /* hides Run entirely when it would do nothing */
+}
+
+/* Make Edit Matchup feel like the primary action in that state */
+.app-shell.has-matchup #matchupBar:not(.is-editing) .matchup-bar-edit{
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.dataset-download-btn{
+  width: 100%;
+  margin: 10px 0 6px;
+}
+
+/* Start a Matchup tile no longer needs per-step status pills (status bar handles it) */
+.pre-matchup-hub .pre-step-status {
+  display: none !important;
+}
+
 /* ========== ANALYSIS SHELL (HIDE UNTIL MATCHUP RUNS) ========== */
 
 .analysis-shell {
@@ -1355,6 +1925,18 @@ select:focus {
 /* IMPORTANT: when hidden, remove from layout entirely */
 .analysis-shell.hidden {
   display: none;
+}
+
+/* In the 3-col cockpit row, cards should NOT add their own top margins */
+.pre-setup-row .start-matchup,
+.pre-setup-row #preMatchupHub,
+.pre-setup-row .controls-card{
+  margin-top: 0 !important;
+}
+
+/* Control spacing with the row itself (top/bottom consistent) */
+.pre-setup-row{
+  margin: 12px 0; /* adjust to taste */
 }
 
 /* ========== SUMMARY SECTION ========== */
@@ -2619,6 +3201,559 @@ select:focus {
 /* Glossary inside footer should not look like a giant main page section */
 .footer-glossary {
   margin-top: 6px;
+}
+
+/* =========================================================
+   MI 3.4 — Pre-matchup density tightening (safe overrides)
+   ========================================================= */
+
+.app-shell.pre-matchup{
+  /* global-ish density knobs for this state */
+  --pm-gap: 12px;
+  --pm-card-pad: 16px;
+  --pm-card-pad-lg: 18px;
+  --pm-hero-pad: 18px;
+}
+
+/* tighten the big vertical stack */
+.app-shell.pre-matchup .top-bar,
+.app-shell.pre-matchup .pre-matchup-hub,
+.app-shell.pre-matchup .start-matchup{
+  margin-top: var(--pm-gap) !important;
+}
+
+/* reduce overall grid gaps */
+.app-shell.pre-matchup .top-bar{
+  gap: var(--pm-gap) !important;
+}
+.app-shell.pre-matchup .pre-matchup-hub{
+  gap: var(--pm-gap) !important;
+}
+
+/* tighten card padding without changing style */
+.app-shell.pre-matchup .card{
+  padding: var(--pm-card-pad) !important;
+}
+.app-shell.pre-matchup .card.controls-card{
+  padding: var(--pm-card-pad-lg) !important;
+}
+
+/* HERO: reduce height/air */
+.app-shell.pre-matchup .app-header.enhanced-header{
+  padding: var(--pm-hero-pad) !important;
+  min-height: 0 !important;
+}
+.app-shell.pre-matchup .hero-logo-wrap{
+  margin-bottom: 10px !important;
+}
+.app-shell.pre-matchup .hero-text-wrap{
+  gap: 6px !important;
+}
+.app-shell.pre-matchup .hero-title{
+  margin: 6px 0 6px !important;
+}
+.app-shell.pre-matchup .hero-tagline{
+  margin: 0 0 6px !important;
+}
+
+/* STATUS BAR: tuck it closer */
+.app-shell.pre-matchup #status{
+  margin: 10px 0 12px !important;
+}
+
+/* “START A MATCHUP” briefing: reduce section padding + tile gaps */
+.app-shell.pre-matchup .start-matchup{
+  padding: 14px !important;
+}
+.app-shell.pre-matchup .start-matchup .briefing-grid,
+.app-shell.pre-matchup .start-matchup .briefing-row{
+  gap: 10px !important;
+}
+.app-shell.pre-matchup .start-matchup .briefing-card{
+  padding: 12px !important;
+}
+
+/* Step panel: reduce internal spacing */
+.app-shell.pre-matchup .steps-panel,
+.app-shell.pre-matchup .matchup-controls{
+  padding: 14px !important;
+}
+.app-shell.pre-matchup .steps-panel .step-block{
+  margin-bottom: 10px !important;
+}
+
+/* ===== Load Tournament Data card: stronger header + 2-col grid ===== */
+.controls-card.is-primary-entry{
+  padding-top: 14px; /* slightly tighter + header feels anchored */
+}
+
+.controls-card.is-primary-entry .controls-head{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.controls-card.is-primary-entry .card-title{
+  margin: 0;
+  padding: 0;
+  font-size: 16px;       /* more prominent */
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  line-height: 1.1;
+  transform: translateY(-2px); /* nudge up toward top edge */
+}
+
+.controls-card.is-primary-entry .csv-spec-btn{
+  margin-top: -2px;      /* lifts pill into the same “header row” */
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+}
+
+/* Two-column control grid */
+.controls-card.is-primary-entry .controls-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+}
+
+/* Left: dataset select */
+.controls-card.is-primary-entry .dataset-select-wrap{
+  min-width: 0;
+}
+.controls-card.is-primary-entry .field-label{
+  font-size: 12px;
+  opacity: 0.8;
+  margin: 0 0 6px;
+  text-align: center;
+}
+
+.controls-card.is-primary-entry .dataset-select-wrap select{
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+}
+
+/* Right: manual upload (match size/weight of select) */
+.controls-card.is-primary-entry .file-label.file-label--manual{
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Mobile: stack */
+@media (max-width: 720px){
+  .controls-card.is-primary-entry .controls-grid{
+    grid-template-columns: 1fr;
+  }
+  .controls-card.is-primary-entry .field-label{
+    text-align: left;
+  }
+}
+
+/* ===========================
+   Pre-matchup Option B layout
+   3 equal columns under status bar
+   =========================== */
+
+.pre-setup-row{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.pre-setup-row > *{
+  min-width: 0; /* critical: allows equal columns even with wide inner content */
+  height: 100%;
+}
+
+/* Ensure all 3 cards fill their column height consistently */
+.pre-setup-row > .card{
+  height: 100%;
+}
+
+/* Responsive: collapse to 1 column on smaller screens */
+@media (max-width: 960px){
+  .pre-setup-row{ grid-template-columns: 1fr; }
+}
+
+/* Hub was designed for stacked layout; remove extra lift in 3-col row */
+.pre-setup-row #preMatchupHub{
+  margin-top: 0;
+}
+
+/* --- In the 3-col cockpit, cards should behave like normal cards (top-left headers) --- */
+.pre-setup-row .controls-card.is-primary-entry{
+  justify-content: flex-start;
+  align-items: stretch;
+  text-align: left;
+  padding-top: 18px; /* keeps header from hugging the border */
+}
+
+.pre-setup-row .controls-card.is-primary-entry .controls-card-head{
+  justify-content: space-between; /* title left, pill right */
+  align-items: flex-start;
+}
+
+.pre-setup-row .controls-card.is-primary-entry .field-label{
+  text-align: left; /* stop "Dataset" from centering */
+}
+
+/* --- Right tile: table-like 3-row steps for clarity + consistency --- */
+.pre-setup-row .matchup-steps{
+  gap: 0;                 /* remove spacing so rows feel connected */
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.pre-setup-row .matchup-step{
+  padding: 14px 14px;
+}
+
+.pre-setup-row .matchup-step + .matchup-step{
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.pre-setup-row .controls-card.is-primary-entry .card-title{
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* === CSV Tile: tighter + left-aligned + 1-column stack === */
+.controls-card.is-primary-entry{
+  text-align: left;              /* overrides the earlier center */
+  justify-content: flex-start;   /* stop vertical centering */
+}
+
+.controls-card.is-primary-entry .controls-card-head{
+  justify-content: flex-start;   /* title hugs top-left */
+}
+
+/* Keep title on one line now that the pill is gone */
+.controls-card.is-primary-entry .controls-card-head .card-title{
+  white-space: nowrap;
+}
+
+/* Stack dropdown + upload button vertically (tighter + cleaner) */
+.controls-card.is-primary-entry .controls-grid{
+  grid-template-columns: 1fr;    /* was 1fr 1fr */
+  gap: 10px;
+  align-items: start;
+}
+
+/* Shrink the upload button text so it doesn't dominate */
+.controls-card.is-primary-entry .file-label.file-label--manual span{
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+
+/* Optional: make the upload button feel less “billboard” */
+.controls-card.is-primary-entry .file-label.file-label--manual{
+  height: 42px;
+  min-height: 42px;
+}
+
+/* =========================================
+   Next-action spotlight handoff (CSV -> Steps)
+   ========================================= */
+
+/* 1) While NOT loaded, keep the halo on the primary entry (you already do this) */
+/* .controls-card.is-primary-entry is currently your “halo” card via border/box-shadow. :contentReference[oaicite:3]{index=3} */
+
+/* 2) Once CSV is loaded, REMOVE the halo from the dataset card */
+.app-shell.csv-loaded .controls-card.is-primary-entry{
+  border-color: 1px solid var(--mi-border-card);
+  box-shadow: var(--mi-shadow-soft), var(--mi-shadow-card-inset);
+  background: var(--mi-grad-card);
+  transform: none;
+}
+
+/* =========================================
+   Restore normal state for dataset card
+   (after halo is removed)
+   ========================================= */
+
+/* 3) Once CSV is loaded, MOVE the halo to the 3-step card */
+.app-shell.csv-loaded #matchupSetupCard{
+  border: 1px solid rgba(56, 189, 248, 0.75) !important;
+
+  box-shadow:
+    /* crisp cyan edge */
+    0 0 0 1px rgba(56, 189, 248, 0.45),
+
+    /* primary glow */
+    0 0 28px rgba(56, 189, 248, 0.35),
+
+    /* secondary falloff */
+    0 0 60px rgba(56, 189, 248, 0.18),
+
+    /* depth */
+    0 20px 50px rgba(0, 0, 0, 0.55),
+
+    var(--mi-shadow-card-inset) !important;
+
+  background:
+    /* inner lift so the card itself responds */
+    radial-gradient(
+      140% 140% at 50% -25%,
+      rgba(56, 189, 248, 0.14),
+      transparent 65%
+    ),
+    var(--mi-grad-card) !important;
+}
+
+/* 2) Once CSV is loaded, dataset card returns to NORMAL card styling */
+.app-shell.csv-loaded .controls-card.is-primary-entry{
+  border: 1px solid var(--mi-border-card);
+  box-shadow: var(--mi-shadow-soft), var(--mi-shadow-card-inset);
+  background: var(--mi-grad-card);
+  transform: none;
+}
+
+/* OR divider between dataset dropdown and manual upload */
+.or-divider{
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 2px;
+  opacity: 0.9;
+}
+
+.or-divider::before,
+.or-divider::after{
+  content: "";
+  height: 1px;
+  background: rgba(148, 163, 184, 0.22);
+}
+
+.or-divider span{
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(226, 232, 240, 0.70);
+}
+
+/* ================================
+   PRE-SETUP RIGHT TILE: single-box 3-row layout
+   Removes inner "square inside square"
+   ================================ */
+
+/* Make the OUTER card be the unified container */
+.pre-setup-row #matchupSetupCard{
+  padding: 0 !important;          /* removes the extra outer padding that creates the "frame" */
+  overflow: hidden;               /* so row borders clip cleanly */
+}
+
+/* Flatten the INNER wrapper so it doesn't look like a second card */
+.pre-setup-row #matchupSetupCard .matchup-controls{
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+/* Keep the three rows as the visual structure */
+.pre-setup-row #matchupSetupCard .mc-row{
+  padding: 14px 14px !important;
+}
+
+/* Row dividers (unchanged behavior, just ensured) */
+.pre-setup-row #matchupSetupCard .mc-row + .mc-row{
+  border-top: 1px solid rgba(148, 163, 184, 0.14) !important;
+}
+
+/* ================================
+   RIGHT TILE TYPOGRAPHY NORMALIZATION
+   ================================ */
+
+#matchupSetupCard .round-step-label{
+  /* Match card header tone */
+  font-family: inherit;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.98rem;
+  color: rgba(229, 231, 235, 0.92);
+}
+
+#matchupSetupCard label,
+#matchupSetupCard .helper-text,
+#matchupSetupCard .sandbox-toggle span{
+  font-family: inherit;
+  font-size: 0.92rem;
+  color: rgba(229, 231, 235, 0.72);
+}
+
+#matchupSetupCard select,
+#matchupSetupCard button.btn{
+  font-family: inherit;
+}
+
+/* ================================
+   RIGHT TILE ROW DIVIDERS (STRONGER)
+   ================================ */
+
+.pre-setup-row #matchupSetupCard .mc-row + .mc-row{
+  border-top: 1px solid rgba(148, 163, 184, 0.65) !important; /* stronger than before */
+  box-shadow: 0 -1px 0 rgba(2, 8, 23, 0.65) inset;            /* crisp edge line */
+}
+
+.pre-setup-row #matchupSetupCard .mc-row{
+  background: rgba(2, 8, 23, 0.10);
+}
+.pre-setup-row #matchupSetupCard .mc-row:nth-child(odd){
+  background: rgba(2, 8, 23, 0.16);
+}
+
+.pre-setup-row #matchupSetupCard .mc-row{
+  background: rgba(2, 8, 23, 0.10);
+}
+.pre-setup-row #matchupSetupCard .mc-row:nth-child(odd){
+  background: rgba(2, 8, 23, 0.16);
+}
+
+/* ================================
+   STEP 2 CONTROLS: SIZE + ALIGNMENT
+   ================================ */
+
+#matchupSetupCard .round-control-row{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* Shared pill dimensions */
+#matchupSetupCard #roundSelectBtn,
+#matchupSetupCard .sandbox-toggle{
+  height: 44px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+/* Make sandbox look like a button, not a form field */
+#matchupSetupCard .sandbox-toggle{
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  background: rgba(2, 8, 23, 0.25);
+  cursor: pointer;
+}
+
+/* Checkbox alignment cleanup */
+#matchupSetupCard .sandbox-toggle input{
+  margin-right: 8px;
+}
+
+#matchupSetupCard .sandbox-toggle input:checked + span{
+  color: #e5f6ff;
+}
+
+#matchupSetupCard .sandbox-toggle:has(input:checked){
+  border-color: rgba(56, 189, 248, 0.65);
+  background: rgba(56, 189, 248, 0.12);
+}
+
+button,
+.btn {
+  height: var(--mi-control-height);
+  border-radius: var(--mi-control-radius);
+  padding: 0 var(--mi-control-padding-x);
+}
+
+.sandbox-toggle,
+.enhanced-sandbox {
+  height: var(--mi-control-height);
+  border-radius: var(--mi-control-radius);
+  padding: 0 var(--mi-control-padding-x);
+  display: inline-flex;
+  align-items: center;
+}
+
+.sandbox-toggle input {
+  margin-right: 10px;
+}
+
+.enhanced-sandbox {
+  position: relative;
+}
+
+.enhanced-sandbox::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+
+  color: #e5e7eb;
+  background: rgba(2, 8, 23, 0.95);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 8px;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.enhanced-sandbox:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.controls-card{
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+/* Halo the dataset card ONLY before CSV is loaded */
+.app-shell:not(.csv-loaded) .controls-card.is-primary-entry{
+  border: 1px solid rgba(56, 189, 248, 0.75);
+  box-shadow:
+    0 0 0 1px rgba(56, 189, 248, 0.45),
+    0 0 28px rgba(56, 189, 248, 0.35),
+    0 0 60px rgba(56, 189, 248, 0.18),
+    0 20px 50px rgba(0, 0, 0, 0.55),
+    var(--mi-shadow-card-inset);
+  background:
+    radial-gradient(140% 140% at 50% -25%, rgba(56, 189, 248, 0.14), transparent 65%),
+    var(--mi-grad-card);
+}
+
+/* =========================================
+   POST-MATCHUP HEADER (CONDENSED MODE)
+   ========================================= */
+
+.app-shell.has-matchup .hero-tagline,
+.app-shell.has-matchup .hero-overline,
+.app-shell.has-matchup .hero-subtitle {
+  display: none;
 }
 
 /* ========== RESPONSIVE ========== */

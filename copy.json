@@ -8,7 +8,7 @@
   }, 
   "prematch": {
     "progress": {
-    "status_label": "Status",
+    "status_label": "PROGRESS BAR",
     "status_waiting_csv": "Waiting for tournament dataset.",
     "status_pick_teams": "Select two teams to continue.",
     "status_pick_team_a": "Select Team A to continue.",
@@ -21,8 +21,8 @@
     "step1_ready": "Field loaded and teams unlocked.",
     "step2_pending": "Select two teams to compare.",
     "step2_ready": "Teams selected. Matchup is queued.",
-    "step3_pending": "Choose a round, then run Compare to generate analysis.",
-    "step3_ready": "Briefing complete. Run Compare when ready.",
+    "step3_pending": "Choose a round or choose Sandbox Mode to ignore round constraints.",
+    "step3_ready": "Matchup queued. Click Compare when ready.",
     "title": "Start a matchup",
     "subtitle": "",
     "briefing_kicker": "Analyst Briefing",

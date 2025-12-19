@@ -65,275 +65,238 @@
   </div>
 </section>
 
- <section id="matchupBar" class="card matchup-bar">
-  <div class="matchup-bar-main">
-    <div class="matchup-bar-left">
-      <span class="matchup-bar-label">Cinderella</span>
-      <div class="matchup-bar-team">
-        <span id="matchupCinderName">Team A</span>
-        <span id="matchupCinderSeed" class="matchup-bar-seed"></span>
+<!-- ========== PRE-MATCHUP 3-COLUMN SETUP ROW ========== -->
+<section id="preSetupRow" class="pre-setup-row top-bar">
+
+  <!-- COL 1: Start a Matchup (dynamic single-step) -->
+  <section id="preMatchupHub" class="card pre-matchup-hub">
+    <div class="pre-hub-inner">   
+    
+      <div class="pre-hub-title" data-copy="prematch.progress.title">Start a matchup</div>
+
+      <div class="pre-hub-steps">
+        <div class="pre-step" id="preStep1">
+          <div class="pre-step-num">1</div>
+          <div class="pre-step-text" id="preStepText1" data-copy="prematch.progress.step1"></div>
+          <div class="pre-step-status" id="preStepStatus1"></div>
+        </div>
+
+        <div class="pre-step" id="preStep2">
+          <div class="pre-step-num">2</div>
+          <div class="pre-step-text" id="preStepText2" data-copy="prematch.progress.step2"></div>
+          <div class="pre-step-status" id="preStepStatus2"></div>
+        </div>
+
+        <div class="pre-step" id="preStep3">
+          <div class="pre-step-num">3</div>
+          <div class="pre-step-text" id="preStepText3" data-copy="prematch.progress.step3"></div>
+          <div class="pre-step-status" id="preStepStatus3"></div>
+        </div>
       </div>
+
+      <section id="preMatchupPreview" class="prematch-preview" aria-hidden="true">
+        <div class="prematch-preview-inner">
+          <div class="prematch-preview-ghost">
+            <div class="ghost-grid">
+              <div class="ghost-card ghost-card-cind">
+                <div class="ghost-header">
+                  <span class="ghost-role">Cinderella</span>
+                  <span class="ghost-team">Team A</span>
+                </div>
+                <div class="ghost-tile ghost-tile-wide"></div>
+                <div class="ghost-row">
+                  <div class="ghost-tile"></div>
+                  <div class="ghost-tile"></div>
+                </div>
+                <div class="ghost-tile ghost-tile-wide"></div>
+                <div class="ghost-tile ghost-tile-wide ghost-total"></div>
+              </div>
+
+              <div class="ghost-card ghost-card-fav">
+                <div class="ghost-header">
+                  <span class="ghost-role">Favorite</span>
+                  <span class="ghost-team">Team B</span>
+                </div>
+                <div class="ghost-tile ghost-tile-wide"></div>
+                <div class="ghost-row">
+                  <div class="ghost-tile"></div>
+                  <div class="ghost-tile"></div>
+                </div>
+                <div class="ghost-tile ghost-tile-wide"></div>
+                <div class="ghost-tile ghost-tile-wide ghost-total"></div>
+              </div>
+            </div>
+
+            <div class="prematch-preview-caption" data-copy="prematch.progress.preview_caption"></div>
+          </div>
+
+          <aside class="prematch-preview-explainer">
+            <h3 class="prematch-preview-title" data-copy="prematch.progress.preview_title"></h3>
+            <p class="prematch-preview-text" data-copy="prematch.progress.preview_text"></p>
+            <ul class="prematch-preview-bullets">
+              <li data-copy="prematch.progress.preview_b1"></li>
+              <li data-copy="prematch.progress.preview_b2"></li>
+              <li data-copy="prematch.progress.preview_b3"></li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+  <!-- COL 2: CSV / Dataset -->
+  <div class="card controls-card is-primary-entry">
+    <div class="controls-card-head">
+      <h2 class="card-title" data-copy="controls.data_title">Load Tournament Data</h2>
     </div>
 
-    <div class="matchup-bar-center">
-      <div class="matchup-bar-vs">vs</div>
-      <span id="matchupRoundPill" class="summary-round-pill matchup-bar-round">
-        Round of 64
-      </span>
-      <button id="editMatchupBtn" class="matchup-bar-edit">
-        Edit matchup ▾
-      </button>
+    <div class="controls-grid">
+      <div class="dataset-select-wrap">
+        <select id="datasetSelect">
+          <option value="" disabled selected data-copy="controls.dataset_placeholder">Select a dataset…</option>
+          <option value="data/mi_2025_official.csv" data-filename="MadnessIndex_2025_Official.csv">
+            2025 Official Tournament Field
+          </option>
+          <option value="data/mi_2024_official.csv" data-filename="MadnessIndex_2024_Official.csv" disabled>
+            2024 Official Tournament Field (coming soon)
+          </option>
+          <option value="data/mi_2023_official.csv" data-filename="MadnessIndex_2023_Official.csv" disabled>
+            2023 Official Tournament Field (coming soon)
+          </option>
+        </select>
+      </div>
+
+      <div class="or-divider" aria-hidden="true">
+        <span>OR</span>
+      </div>
+
+      <label for="csvFile" class="file-label file-label--manual">
+        <span data-copy="controls.csv_label_manual">Upload CSV manually</span>
+        <input type="file" id="csvFile" accept=".csv" />
+      </label>
     </div>
 
-    <div class="matchup-bar-right">
-      <span class="matchup-bar-label">Favorite</span>
-      <div class="matchup-bar-team">
-        <span id="matchupFavoriteName">Team B</span>
-        <span id="matchupFavoriteSeed" class="matchup-bar-seed"></span>
+    <div id="status" class="status"></div>
+  </div>
+
+  <!-- COL 3: Team / Round / Run (3-row grid) -->
+  <div class="card controls-card matchup-setup-card" id="matchupSetupCard">
+
+    <div class="matchup-steps">
+      <!-- ROW 1 -->
+      <div class="matchup-step mc-row" id="mcRow1">
+        <div class="round-step-label step-label" data-copy="controls.step1_label">STEP 1: Select Teams</div>
+
+        <div class="control-row">
+          <div class="select-wrap" id="teamASelectWrap">
+           <select id="teamA">
+            <option value="" disabled selected>Select Team A</option>
+           </select>
+        </div>
+
+          <div class="select-wrap" id="teamBSelectWrap">
+           <select id="teamB">
+            <option value="" disabled selected>Select Team B</option>
+           </select>
+        </div>
+       </div>
       </div>
+      <!-- ROW 2 -->
+      <div class="matchup-step mc-row" id="mcRow2">
+        <div class="round-step-label" data-copy="controls.step2_label">STEP 2: Select Round</div>
+
+        <div class="round-control-row">
+          <div class="round-selector-wrap" id="roundSelectorWrap">
+            <button id="roundSelectBtn" class="btn ghost round-btn">Select Round</button>
+            <div id="roundDropdown" class="round-dropdown hidden">
+              <div class="round-option" data-round="R64" data-copy="rounds.R64">Round of 64</div>
+              <div class="round-option" data-round="R32" data-copy="rounds.R32">Round of 32</div>
+              <div class="round-option" data-round="S16" data-copy="rounds.S16">Sweet Sixteen</div>
+              <div class="round-option" data-round="E8" data-copy="rounds.E8">Elite Eight</div>
+              <div class="round-option" data-round="F4" data-copy="rounds.F4">Final Four</div>
+              <div class="round-option" data-round="Champ" data-copy="rounds.Champ">Championship</div>
+            </div>
+          </div>
+
+          <label class="sandbox-toggle enhanced-sandbox" data-tooltip="Ignores bracket round constraints">
+            <input type="checkbox" id="sandboxModeToggle" />
+            <span>Sandbox Mode</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- ROW 3 -->
+      <div class="matchup-step mc-row" id="mcRow3">
+        <div class="round-step-label" data-copy="controls.step3_label">STEP 3: Run the Matchup</div>
+
+        <p id="roundHelp" class="helper-text" data-copy="controls.round_help"></p>
+
+        <div class="matchup-actions-row">
+          <button id="compareBtn" class="btn primary compare-btn-disabled" disabled>
+            <span data-copy="controls.compare_btn">Compare Matchup</span>
+          </button>
+
+          <button id="toggleDebugBtn" class="btn subtle">
+            <span data-copy="controls.debug_btn">Toggle Debug View</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
 
-      <!-- ================ TOP CONTROLS ================ -->
-    <section class="top-bar">
-<div class="card controls-card is-primary-entry">
-  <div class="controls-card-head">
-    <h2 class="card-title" data-copy="controls.data_title">1. Load Tournament Data</h2>
+<section id="matchupBar" class="card matchup-bar">
+  <div class="matchup-bar-main">
 
-    <button id="csvSpecBtn" class="csv-spec-btn csv-spec-btn--head" type="button"
-      aria-expanded="false" aria-controls="csvSpecHelp"
-      data-copy="controls.csv_spec_show">
-    </button>
-  </div>
+    <!-- LEFT: CINDERELLA -->
+    <div class="matchup-bar-left">
+      <span class="matchup-bar-label">Cinderella</span>
 
-<div class="control-row dataset-row">
-  <div class="select-wrap dataset-select-wrap">
-    <label for="datasetSelect">
-      <span data-copy="controls.dataset_label">Dataset</span>
-    </label>
+      <div class="matchup-bar-team">
+        <span id="matchupCinderName">Team A</span>
+        <span id="matchupCinderSeed" class="matchup-bar-seed"></span>
+      </div>
 
-    <select id="datasetSelect">
-      <option value="" disabled selected data-copy="controls.dataset_placeholder">Select a dataset…</option>
-
-      <!-- Live -->
-      <option value="data/mi_2025_official.csv" data-filename="MadnessIndex_2025_Official.csv">
-        2025 Official Tournament Field
-      </option>
-
-      <!-- Future slots (ready for later) -->
-      <option value="data/mi_2024_official.csv" data-filename="MadnessIndex_2024_Official.csv" disabled>
-        2024 Official Tournament Field (coming soon)
-      </option>
-      <option value="data/mi_2023_official.csv" data-filename="MadnessIndex_2023_Official.csv" disabled>
-        2023 Official Tournament Field (coming soon)
-      </option>
-    </select>
-  </div>
-
-  <!-- Quiet fallback (keep your existing file input, but visually demote it) -->
-  <label for="csvFile" class="file-label file-label--manual">
-    <span data-copy="controls.csv_label_manual">Upload CSV manually</span>
-    <input type="file" id="csvFile" accept=".csv" />
-  </label>
-</div>
-
-  <div id="status" class="status"></div>
-</div>
-
-      <!-- Team & Role Selection -->
-      <!-- Team & Matchup Selection -->
-      <div class="card controls-card">
-        <!-- Hidden legacy title; kept for structure/JSON but not visible -->
-        <h2 class="card-title matchup-title-hidden" data-copy="controls.matchup_title"></h2>
-
-        <!-- Three-step flow container -->
-        <div class="matchup-steps">
-
-          <!-- STEP 1: Select Teams -->
-          <div class="matchup-step matchup-step-1">
-            <div class="round-step-label step-label" data-copy="controls.step1_label">
-              STEP 1: Select Teams
-            </div>
-
-            <div class="control-row">
-              <div class="select-wrap">
-                <label for="teamA">
-                  <span data-copy="controls.teamA_label">Team A</span>
-                </label>
-                <select id="teamA">
-                  <option value="" disabled selected>Select Team A</option>
-                </select>
-              </div>
-
-              <div class="select-wrap">
-                <label for="teamB">
-                  <span data-copy="controls.teamB_label">Team B</span>
-                </label>
-                <select id="teamB">
-                  <option value="" disabled selected>Select Team B</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          <!-- STEP 2: Select Round -->
-          <div class="matchup-step matchup-step-2">
-            <div class="round-step-label" data-copy="controls.step2_label">
-              STEP 2: Select Round
-            </div>
-
-            <div class="round-control-row">
-              <!-- ROUND SELECTOR -->
-              <div class="round-selector-wrap">
-                <button id="roundSelectBtn" class="btn ghost round-btn">
-                  Select Round
-                </button>
-
-                <div id="roundDropdown" class="round-dropdown hidden">
-                  <div class="round-option" data-round="R64"   data-copy="rounds.R64">Round of 64</div>
-                  <div class="round-option" data-round="R32"   data-copy="rounds.R32">Round of 32</div>
-                  <div class="round-option" data-round="S16"   data-copy="rounds.S16">Sweet Sixteen</div>
-                  <div class="round-option" data-round="E8"    data-copy="rounds.E8">Elite Eight</div>
-                  <div class="round-option" data-round="F4"    data-copy="rounds.F4">Final Four</div>
-                  <div class="round-option" data-round="Champ" data-copy="rounds.Champ">Championship</div>
-                </div>
-              </div>
-
-              <!-- SANDBOX TOGGLE -->
-              <label class="sandbox-toggle enhanced-sandbox">
-                <input type="checkbox" id="sandboxModeToggle" />
-                <span>Sandbox mode (ignore round constraints)</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- STEP 3: Run the matchup -->
-          <div class="matchup-step matchup-step-3">
-            <div class="round-step-label" data-copy="controls.step3_label">
-              STEP 3: Run the Matchup
-            </div>
-
-            <!-- JSON-driven instructions -->
-            <p id="roundHelp" class="helper-text" data-copy="controls.round_help">
-              To run a matchup: 1) Load the tournament data. 2) Select Team A and Team B.
-              3) Choose a valid round from the dropdown. 4) Turn on Sandbox Mode only if you
-              want to ignore bracket round constraints. 5) Click Compare Matchup to see the
-              full breakdown.
-            </p>
-
-            <div class="matchup-actions-row">
-              <button id="compareBtn" class="btn primary compare-btn-disabled" disabled>
-                <span data-copy="controls.compare_btn">Compare Matchup</span>
-              </button>
-
-              <button id="toggleDebugBtn" class="btn subtle">
-                <span data-copy="controls.debug_btn">Toggle Debug View</span>
-              </button>
-            </div>
-          </div>
-
-        </div> <!-- end .matchup-steps -->
-      </div> <!-- end .card.controls-card (Select Matchup) -->
-</section> <!-- end .top-bar -->
-
-<!-- ===== PRE-MATCHUP HUB FOR 3.4 ===== --> 
-
-<section id="preMatchupHub" class="card pre-matchup-hub">
-  <div class="pre-hub-inner">   
-  
-  <!-- ===== Hub Title & Status ===== --> 
-  <div class="pre-hub-title" data-copy="prematch.progress.title">Start a matchup</div>
-  <div class="pre-hub-sub" data-copy="prematch.progress.subtitle"></div>
-
-    <!-- ===== Analyst Briefing ===== -->
-    <div class="pre-briefing-body">
-      <p class="pre-briefing-line" data-copy="prematch.progress.briefing_p1"></p>
-      <p class="pre-briefing-line" data-copy="prematch.progress.briefing_p2"></p>
-      <p class="pre-briefing-line" data-copy="prematch.progress.briefing_p3"></p>
+      <!-- QUICK EDIT SLOT: Team A select gets moved here -->
+      <div id="matchupQuickA" class="matchup-quick-slot" aria-hidden="true"></div>
     </div>
 
-    <!-- ===== Step Readiness ===== -->
-    <div class="pre-hub-steps">
-     <div class="pre-step" id="preStep1">
-      <div class="pre-step-num">1</div>
-      <div class="pre-step-text" id="preStepText1" data-copy="prematch.progress.step1"></div>
-      <div class="pre-step-status" id="preStepStatus1"></div>
-     </div>
+    <!-- CENTER: VS / ROUND / ACTIONS -->
+    <div class="matchup-bar-center">
+      <div class="matchup-bar-vs">vs</div>
 
-     <div class="pre-step" id="preStep2">
-      <div class="pre-step-num">2</div>
-      <div class="pre-step-text" id="preStepText2" data-copy="prematch.progress.step2"></div>
-      <div class="pre-step-status" id="preStepStatus2"></div>
-     </div>
+      <span id="matchupRoundPill" class="summary-round-pill matchup-bar-round">
+        Round of 64
+      </span>
 
-     <div class="pre-step" id="preStep3">
-      <div class="pre-step-num">3</div>
-      <div class="pre-step-text" id="preStepText3" data-copy="prematch.progress.step3"></div>
-      <div class="pre-step-status" id="preStepStatus3"></div>
-     </div>
-   </div>
+      <button id="editMatchupBtn" class="matchup-bar-edit" type="button">
+        Edit matchup ▾
+      </button>
 
-   <!-- ===== Hub Note ===== -->
-   <div class="pre-hub-note" data-copy="prematch.progress.note"></div>
+      <!-- QUICK EDIT SLOT: round selector gets moved here -->
+      <div id="matchupQuickRound" class="matchup-quick-slot matchup-quick-round" aria-hidden="true"></div>
 
-   <!-- ===== Optional Preview Toggle ===== -->
-  <button id="prematchMoreBtn" class="pre-hub-more" type="button" aria-expanded="false" aria-controls="preMatchupPreview" data-copy="prematch.progress.more_show"></button>
-
-<!-- ========== PRE-MATCHUP PREVIEW (VISIBLE ONLY BEFORE MATCHUP) ========== -->
- <section id="preMatchupPreview" class="prematch-preview" aria-hidden="true">
-      <div class="prematch-preview-inner">
-
-        <!-- Left: Ghost Scorecards -->
-        <div class="prematch-preview-ghost">
-          <div class="ghost-grid">
-
-            <div class="ghost-card ghost-card-cind">
-              <div class="ghost-header">
-                <span class="ghost-role">Cinderella</span>
-                <span class="ghost-team">Team A</span>
-              </div>
-              <div class="ghost-tile ghost-tile-wide"></div>
-              <div class="ghost-row">
-                <div class="ghost-tile"></div>
-                <div class="ghost-tile"></div>
-              </div>
-              <div class="ghost-tile ghost-tile-wide"></div>
-              <div class="ghost-tile ghost-tile-wide ghost-total"></div>
-            </div>
-
-            <div class="ghost-card ghost-card-fav">
-              <div class="ghost-header">
-                <span class="ghost-role">Favorite</span>
-                <span class="ghost-team">Team B</span>
-              </div>
-              <div class="ghost-tile ghost-tile-wide"></div>
-              <div class="ghost-row">
-                <div class="ghost-tile"></div>
-                <div class="ghost-tile"></div>
-              </div>
-              <div class="ghost-tile ghost-tile-wide"></div>
-              <div class="ghost-tile ghost-tile-wide ghost-total"></div>
-            </div>
-
-          </div>
-
-          <div class="prematch-preview-caption" data-copy="prematch.progress.preview_caption"></div>
-        </div>
-
-        <!-- Right: Explainer -->
-        <aside class="prematch-preview-explainer">
-          <h3 class="prematch-preview-title" data-copy="prematch.progress.preview_title"></h3>
-          <p class="prematch-preview-text" data-copy="prematch.progress.preview_text"></p>
-          <ul class="prematch-preview-bullets">
-            <li data-copy="prematch.progress.preview_b1"></li>
-            <li data-copy="prematch.progress.preview_b2"></li>
-            <li data-copy="prematch.progress.preview_b3"></li>
-          </ul>
-        </aside>
-
+      <!-- QUICK EDIT ACTIONS -->
+      <div class="matchup-quick-actions" aria-hidden="true">
+        <button id="matchupQuickRun" class="btn primary matchup-quick-run" type="button">Run</button>
+        <button id="matchupQuickCancel" class="btn ghost matchup-quick-cancel" type="button">Cancel</button>
       </div>
-    </section>
+    </div>
+
+    <!-- RIGHT: FAVORITE -->
+    <div class="matchup-bar-right">
+      <span class="matchup-bar-label">Favorite</span>
+
+      <div class="matchup-bar-team">
+        <span id="matchupFavoriteName">Team B</span>
+        <span id="matchupFavoriteSeed" class="matchup-bar-seed"></span>
+      </div>
+
+      <!-- QUICK EDIT SLOT: Team B select gets moved here -->
+      <div id="matchupQuickB" class="matchup-quick-slot" aria-hidden="true"></div>
+    </div>
 
   </div>
 </section>
