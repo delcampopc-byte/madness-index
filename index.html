@@ -699,50 +699,54 @@
 </main>
 
 <!-- ================ INTERACTION METRICS TABLE ================ -->
-<section id="interactionsSection" class="card interactions-card">
-  <div class="legend-header">
-    <h3 data-copy="interactions.title">4. Interaction Metrics</h3>
+<section id="interactionsSection" class="card interactions-card"><div class="legend-header legend-header--interactions">
+  <div class="interactions-head interactions-head--left">
+    <div class="int-console-pill interactions-header-pill">INTERACTION METRICS</div>
   </div>
 
-  <p class="summary-help" data-copy="interactions.help"></p>
+  <div class="interactions-head interactions-head--right">
+    <div class="int-console-pill interactions-header-pill">INTERACTION CONSOLE</div>
+  </div>
+</div>
 
   <div class="interactions-grid">
-    <!-- LEFT: TABLE -->
-    <div class="interactions-left">
-      <table id="interactionsTable" class="interaction-table">
-        <thead>
-          <tr>
-            <th>Interaction</th>
-            <th class="col-domain">Domain</th>
-            <th>Edge</th>
-            <th class="col-intensity">Intensity</th>
-            <th id="adjAHeader">Adj to Team A</th>
-            <th id="adjBHeader">Adj to Team B</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <!-- LEFT: METRICS TILE -->
+    <div class="interactions-left interactions-left-tile">
 
-      <!-- TOTAL BAR (big, matchup-edge style) -->
-      <div id="interactionTotalsBar" class="interaction-totals-bar"></div>
-    </div>
+  <div class="interaction-table-wrap">
+    <table id="interactionsTable" class="interaction-table">
+      <thead>
+        <tr>
+          <th>Interaction</th>
+          <th>Edge</th>
+          <th class="col-intensity">Intensity</th>
+          <th id="adjAHeader">Adj to Team A</th>
+          <th id="adjBHeader">Adj to Team B</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-    <!-- RIGHT: EXPLAINER TILE -->
-    <div class="interactions-right interactions-explain-tile">
-      <h4 data-copy="interactions.howto_title"></h4>
-      <ul id="interactionsHowToList"></ul>
-      <div class="explain-note" data-copy="interactions.howto_note"></div>
+  <div id="interactionTotalsBar" class="interaction-totals-bar"></div>
+</div>
+
+<!-- RIGHT: CONSOLE TILE -->
+<div class="interactions-right interactions-console-tile">
+  <div class="int-console-body" id="interactionConsoleBody">
+    <div class="int-console-card is-placeholder">
+      <div class="int-console-label">Ready</div>
+      <div class="int-console-text">Run a matchup to populate these interaction descriptions.</div>
     </div>
   </div>
+  </div>
+</div>
 </section>
 
 <!-- ================ SCORECARDS & MATCHUP SUMMARY ================ -->
 <section id="summarySection" class="card summary-card">
   <div class="summary-header">
     <h2 data-copy="summary.title">5. Scorecards & Matchup Summary</h2>
-    <p class="summary-help" data-copy="summary.help">
-      Final Madness Index scores for each team, the MI gap, and the model’s predicted lean.
-    </p>
   </div>
 
   <!-- Clean matchup summary table -->

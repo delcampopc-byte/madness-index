@@ -2796,6 +2796,7 @@ function compareTeams(teamAName, teamBName, roleMode = 'auto') {
   renderProfileMarks(a, "inlineMarksA");
   renderProfileMarks(b, "inlineMarksB");
   renderInteractionsTable(result);
+  renderInteractionsConsole(result);
   renderSummary(result);
   updateMatchupBarFromDOM();
   updateCoreBacksForResult(result);
@@ -2804,7 +2805,6 @@ function compareTeams(teamAName, teamBName, roleMode = 'auto') {
   updateMarksBacksForResult(result);
   updateFormulaBacksForResult(result);
   updateIdentityBacksForResult(result);
-
 
   // New: pull copy.json from the global and feed it into the MI back-of-card builder
   const copy = window.MI_COPY;
@@ -3199,21 +3199,9 @@ function renderInteractionsTable(result) {
     'to':    'Turnover Pressure',
     'glass': 'Glass Tension',
     'resume':'Résumé Pressure',
-    'phys':  'Physicality / Contact Tolerance',
-    'shotq': 'Shot Quality / Discipline',
+    'phys':  'Physicality Tolerance',
+    'shotq': 'Shot Discipline',
     'var':   'Variance Sensitivity',
-  };
-
-  const DOMAIN = {
-    '3pt':   'Shooting',
-    'ft':    'Pressure',
-    'paint': 'Pressure',
-    'to':    'Pressure',
-    'glass': 'Glass',
-    'resume':'Résumé',
-    'phys':  'Physicality',
-    'shotq': 'Shooting',
-    'var':   'Variance',
   };
 
   const intensityLabel = (val) => {
@@ -3263,9 +3251,8 @@ function renderInteractionsTable(result) {
     const rowClass = i % 2 === 0 ? "int-row-even" : "int-row-odd";
 
     tbody.innerHTML += `
-      <tr class="${rowClass}">
+      <tr class="${rowClass}" data-int-key="${key}">
         <td class="int-name">${LABEL[key]}</td>
-        <td class="col-domain">${DOMAIN[key]}</td>
         <td class="int-edge"><span class="int-edge-pill ${pillClass}">${edgeText}</span></td>
         <td class="col-intensity">${intensity}</td>
         <td class="int-adj ${aAdj >= 0 ? 'pos' : 'neg'}">${fmt(aAdj, 3)}</td>
@@ -3296,6 +3283,321 @@ function renderInteractionsTable(result) {
       </div>
     `;
   }
+}
+
+/* ==========================================================================
+   Interaction Console (v3.5) — Wiring + Selection + Sync
+   Depends on:
+   - #interactionConsoleBody (HTML)
+   - #interactionsTable (HTML)
+   - window.MI_COPY.interactions_console (copy.json)
+   ========================================================================== */
+
+const INT_CONSOLE_KEYMAP = {
+  '3pt':   'three_pt_tension',
+  'ft':    'ft_pressure',
+  'paint': 'paint_tension',
+  'to':    'turnover_pressure',
+  'glass': 'glass_tension',
+  'resume':'resume_pressure',
+  'phys':  'physicality_tolerance',
+  'shotq': 'shot_discipline',
+  'var':   'variance_sensitivity'
+};
+
+function miHash32(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function miStrength(absAdj) {
+  if (absAdj >= 0.50) return 'major';
+  if (absAdj >= 0.25) return 'moderate';
+  if (absAdj >  0.00) return 'thin';
+  return 'none';
+}
+
+function miCaseFor(adj, eps = 1e-9) {
+  if (Math.abs(adj) <= eps) return 'even';
+  return adj > 0 ? 'a_adv' : 'b_adv';
+}
+
+function miFillTeamTokens(text, aName, bName, tokenA = "{{TEAM_A}}", tokenB = "{{TEAM_B}}") {
+  if (!text) return "";
+  return String(text)
+    .split(tokenA).join(aName)
+    .split(tokenB).join(bName);
+}
+
+function miPickPool({ seedBase, rerunIndex, hasAlt }) {
+  // stable flip only on rerun; if no alt, always primary
+  if (!hasAlt) return 'primary';
+  const h = miHash32(seedBase);
+  const preferAlt = ((h + (rerunIndex || 0)) % 2) === 1;
+  return preferAlt ? 'alt' : 'primary';
+}
+
+function miPickLine(lines, seedBase, rerunIndex, salt) {
+  if (!Array.isArray(lines) || lines.length === 0) return "";
+  const h = miHash32(seedBase + "::" + salt);
+  const idx = (h + (rerunIndex || 0)) % lines.length;
+  return lines[idx];
+}
+
+function miPairsToRender({ card, isTopDriver, defaults }) {
+  let pairs = Number(defaults?.pair_count_default ?? 1);
+
+  if (isTopDriver) {
+    pairs = Math.max(pairs, Number(defaults?.pair_count_if_top_driver ?? 2));
+  }
+
+  const threshold = String(defaults?.pair_count_if_strength_at_least ?? 'moderate').toLowerCase();
+  const s = miStrength(Math.abs(card.adj));
+
+  const meetsThreshold =
+    threshold === 'minor' ||
+    (threshold === 'moderate' && (s === 'moderate' || s === 'major')) ||
+    (threshold === 'major' && s === 'major');
+
+  if (meetsThreshold) pairs = Math.max(pairs, 2);
+
+  // Even interactions: keep them single-line unless they’re also a true driver
+  if (card.case === 'even' && !(isTopDriver && s !== 'none')) pairs = 1;
+
+  return Math.max(1, Math.min(2, pairs));
+}
+
+/**
+ * Interaction Console (right tile)
+ * Renders ALL 9 interaction channels in a fixed order.
+ * - No "TOP" chips.
+ * - Safe fallbacks if a channel is missing narrative text (prevents blank cards like PHYS).
+ */
+function renderInteractionsConsole(result) {
+  const host = document.getElementById('interactionConsoleBody');
+  if (!host) return;
+
+  // Your interactions object is keyed directly (threept, ft, paint, tov, glass, resume, phys, shotq, var)
+  const breakdown = result?.interactions?.breakdown || null;
+
+    // Pre-matchup / missing data
+    if (!breakdown) {
+    host.innerHTML = `
+      <div class="int-console-card is-placeholder">
+        <div class="int-console-label">Ready</div>
+        <div class="int-console-text">
+          Run a matchup to populate these interaction descriptions.
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // Map JS interaction keys -> MI_COPY interactions_console channel keys
+  const KEYMAP = {
+    threept: "three_pt_tension",
+    ft: "ft_pressure",
+    paint: "paint_tension",
+    tov: "turnover_pressure",
+    glass: "glass_tension",
+    resume: "resume_pressure",
+    phys: "physicality_tolerance",
+    shotq: "shot_discipline",
+    var: "variance_sensitivity",
+  };
+
+  // Console keys -> breakdown keys (must match interactions table)
+  const BREAKDOWN_KEY = {
+    threept: "3pt",
+    ft: "ft",
+    paint: "paint",
+    tov: "to",
+    glass: "glass",
+    resume: "resume",
+    phys: "phys",
+    shotq: "shotq",
+    var: "var",
+  };
+
+  const ORDER = [
+    { key: "threept", fallbackLabel: "3PT Tension" },
+    { key: "ft", fallbackLabel: "FT Pressure" },
+    { key: "paint", fallbackLabel: "Paint Tension" },
+    { key: "tov", fallbackLabel: "Turnover Pressure" },
+    { key: "glass", fallbackLabel: "Glass Tension" },
+    { key: "resume", fallbackLabel: "Résumé Pressure" },
+    { key: "phys", fallbackLabel: "Physicality Tolerance" },
+    { key: "shotq", fallbackLabel: "Shot Discipline" },
+    { key: "var", fallbackLabel: "Variance Sensitivity" },
+  ];
+
+  const copyRoot = window.MI_COPY && window.MI_COPY.interactions_console ? window.MI_COPY.interactions_console : null;
+
+  // helper: random pick from array
+  const pick = (arr) => (Array.isArray(arr) && arr.length ? arr[Math.floor(Math.random() * arr.length)] : "");
+
+  host.innerHTML = "";
+
+  ORDER.forEach(({ key, fallbackLabel }) => {
+    // Always render the card, even if a channel is missing (prevents “only 5 show up” confusion)
+    const longKey = KEYMAP[key];
+    const copyCh = copyRoot && copyRoot.channels ? copyRoot.channels[longKey] : null;
+
+    // Title: prefer JSON label, else fallback
+    const title = (copyCh && copyCh.label) ? copyCh.label : fallbackLabel;
+
+    // Pull the interaction adjustment from the SAME source as the table
+    const bKey = BREAKDOWN_KEY[key];
+    const raw = breakdown?.[bKey];
+
+    // Determine case from adjustment (fallback to even)
+    let aAdj = 0;
+    if (typeof raw === "number") aAdj = raw;
+    else if (raw && typeof raw === "object") aAdj = Number(raw.aAdj ?? 0);
+
+    const resolvedCaseKey = miCaseFor(aAdj);
+
+    // Pull sentence pools from JSON (supports both schemas)
+    const caseObj = copyCh?.cases?.[resolvedCaseKey] || null;
+
+    const pools =
+      caseObj?.sentence_sets?.primary ||
+      caseObj?.primary ||
+      null;
+
+    const aName = result?.a?.name || result?.teamA?.name || result?.a?.team || "Team A";
+    const bName = result?.b?.name || result?.teamB?.name || result?.b?.team || "Team B";
+
+    const line1 = pools ? miFillTeamTokens(pick(pools.s1), aName, bName) : "";
+    const line2 = pools ? miFillTeamTokens(pick(pools.s2), aName, bName) : "";
+
+    // Always render as ONE paragraph per card
+    const text = [line1, line2].filter(Boolean).join(" ");
+
+    const card = document.createElement("div");
+    card.className = "int-console-card";
+    card.dataset.intKey = BREAKDOWN_KEY[key];
+    const labelEl = document.createElement("div");
+    labelEl.className = "int-console-label";
+
+    /* Title */
+    const titleSpan = document.createElement("span");
+    titleSpan.textContent = title.toUpperCase();
+
+    /* Edge pill — SAME classes as table */
+    const edge =
+      aAdj > 0 ? "A" :
+      aAdj < 0 ? "B" :
+      "EVEN";
+
+    const pill = document.createElement("span");
+    pill.classList.add("int-edge-pill");
+
+    if (edge === "A") {
+      pill.classList.add("int-edge-A");
+      pill.textContent = `FAVORS ${aName}`;
+    } else if (edge === "B") {
+      pill.classList.add("int-edge-B");
+      pill.textContent = `FAVORS ${bName}`;
+    } else {
+      pill.classList.add("int-edge-even"); // if your CSS uses this
+      pill.textContent = "EVEN";
+    }
+
+    labelEl.appendChild(titleSpan);
+    labelEl.appendChild(pill);
+
+    const textEl = document.createElement("div");
+    textEl.className = "int-console-text";
+    textEl.textContent = text || "—";
+
+    card.appendChild(labelEl);
+    card.appendChild(textEl);
+    host.appendChild(card);
+  });
+}
+
+/* --------------------------
+   Table ↔ Console spotlight sync
+   -------------------------- */
+
+function clearInteractionConsoleSpotlight() {
+  const body = document.getElementById('interactionConsoleBody');
+  if (!body) return;
+
+  body.querySelectorAll('.int-console-card.is-active').forEach(el => el.classList.remove('is-active'));
+
+  const table = document.getElementById('interactionsTable');
+  if (table) {
+    table.querySelectorAll('tbody tr.is-console-active').forEach(tr => tr.classList.remove('is-console-active'));
+  }
+}
+
+function spotlightInteractionConsole(key) {
+  if (!key) return;
+
+  const body = document.getElementById('interactionConsoleBody');
+  if (!body) return;
+
+  clearInteractionConsoleSpotlight();
+
+  const card = body.querySelector(`.int-console-card[data-int-key="${key}"]`);
+  if (card) card.classList.add('is-active');
+
+  const table = document.getElementById('interactionsTable');
+  if (table) {
+    const tr = table.querySelector(`tbody tr[data-int-key="${key}"]`);
+    if (tr) tr.classList.add('is-console-active');
+  }
+}
+
+function initInteractionConsoleSync() {
+  const table = document.getElementById('interactionsTable');
+  if (!table) return;
+
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
+
+  // hover (desktop)
+  tbody.addEventListener('mouseover', (e) => {
+    const tr = e.target.closest('tr[data-int-key]');
+    if (!tr) return;
+    spotlightInteractionConsole(tr.dataset.intKey);
+  });
+
+  tbody.addEventListener('mouseout', (e) => {
+    // If leaving the tbody entirely, clear
+    const related = e.relatedTarget;
+    if (related && tbody.contains(related)) return;
+    clearInteractionConsoleSpotlight();
+  });
+
+  // tap/click (mobile-safe)
+  tbody.addEventListener('click', (e) => {
+    const tr = e.target.closest('tr[data-int-key]');
+    if (!tr) return;
+
+    const key = tr.dataset.intKey;
+    const body = document.getElementById('interactionConsoleBody');
+    const active = body?.querySelector(`.int-console-card.is-active[data-int-key="${key}"]`);
+
+    if (active) {
+      clearInteractionConsoleSpotlight();
+      return;
+    }
+
+    spotlightInteractionConsole(key);
+
+    // auto-clear after a moment so it doesn’t “stick” forever on mobile
+    window.clearTimeout(window.__MI_INT_CONSOLE_TAP_TIMER);
+    window.__MI_INT_CONSOLE_TAP_TIMER = window.setTimeout(() => {
+      clearInteractionConsoleSpotlight();
+    }, 1800);
+  });
 }
 
 // ========== RENDER PROFILE MARK BADGES ==========
@@ -4784,6 +5086,7 @@ if (roundBtn && roundDropdown) {
       updatePreMatchupHubProgress();
       refreshCompareButtonState();
     });
+    initInteractionConsoleSync();
   }
 }
 

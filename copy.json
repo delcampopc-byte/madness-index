@@ -715,11 +715,614 @@
       "balanced": "The score reflects a fairly even blend of core profile, résumé context, and matchup interaction leverage."
     }
   },
+  "interactions_console": {
+  "meta": {
+    "team_tokens": {
+      "a": "{{TEAM_A}}",
+      "b": "{{TEAM_B}}"
+    },
+    "defaults": {
+      "pair_count_default": 1,
+      "pair_count_if_top_driver": 2,
+      "pair_count_if_strength_at_least": "moderate",
+      "matchup_anchor_required": true,
+      "ambiguity_required": true
+    }
+  },
+
+  "channels": {
+    "three_pt_tension": {
+      "label": "3PT Tension",
+      "pov": "constraint",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, {{TEAM_A}}’s closeout discipline can make it harder for {{TEAM_B}} to find clean perimeter looks and sustain shooting rhythm.",
+              "When {{TEAM_B}}’s perimeter approach meets {{TEAM_A}}’s contest profile, outside attempts may become more crowded and less rhythmic."
+            ],
+            "s2": [
+              "That shift can push {{TEAM_B}} toward lower-comfort attempts, reducing the payoff of its preferred offensive identity.",
+              "Over possessions, shot selection may drift away from {{TEAM_B}}’s most efficient perimeter outcomes."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, {{TEAM_A}} can narrow the margin for error on the perimeter, making rhythm threes harder for {{TEAM_B}} to access consistently.",
+              "When {{TEAM_A}}’s perimeter coverage meets {{TEAM_B}}’s shooting profile, outside looks can arrive with less balance and timing."
+            ],
+            "s2": [
+              "That pressure can push {{TEAM_B}} toward more improvised perimeter attempts as {{TEAM_A}} keeps recovery angles intact.",
+              "Across possessions, {{TEAM_A}} may subtly influence how confidently {{TEAM_B}} steps into catch-and-shoot chances."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, {{TEAM_A}}’s closeout discipline can make it harder for {{TEAM_B}} to find clean perimeter looks and sustain shooting rhythm.",
+              "When {{TEAM_B}}’s perimeter approach meets {{TEAM_A}}’s contest profile, outside attempts may become more crowded and less rhythmic."
+            ],
+            "s2": [
+              "That shift can push {{TEAM_B}} toward lower-comfort attempts, reducing the payoff of its preferred offensive identity.",
+              "Over possessions, shot selection may drift away from {{TEAM_B}}’s most efficient perimeter outcomes."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, {{TEAM_A}} can narrow the margin for error on the perimeter, making rhythm threes harder for {{TEAM_B}} to access consistently.",
+              "When {{TEAM_A}}’s perimeter coverage meets {{TEAM_B}}’s shooting profile, outside looks can arrive with less balance and timing."
+            ],
+            "s2": [
+              "That pressure can push {{TEAM_B}} toward more improvised perimeter attempts as {{TEAM_A}} keeps recovery angles intact.",
+              "Across possessions, {{TEAM_A}} may subtly influence how confidently {{TEAM_B}} steps into catch-and-shoot chances."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} appear closely matched in how perimeter looks are created and contested, making arc outcomes more execution-dependent than profile-driven.",
+      "When {{TEAM_A}}’s perimeter approach meets {{TEAM_B}}’s closeout structure (and vice versa), neither side projects a built-in three-point separation in this specific pairing."
+            ], 
+            "s2": ["That balance can keep perimeter scoring from tilting structurally toward either {{TEAM_A}} or {{TEAM_B}}, with short-run rhythm potentially carrying extra weight in this head-to-head context.",
+      "If the arc becomes decisive here, it may reflect timing and shot selection within this pairing rather than a consistent mismatch between {{TEAM_A}} and {{TEAM_B}}."
+            ]
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may neutralize each other’s perimeter identity enough that clean looks come and go without a sustained advantage from either side.",
+      "Against each other’s specific profiles, {{TEAM_A}} and {{TEAM_B}} can trade perimeter pressure in ways that keep three-point leverage from settling into a clear direction."
+                  ], 
+            "s2": ["That dynamic can shift emphasis toward possession quality and secondary creation for both {{TEAM_A}} and {{TEAM_B}} in this matchup.",
+      "If one side gains perimeter control here, it may come from in-game adjustments rather than an inherent edge for {{TEAM_A}} or {{TEAM_B}} in this interaction."
+            ]
+        }
+      }
+    }
+  },
+    "ft_pressure": {
+      "label": "FT Pressure",
+      "pov": "imposition",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "Against {{TEAM_B}}’s defensive tendencies, {{TEAM_A}} may be positioned to convert pressure into frequent contact and sustained foul stress.",
+              "In this head-to-head context, {{TEAM_A}}’s ability to draw contact can put {{TEAM_B}} in more defensive decision pressure than usual."
+            ],
+            "s2": [
+              "As possessions tighten, that dynamic can create scoring equity for {{TEAM_A}} even when clean looks are limited.",
+              "If contact accumulates, {{TEAM_B}} may be forced into more conservative defense, changing how {{TEAM_A}} can attack."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can generate enough downhill contact to test how {{TEAM_B}} manages fouls across defensive possessions.",
+              "When {{TEAM_A}}’s attacking lanes meet {{TEAM_B}}’s defensive habits, free-throw pressure can quietly accumulate."
+            ],
+            "s2": [
+              "That contact profile can keep {{TEAM_A}} productive even if shot efficiency fluctuates against {{TEAM_B}}.",
+              "If whistles stack up, {{TEAM_B}} may adjust its aggression level, opening different driving windows for {{TEAM_A}}."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "Against {{TEAM_B}}’s defensive tendencies, {{TEAM_A}} may be positioned to convert pressure into frequent contact and sustained foul stress.",
+              "In this head-to-head context, {{TEAM_A}}’s ability to draw contact can put {{TEAM_B}} in more defensive decision pressure than usual."
+            ],
+            "s2": [
+              "As possessions tighten, that dynamic can create scoring equity for {{TEAM_A}} even when clean looks are limited.",
+              "If contact accumulates, {{TEAM_B}} may be forced into more conservative defense, changing how {{TEAM_A}} can attack."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can generate enough downhill contact to test how {{TEAM_B}} manages fouls across defensive possessions.",
+              "When {{TEAM_A}}’s attacking lanes meet {{TEAM_B}}’s defensive habits, free-throw pressure can quietly accumulate."
+            ],
+            "s2": [
+              "That contact profile can keep {{TEAM_A}} productive even if shot efficiency fluctuates against {{TEAM_B}}.",
+              "If whistles stack up, {{TEAM_B}} may adjust its aggression level, opening different driving windows for {{TEAM_A}}."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+             "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} project similar leverage in how contact is created and absorbed, making free-throw impact more situational within this specific pairing.",
+      "When {{TEAM_A}}’s pressure meets {{TEAM_B}}’s foul discipline (and vice versa), neither side appears positioned to generate a consistent line-based advantage in this head-to-head context."], 
+             "s2": ["That balance can keep scoring equity tied more closely to shot quality and possession execution for both {{TEAM_A}} and {{TEAM_B}} in this matchup.",
+      "If foul pressure becomes decisive here, it may reflect game texture and tactical choices rather than a built-in contact mismatch between {{TEAM_A}} and {{TEAM_B}}."
+          ] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may trade stretches of contact advantage without either side sustaining foul-driven control across the game.",
+      "Against each other’s tendencies, {{TEAM_A}} and {{TEAM_B}} can keep whistle leverage from becoming a stable scoring outlet for either team in this matchup."], "s2": [] }
+        }
+      }
+    },
+
+    "paint_tension": {
+      "label": "Paint Tension",
+      "pov": "constraint",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can make interior access less available, removing the easy finishes {{TEAM_B}} often depends on when actions break down.",
+              "When {{TEAM_B}}’s rim-oriented pressure runs into {{TEAM_A}}’s interior resistance, paint efficiency may be harder to sustain."
+            ],
+            "s2": [
+              "As rim access tightens, {{TEAM_B}} may be pushed outward into attempts that fall outside its preferred scoring profile.",
+              "That constraint can narrow {{TEAM_B}}’s bailout options and increase reliance on tougher shot outcomes."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, {{TEAM_A}}’s interior presence can compress space, making paint touches more contested for {{TEAM_B}}.",
+              "When {{TEAM_B}} looks to establish inside scoring, {{TEAM_A}} can make those entries arrive under heavier resistance."
+            ],
+            "s2": [
+              "As interior paths tighten, {{TEAM_B}} may be redirected toward secondary options rather than direct rim pressure against {{TEAM_A}}.",
+              "That constraint can change how {{TEAM_B}} sequences its offense when early paint reads aren’t available."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can make interior access less available, removing the easy finishes {{TEAM_B}} often depends on when actions break down.",
+              "When {{TEAM_B}}’s rim-oriented pressure runs into {{TEAM_A}}’s interior resistance, paint efficiency may be harder to sustain."
+            ],
+            "s2": [
+              "As rim access tightens, {{TEAM_B}} may be pushed outward into attempts that fall outside its preferred scoring profile.",
+              "That constraint can narrow {{TEAM_B}}’s bailout options and increase reliance on tougher shot outcomes."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, {{TEAM_A}}’s interior presence can compress space, making paint touches more contested for {{TEAM_B}}.",
+              "When {{TEAM_B}} looks to establish inside scoring, {{TEAM_A}} can make those entries arrive under heavier resistance."
+            ],
+            "s2": [
+              "As interior paths tighten, {{TEAM_B}} may be redirected toward secondary options rather than direct rim pressure against {{TEAM_A}}.",
+              "That constraint can change how {{TEAM_B}} sequences its offense when early paint reads aren’t available."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} look relatively matched in rim access and interior resistance, making paint outcomes more dependent on finishing and timing within this specific pairing.",
+      "When {{TEAM_A}}’s interior approach meets {{TEAM_B}}’s rim deterrence (and vice versa), neither side projects a clear paint-based separation in this head-to-head context."], 
+            "s2": ["That balance can keep shot geography from tilting heavily toward either {{TEAM_A}} or {{TEAM_B}}, elevating the importance of secondary creation paths in this matchup.",
+      "If interior scoring separates here, it may reflect sequencing and conversion rather than a consistent profile mismatch between {{TEAM_A}} and {{TEAM_B}} in this interaction."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may contest the rim at similar levels, keeping paint touches valuable but not reliably advantaged for either side in this matchup.",
+      "Against each other’s interior profiles, {{TEAM_A}} and {{TEAM_B}} can trade stretches of rim success without a stable paint edge emerging in this interaction."], 
+            "s2": ["That dynamic can push both {{TEAM_A}} and {{TEAM_B}} to win possessions through shot selection and movement rather than interior dominance in this matchup.",
+      "If one team gains paint control here, it may come from tactical adjustments rather than an inherent mismatch for {{TEAM_A}} or {{TEAM_B}} in this pairing."] 
+          }
+        }
+      }
+    },
+
+    "turnover_pressure": {
+      "label": "Turnover Pressure",
+      "pov": "imposition",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "When {{TEAM_A}}’s disruption profile meets {{TEAM_B}}’s ball-handling tendencies, early pressure may prevent {{TEAM_B}} from settling into its preferred structure.",
+              "In this pairing, {{TEAM_A}} can create enough defensive activity to speed {{TEAM_B}} into earlier decisions than it wants."
+            ],
+            "s2": [
+              "That can shift possession value toward reaction and short-clock execution for {{TEAM_B}}, rather than extended half-court comfort against {{TEAM_A}}.",
+              "If empty possessions show up, {{TEAM_A}} can find scoring chances without needing perfect shot-making against {{TEAM_B}}."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can apply enough ball pressure to disrupt how comfortably {{TEAM_B}} initiates offense.",
+              "When {{TEAM_A}}’s activity level meets {{TEAM_B}}’s handling profile, possessions can feel rushed earlier than planned."
+            ],
+            "s2": [
+              "That tempo stress can shift {{TEAM_B}} into quicker decisions, reducing time to fully organize against {{TEAM_A}}.",
+              "If mistakes surface, {{TEAM_A}} can benefit from shortened possessions without changing its own shot selection."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "When {{TEAM_A}}’s disruption profile meets {{TEAM_B}}’s ball-handling tendencies, early pressure may prevent {{TEAM_B}} from settling into its preferred structure.",
+              "In this pairing, {{TEAM_A}} can create enough defensive activity to speed {{TEAM_B}} into earlier decisions than it wants."
+            ],
+            "s2": [
+              "That can shift possession value toward reaction and short-clock execution for {{TEAM_B}}, rather than extended half-court comfort against {{TEAM_A}}.",
+              "If empty possessions show up, {{TEAM_A}} can find scoring chances without needing perfect shot-making against {{TEAM_B}}."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can apply enough ball pressure to disrupt how comfortably {{TEAM_B}} initiates offense.",
+              "When {{TEAM_A}}’s activity level meets {{TEAM_B}}’s handling profile, possessions can feel rushed earlier than planned."
+            ],
+            "s2": [
+              "That tempo stress can shift {{TEAM_B}} into quicker decisions, reducing time to fully organize against {{TEAM_A}}.",
+              "If mistakes surface, {{TEAM_A}} can benefit from shortened possessions without changing its own shot selection."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} appear closely matched in disruption and ball security, making the possession battle more sequence-dependent within this specific pairing.",
+      "When {{TEAM_A}}’s pressure meets {{TEAM_B}}’s handling profile (and vice versa), neither side projects a consistent turnover-driven separation in this head-to-head context."], 
+            "s2": ["That balance can keep the game from being decided by giveaways alone, placing more weight on shot-making and rebounding outcomes for both {{TEAM_A}} and {{TEAM_B}} here.",
+      "If the turnover margin swings in this matchup, it may reflect moment-to-moment execution under stress rather than a stable mismatch between {{TEAM_A}} and {{TEAM_B}} in this interaction."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may trade stretches of ball pressure without either side sustaining a clear possession-control advantage through turnovers in this matchup.",
+      "Against each other’s profiles, {{TEAM_A}} and {{TEAM_B}} can keep disruption from becoming a predictable source of scoring chances in this specific interaction."], 
+            "s2": ["That dynamic can shift emphasis toward half-court quality for both {{TEAM_A}} and {{TEAM_B}} in this matchup.",
+      "If mistakes cluster for one side here, it may come from pace spikes and situational decisions rather than a built-in edge for {{TEAM_A}} or {{TEAM_B}}."] 
+          }
+        }
+      }
+    },
+
+    "glass_tension": {
+      "label": "Glass Tension",
+      "pov": "control",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, the glass can become a control point, where {{TEAM_A}}’s rebounding presence can limit {{TEAM_B}}’s extra possessions and runouts.",
+              "When {{TEAM_A}}’s box-out discipline meets {{TEAM_B}}’s crash tendencies, the second-chance economy can swing on a few bounces and clean-outs."
+            ],
+            "s2": [
+              "If the rebound battle tilts, {{TEAM_B}} may see fewer reset opportunities, while {{TEAM_A}} can extend possessions without changing its shot mix.",
+              "That possession texture can amplify small stretches of shot-making, since {{TEAM_A}} and {{TEAM_B}} aren’t getting the same number of clean repeats."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, control of the boards can tilt possession flow as {{TEAM_A}} challenges {{TEAM_B}}’s ability to extend trips.",
+              "When both teams contest the glass, {{TEAM_A}}’s positioning can limit how often {{TEAM_B}} earns second looks."
+            ],
+            "s2": [
+              "That rebounding texture can reduce reset chances for {{TEAM_B}}, placing more weight on first-shot efficiency.",
+              "Small rebounding swings may carry extra weight as {{TEAM_A}} and {{TEAM_B}} trade possessions without easy repeats."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, the glass can become a control point, where {{TEAM_A}}’s rebounding presence can limit {{TEAM_B}}’s extra possessions and runouts.",
+              "When {{TEAM_A}}’s box-out discipline meets {{TEAM_B}}’s crash tendencies, the second-chance economy can swing on a few bounces and clean-outs."
+            ],
+            "s2": [
+              "If the rebound battle tilts, {{TEAM_B}} may see fewer reset opportunities, while {{TEAM_A}} can extend possessions without changing its shot mix.",
+              "That possession texture can amplify small stretches of shot-making, since {{TEAM_A}} and {{TEAM_B}} aren’t getting the same number of clean repeats."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, control of the boards can tilt possession flow as {{TEAM_A}} challenges {{TEAM_B}}’s ability to extend trips.",
+              "When both teams contest the glass, {{TEAM_A}}’s positioning can limit how often {{TEAM_B}} earns second looks."
+            ],
+            "s2": [
+              "That rebounding texture can reduce reset chances for {{TEAM_B}}, placing more weight on first-shot efficiency.",
+              "Small rebounding swings may carry extra weight as {{TEAM_A}} and {{TEAM_B}} trade possessions without easy repeats."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} appear closely matched on the glass, making second-chance outcomes more bounce- and positioning-dependent within this specific pairing.",
+      "When {{TEAM_A}}’s crash tendencies meet {{TEAM_B}}’s box-out structure (and vice versa), neither side projects a consistent rebounding-based separation in this head-to-head context."], 
+            "s2": ["That balance can keep possession volume relatively even for {{TEAM_A}} and {{TEAM_B}}, placing more weight on first-shot efficiency in this matchup.",
+      "If the board battle tilts here, it may reflect lineup moments and effort swings rather than a stable mismatch between {{TEAM_A}} and {{TEAM_B}} in this interaction."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may trade rebounding runs without either side consistently extending possessions or shutting them down in this matchup.",
+      "Against each other’s rebounding profiles, {{TEAM_A}} and {{TEAM_B}} can keep the second-chance economy from settling into a clear direction in this specific interaction."], 
+            "s2": ["That dynamic can make small rebounding sequences feel amplified, since {{TEAM_A}} and {{TEAM_B}} aren’t projecting a built-in possession edge here.",
+      "If one team earns extra looks in this matchup, it may come from tactical emphasis rather than an inherent glass advantage for {{TEAM_A}} or {{TEAM_B}}."] 
+          }
+        }
+      }
+    },
+
+    "resume_pressure": {
+      "label": "Résumé Pressure",
+      "pov": "control",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this pairing, the game can carry a résumé-weighted texture where {{TEAM_A}}’s steadiness can compress {{TEAM_B}}’s margin for sloppy stretches.",
+              "When {{TEAM_A}}’s proven baseline meets {{TEAM_B}}’s profile, early runs can feel more consequential, shaping how each side manages tempo and risk."
+            ],
+            "s2": [
+              "If momentum flips, {{TEAM_B}} may feel compelled to chase cleaner answers faster, while {{TEAM_A}} can stay patient and protect possession value.",
+              "That environment can make late-clock choices sharper, since {{TEAM_A}} and {{TEAM_B}} are reacting to the same run-risk in different ways."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, the broader game context can amplify stretches where {{TEAM_A}} plays clean, pressuring {{TEAM_B}} to respond efficiently.",
+              "When {{TEAM_A}}’s steadier baseline meets {{TEAM_B}}’s profile, momentum pockets can shape decision-making pace."
+            ],
+            "s2": [
+              "That environment can make missed opportunities feel heavier for {{TEAM_B}}, while {{TEAM_A}} stays within its comfort script.",
+              "As runs form, both teams may manage risk differently, subtly changing how possessions unfold."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this pairing, the game can carry a résumé-weighted texture where {{TEAM_A}}’s steadiness can compress {{TEAM_B}}’s margin for sloppy stretches.",
+              "When {{TEAM_A}}’s proven baseline meets {{TEAM_B}}’s profile, early runs can feel more consequential, shaping how each side manages tempo and risk."
+            ],
+            "s2": [
+              "If momentum flips, {{TEAM_B}} may feel compelled to chase cleaner answers faster, while {{TEAM_A}} can stay patient and protect possession value.",
+              "That environment can make late-clock choices sharper, since {{TEAM_A}} and {{TEAM_B}} are reacting to the same run-risk in different ways."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, the broader game context can amplify stretches where {{TEAM_A}} plays clean, pressuring {{TEAM_B}} to respond efficiently.",
+              "When {{TEAM_A}}’s steadier baseline meets {{TEAM_B}}’s profile, momentum pockets can shape decision-making pace."
+            ],
+            "s2": [
+              "That environment can make missed opportunities feel heavier for {{TEAM_B}}, while {{TEAM_A}} stays within its comfort script.",
+              "As runs form, both teams may manage risk differently, subtly changing how possessions unfold."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} project similar résumé-weighted context, making composure and execution more defining than a built-in toughness gap in this specific pairing.",
+      "When {{TEAM_A}}’s baseline meets {{TEAM_B}}’s baseline in this head-to-head context, neither side appears to carry a clear résumé-driven advantage that reshapes game texture on its own."], 
+            "s2": ["That balance can keep momentum management and risk decisions symmetrical, with {{TEAM_A}} and {{TEAM_B}} reacting to runs from a similar footing in this matchup.",
+      "If the moment feels heavy here, it may show up as tactical conservatism on both sides rather than a structural résumé mismatch between {{TEAM_A}} and {{TEAM_B}}."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may meet with comparable contextual profiles, limiting how much résumé texture separates decision-making in this matchup.",
+      "Against each other’s scheduling and performance context, {{TEAM_A}} and {{TEAM_B}} can enter on similar footing, keeping this interaction relatively neutral in this head-to-head setup."], 
+            "s2": ["That dynamic can place more weight on tactical edges and shot execution for both {{TEAM_A}} and {{TEAM_B}} in this matchup.",
+      "If one side looks steadier here, it may reflect in-game control rather than a built-in résumé gap between {{TEAM_A}} and {{TEAM_B}}."] 
+          }
+        }
+      }
+    },
+
+    "physicality_tolerance": {
+      "label": "Physicality Tolerance",
+      "pov": "imposition",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can apply a more physical screen-and-bodying level that tests how comfortably {{TEAM_B}} holds spacing and balance through contact.",
+              "When {{TEAM_A}}’s strength profile meets {{TEAM_B}}’s tolerance, drives and cuts can turn into collision possessions that wear on timing."
+            ],
+            "s2": [
+              "If the contact tone rises, {{TEAM_B}} may spend more energy finishing plays than creating them, while {{TEAM_A}} can keep pressure on the next action.",
+              "That can affect late-game legs, where {{TEAM_A}} and {{TEAM_B}} may not get the same lift on jumpers or the same sharpness on closeouts."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can sustain a physical tone that tests how smoothly {{TEAM_B}} executes through contact.",
+              "When bodies collide on cuts and screens, {{TEAM_A}}’s strength can challenge {{TEAM_B}}’s offensive balance."
+            ],
+            "s2": [
+              "That contact level can tax timing and lift for {{TEAM_B}} as the game progresses against {{TEAM_A}}.",
+              "Over time, physical exchanges may influence how both teams finish plays and recover defensively."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can apply a more physical screen-and-bodying level that tests how comfortably {{TEAM_B}} holds spacing and balance through contact.",
+              "When {{TEAM_A}}’s strength profile meets {{TEAM_B}}’s tolerance, drives and cuts can turn into collision possessions that wear on timing."
+            ],
+            "s2": [
+              "If the contact tone rises, {{TEAM_B}} may spend more energy finishing plays than creating them, while {{TEAM_A}} can keep pressure on the next action.",
+              "That can affect late-game legs, where {{TEAM_A}} and {{TEAM_B}} may not get the same lift on jumpers or the same sharpness on closeouts."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can sustain a physical tone that tests how smoothly {{TEAM_B}} executes through contact.",
+              "When bodies collide on cuts and screens, {{TEAM_A}}’s strength can challenge {{TEAM_B}}’s offensive balance."
+            ],
+            "s2": [
+              "That contact level can tax timing and lift for {{TEAM_B}} as the game progresses against {{TEAM_A}}.",
+              "Over time, physical exchanges may influence how both teams finish plays and recover defensively."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} appear similarly equipped to play through contact, making physical exchanges less likely to create a consistent separation in this specific pairing.",
+      "When {{TEAM_A}}’s contact level meets {{TEAM_B}}’s tolerance (and vice versa), neither side projects a clear advantage in how physicality reshapes timing and balance here."], 
+            "s2": ["That balance can keep finishing and defensive recovery more execution-dependent for both {{TEAM_A}} and {{TEAM_B}} in this matchup.",
+      "If physicality becomes decisive here, it may reflect whistle texture and rotation stress rather than an inherent mismatch between {{TEAM_A}} and {{TEAM_B}}."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may absorb contact at similar levels, keeping collision possessions meaningful but not predictably advantaged for either side in this matchup.",
+      "Against each other’s profiles, {{TEAM_A}} and {{TEAM_B}} can trade physical stretches without a stable tone advantage emerging in this head-to-head context."], 
+            "s2": ["That dynamic can push both {{TEAM_A}} and {{TEAM_B}} to win possessions through precision rather than pure force in this matchup.",
+      "If one team imposes more physical control here, it may come from tactical emphasis rather than a built-in edge for {{TEAM_A}} or {{TEAM_B}} in this interaction."] 
+          }
+        }
+      }
+    },
+
+    "shot_discipline": {
+      "label": "Shot Discipline",
+      "pov": "constraint",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, clean shot access can be harder to maintain, as {{TEAM_A}}’s containment can push {{TEAM_B}} into quicker, less-set attempts.",
+              "When {{TEAM_B}}’s shot diet meets {{TEAM_A}}’s ability to shrink windows, the best looks can arrive later in the clock and under more contest."
+            ],
+            "s2": [
+              "That can raise the value of patience for {{TEAM_B}}, since rushed attempts are more likely to play into {{TEAM_A}}’s preferred defensive outcomes.",
+              "Over time, {{TEAM_A}} can influence {{TEAM_B}} toward lower-quality bailouts, changing how each possession is built from the first trigger."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, {{TEAM_A}} can make clean shot selection harder, nudging {{TEAM_B}} toward attempts later in the possession.",
+              "When {{TEAM_A}} shrinks space, {{TEAM_B}}’s preferred looks may require extra movement or faster decisions."
+            ],
+            "s2": [
+              "That pressure can reward patience for {{TEAM_B}}, while rushed attempts tend to align with {{TEAM_A}}’s defensive goals.",
+              "Across the game, {{TEAM_A}} may subtly dictate which shots {{TEAM_B}} feels comfortable taking."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, clean shot access can be harder to maintain, as {{TEAM_A}}’s containment can push {{TEAM_B}} into quicker, less-set attempts.",
+              "When {{TEAM_B}}’s shot diet meets {{TEAM_A}}’s ability to shrink windows, the best looks can arrive later in the clock and under more contest."
+            ],
+            "s2": [
+              "That can raise the value of patience for {{TEAM_B}}, since rushed attempts are more likely to play into {{TEAM_A}}’s preferred defensive outcomes.",
+              "Over time, {{TEAM_A}} can influence {{TEAM_B}} toward lower-quality bailouts, changing how each possession is built from the first trigger."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, {{TEAM_A}} can make clean shot selection harder, nudging {{TEAM_B}} toward attempts later in the possession.",
+              "When {{TEAM_A}} shrinks space, {{TEAM_B}}’s preferred looks may require extra movement or faster decisions."
+            ],
+            "s2": [
+              "That pressure can reward patience for {{TEAM_B}}, while rushed attempts tend to align with {{TEAM_A}}’s defensive goals.",
+              "Across the game, {{TEAM_A}} may subtly dictate which shots {{TEAM_B}} feels comfortable taking."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} appear similarly capable of protecting their shot diet, making shot-quality outcomes more dependent on possession-level execution in this specific pairing.",
+      "When {{TEAM_A}}’s defensive structure meets {{TEAM_B}}’s shot creation (and vice versa), neither side projects a consistent ability to distort the other’s preferred looks here."], 
+            "s2": ["That balance can keep shot quality from drifting structurally toward either {{TEAM_A}} or {{TEAM_B}}, increasing the importance of timing and decision quality in this matchup.",
+      "If shot selection degrades for one side here, it may reflect pace spikes and adjustments rather than a stable mismatch between {{TEAM_A}} and {{TEAM_B}} in this interaction."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may each access a workable shot mix, keeping the shot ecosystem relatively stable in this head-to-head context.",
+      "Against each other’s profiles, {{TEAM_A}} and {{TEAM_B}} can trade stretches of clean creation without a sustained distortion pattern emerging in this matchup."], 
+            "s2": ["That dynamic can place more weight on shot-making and late-clock choices for both {{TEAM_A}} and {{TEAM_B}} in this matchup.",
+      "If one team dictates shot selection here, it may come from targeted adjustments rather than an inherent discipline edge for {{TEAM_A}} or {{TEAM_B}}."] 
+          }
+        }
+      }
+    },
+
+    "variance_sensitivity": {
+      "label": "Variance Sensitivity",
+      "pov": "control",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, the game’s swing potential can hinge on how {{TEAM_A}} and {{TEAM_B}} absorb shooting runs without abandoning their preferred pace.",
+              "When {{TEAM_A}}’s stability meets {{TEAM_B}}’s volatility profile, a couple of makes or misses can reshape spacing and decision speed on both ends."
+            ],
+            "s2": [
+              "If the first run lands, {{TEAM_B}} may lean harder into higher-variance shots, while {{TEAM_A}} can try to steady possessions and limit quick exchanges.",
+              "That dynamic can make short stretches disproportionately loud, since {{TEAM_A}} and {{TEAM_B}} are both responding to momentum rather than structure alone."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, short shooting runs can disproportionately shape flow as {{TEAM_A}} and {{TEAM_B}} trade momentum.",
+              "When volatility enters, both teams may feel pressure to respond quickly rather than settle into structure."
+            ],
+            "s2": [
+              "That sensitivity can elevate the impact of brief streaks, especially if {{TEAM_B}} leans into quicker answers.",
+              "As swings emerge, {{TEAM_A}} may try to slow exchanges while {{TEAM_B}} rides rhythm-dependent stretches."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, the game’s swing potential can hinge on how {{TEAM_A}} and {{TEAM_B}} absorb shooting runs without abandoning their preferred pace.",
+              "When {{TEAM_A}}’s stability meets {{TEAM_B}}’s volatility profile, a couple of makes or misses can reshape spacing and decision speed on both ends."
+            ],
+            "s2": [
+              "If the first run lands, {{TEAM_B}} may lean harder into higher-variance shots, while {{TEAM_A}} can try to steady possessions and limit quick exchanges.",
+              "That dynamic can make short stretches disproportionately loud, since {{TEAM_A}} and {{TEAM_B}} are both responding to momentum rather than structure alone."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, short shooting runs can disproportionately shape flow as {{TEAM_A}} and {{TEAM_B}} trade momentum.",
+              "When volatility enters, both teams may feel pressure to respond quickly rather than settle into structure."
+            ],
+            "s2": [
+              "That sensitivity can elevate the impact of brief streaks, especially if {{TEAM_B}} leans into quicker answers.",
+              "As swings emerge, {{TEAM_A}} may try to slow exchanges while {{TEAM_B}} rides rhythm-dependent stretches."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} project similar volatility interaction, making runs and momentum shifts more rhythm-driven than structurally amplified in this specific pairing.",
+      "When {{TEAM_A}}’s stability and {{TEAM_B}}’s volatility profile collide in this head-to-head context, neither side appears uniquely positioned to suppress or amplify swings on its own."], 
+            "s2": ["That balance can keep the game from being predisposed to chaos or stability, with {{TEAM_A}} and {{TEAM_B}} both needing to manage runs in real time here.",
+      "If volatility spikes in this matchup, it may reflect shot variance and sequence timing rather than a consistent mismatch between {{TEAM_A}} and {{TEAM_B}} in this interaction."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may experience swing stretches without either side reliably controlling the volatility dial in this matchup.",
+      "Against each other’s profiles, {{TEAM_A}} and {{TEAM_B}} can keep variance sensitivity from tilting predictably toward chaos or control in this specific head-to-head setup."], 
+            "s2": ["That dynamic can elevate the importance of timeout management and possession pacing for both {{TEAM_A}} and {{TEAM_B}} here.",
+      "If one team rides a run in this matchup, it may come from momentary rhythm rather than an inherent variance edge for {{TEAM_A}} or {{TEAM_B}}."] 
+          }
+        }
+      }
+    }
+  },
   "debug": {
     "title": "Developer Debug Panel",
     "help": "Shows parsed inputs and rule evaluations for QA. Only visible when Debug View is enabled."
   },
   "footer": {
     "note": "All logic is deterministic and based solely on the uploaded season stats."
+  }
   }
 }
