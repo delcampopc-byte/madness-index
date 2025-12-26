@@ -2730,16 +2730,16 @@ select:focus {
   letter-spacing: 0.08em;
   color: var(--mi-accent-cyan);
 }
-.context-subrow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  color: var(--mi-text-muted);
-  font-style: italic;
+
+/* Hide subrows ONLY where we don't want them (identity/resume) */
+.team-card-bottom .context-subrow {
+  display: none;
 }
-.context-tier { font-weight: 700; font-style: normal; }
-.context-desc { opacity: 0.9; }
+
+/* But SHOW the subrow in Profile Marks (this is where the badges live) */
+.team-card-marks .context-subrow {
+  display: block;
+}
 
 /* Center FRONT faces for identity/resume/marks/mi */
 .context-tile.flip-tile .tile-front {
@@ -2819,17 +2819,20 @@ select:focus {
   font-weight: 900;
 }
 
-#resumeTileA .context-subrow,
-#resumeTileB .context-subrow {
-  margin-top: 6px;
-  display: flex;
-  justify-content: space-between;
-  gap: 6px;
-  color: var(--mi-text-muted);
-}
-
 #resumeTileA .context-note,
 #resumeTileB .context-note { opacity: 0.9; text-align: right; }
+
+/* Resume tile front face — ensure rounded borders */
+.context-tile .tile-face.tile-front {
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;              /* even vertical spacing like identity */
+  text-align: center;
+  padding: 18px 16px;     /* matches the “breathing room” identity has */
+}
 
 /* Tier classes applied by JS on .context-tile */
 .context-tile.resume-tier-strong .tile-face.tile-front {
@@ -3115,6 +3118,60 @@ select:focus {
 .context-tile.flip-tile .tile-face.tile-back,
 .madness-tile.flip-tile .tile-face.tile-back {
   gap: 4px;
+}
+
+/* ===============================
+   IDENTITY + RÉSUMÉ TILE BACKS
+   (bigger, readable, consistent)
+   =============================== */
+
+/* Back face layout (identity + resume only) */
+#identityTileA .tile-face.tile-back,
+#identityTileB .tile-face.tile-back,
+#resumeTileA   .tile-face.tile-back,
+#resumeTileB   .tile-face.tile-back {
+  padding: 14px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 10px;
+  text-align: left;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+/* Main paragraph text */
+#identityTileA .tile-face.tile-back .back-line,
+#identityTileB .tile-face.tile-back .back-line,
+#resumeTileA   .tile-face.tile-back .back-line,
+#resumeTileB   .tile-face.tile-back .back-line {
+  font-size: 12.5px;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  color: rgba(229, 231, 235, 0.92);
+  margin: 0;
+}
+
+/* Helper line */
+#identityTileA .tile-face.tile-back .back-helper,
+#identityTileB .tile-face.tile-back .back-helper,
+#resumeTileA   .tile-face.tile-back .back-helper,
+#resumeTileB   .tile-face.tile-back .back-helper {
+  font-size: 11px;
+  line-height: 1.2;
+  color: rgba(148, 163, 184, 0.95);
+  margin: 0;
+}
+
+/* Résumé back has an h4 ("Explanation:") — make it match the system */
+#resumeTileA .tile-face.tile-back h4,
+#resumeTileB .tile-face.tile-back h4 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(191, 219, 254, 0.9);
 }
 
 /* Step tiles: prevent status pill collisions */
@@ -4521,6 +4578,55 @@ button,
   position: relative;
 }
 
+/* Profile Marks — Empty State */
+.pm-empty{
+  height: 100%;
+  min-height: 92px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 16px;
+}
+
+.pm-empty-inner{
+  display: grid;
+  gap: 10px;
+  place-items: center;
+  max-width: 520px;
+}
+
+.pm-empty-icon{
+  width: 34px;     /* ↑ bigger */
+  height: 34px;    /* ↑ bigger */
+  opacity: 0.55;
+  filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.12));
+}
+
+.pm-empty-title{
+  font: inherit;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: rgba(229, 231, 235, 0.92);
+  font-size: 1.05em;  /* ↑ slightly bigger */
+}
+
+.pm-empty-text{
+  font: inherit;
+  line-height: 1.35;
+  color: rgba(229, 231, 235, 0.72);
+  font-size: 1.0em;   /* ↑ back to normal (or 0.98em if you want it slightly smaller) */
+}
+
+.context-tile .context-header{
+  gap: 8px;               /* header stack spacing */
+}
+
+.context-tile .context-title{
+  margin: 0;
+  letter-spacing: 0.14em; /* optional: only if identity uses wide tracking */
+  text-transform: uppercase;
+}
+
 /* ========== RESPONSIVE ========== */
 
 @media (max-width: 960px) {
@@ -4551,5 +4657,152 @@ button,
     max-width: 150px;
     min-height: 165px;
     max-height: 165px;
+  }
+}
+
+/* =========================================================
+   MOBILE — POST-MATCHUP LAYOUT FIXES
+   Goal: keep pre-matchup as-is, but make post-matchup readable.
+========================================================= */
+
+/* 1) Global breathing room on small screens */
+@media (max-width: 900px){
+  .card{
+    padding: 12px 12px 10px;
+  }
+}
+
+/* 2) Matchup bar: collapse the 3-column rail layout into a vertical stack */
+@media (max-width: 900px){
+  .matchup-bar-main{
+    grid-template-columns: 1fr !important;  /* was 1fr auto 1fr */
+    row-gap: 10px;
+    column-gap: 0;
+    text-align: center;
+  }
+
+  .matchup-bar-left,
+  .matchup-bar-right{
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  /* Keep center chunk centered with a little spacing */
+  .matchup-bar-center{
+    gap: 6px;
+  }
+
+  /* Quick-edit slot should take full width comfortably */
+  .matchup-quick-slot{
+    max-width: 100% !important;
+  }
+}
+
+/* 3) Interactions: two-tile grid -> one column */
+@media (max-width: 900px){
+  .interactions-grid{
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  /* The two header pills should also stack cleanly */
+  .legend-header--interactions{
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px;
+  }
+
+  .interactions-head--left,
+  .interactions-head--right{
+    justify-content: center;
+  }
+}
+
+/* 4) Tables on mobile: allow horizontal scroll instead of crushing columns */
+@media (max-width: 900px){
+  .interaction-table-wrap{
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .interaction-table{
+    min-width: 640px; /* adjust if you want fewer wraps */
+  }
+
+  /* Summary table: same treatment */
+  #summaryTable{
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #summaryTable.summary-table{
+    min-width: 680px;
+  }
+}
+
+/* 5) Post-matchup hero: keep your compact header, but reduce crowding */
+@media (max-width: 600px){
+  .app-shell.has-matchup .enhanced-header{
+    grid-template-columns: 1fr !important;
+    row-gap: 10px;
+    text-align: center;
+  }
+
+  .app-shell.has-matchup .hero-logo-wrap{
+    justify-self: center !important;
+  }
+
+  .app-shell.has-matchup .hero-text-wrap{
+    grid-column: auto !important;
+  }
+
+  .hero-matchup-hud{
+    gap: 12px; /* was roomy desktop spacing */
+  }
+}
+
+
+/* =========================================================
+   MOBILE FIXES — POST MATCHUP (Scorecards)
+   Goal: stop the crushed/tiny text look on phones.
+========================================================= */
+
+@media (max-width: 768px){
+
+  /* 1) Identity + Resume must STACK on mobile */
+  .team-card-bottom{
+    grid-template-columns: 1fr !important; /* was 1fr 1fr */
+    gap: 10px;
+  }
+
+  /* 2) Give flip tiles a little more vertical breathing room */
+  .team-card-bottom .context-tile.flip-tile,
+  .team-card-bottom .context-tile.flip-tile .flip-tile-inner{
+    min-height: 128px; /* was 115px */
+  }
+
+  /* 3) Profile marks: stop the awkward wrap/spacing */
+  .inline-marks-strip{
+    justify-content: center;
+    gap: 10px;
+  }
+
+  /* Use a 2-up grid feel instead of fixed 165px cards */
+  .mark-chip{
+    width: calc(50% - 6px);
+    min-width: 0;
+    max-width: none;
+
+    /* keep your uniform height, but a touch shorter helps phones */
+    min-height: 150px;
+    max-height: 150px;
+  }
+}
+
+/* Extra-small phones: marks become single-column cards */
+@media (max-width: 420px){
+  .mark-chip{
+    width: 100%;
   }
 }

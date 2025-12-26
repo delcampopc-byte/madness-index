@@ -3459,7 +3459,17 @@ function renderInteractionsConsole(result) {
     if (typeof raw === "number") aAdj = raw;
     else if (raw && typeof raw === "object") aAdj = Number(raw.aAdj ?? 0);
 
-    const resolvedCaseKey = miCaseFor(aAdj);
+    // Determine edge from the same sign logic the pill uses
+    const edge =
+      aAdj > 0 ? "A" :
+      aAdj < 0 ? "B" :
+      "EVEN";
+
+    // Console case must match the pill edge (prevents inverted miCaseFor behavior)
+    const resolvedCaseKey =
+      edge === "A" ? "a_adv" :
+      edge === "B" ? "b_adv" :
+      "even";
 
     // Pull sentence pools from JSON (supports both schemas)
     const caseObj = copyCh?.cases?.[resolvedCaseKey] || null;
@@ -3487,12 +3497,6 @@ function renderInteractionsConsole(result) {
     /* Title */
     const titleSpan = document.createElement("span");
     titleSpan.textContent = title.toUpperCase();
-
-    /* Edge pill — SAME classes as table */
-    const edge =
-      aAdj > 0 ? "A" :
-      aAdj < 0 ? "B" :
-      "EVEN";
 
     const pill = document.createElement("span");
     pill.classList.add("int-edge-pill");
@@ -3607,6 +3611,27 @@ function renderProfileMarks(team, containerId) {
 
   el.innerHTML = '';
 
+  if (team.profileMarks.length === 0) {
+    el.innerHTML = `
+      <div class="pm-empty" role="status" aria-live="polite">
+        <div class="pm-empty-inner">
+          <svg class="pm-empty-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 8v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 16.5h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            <path d="M10.3 3.9 2.6 19.2A2 2 0 0 0 4.4 22h15.2a2 2 0 0 0 1.8-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z"
+                  stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" opacity="0.9"/>
+          </svg>
+
+          <div class="pm-empty-title">No Profile Marks Detected</div>
+          <div class="pm-empty-text">
+            This team does not meet the criteria for any profile marks.
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
   const BADGE_MAP = {
     "Offensive Rigidity — Moderate": "badge_offensive_rigidity_moderate.svg",
     "Offensive Rigidity — Severe":   "badge_offensive_rigidity_severe.svg",
@@ -3644,23 +3669,20 @@ function renderProfileMarks(team, containerId) {
                     : mark.includes('Moderate') ? 'Moderate'
                     : 'Neutral';
 
-    // Outer chip
     const chip = document.createElement('div');
     chip.className = 'mark-chip';
     if (severity === 'Severe')   chip.classList.add('severe');
     if (severity === 'Moderate') chip.classList.add('moderate');
 
-    // Icon plate + icon
     const iconPlate = document.createElement('div');
     iconPlate.className = 'mark-icon-plate';
 
     const img = document.createElement('img');
     img.src = filename;
     img.alt = baseName;
-    img.className = 'mark-badge';   // still reuse this class
+    img.className = 'mark-badge';
     iconPlate.appendChild(img);
 
-    // Text block
     const info = document.createElement('div');
     info.className = 'mark-info';
 
@@ -3678,7 +3700,6 @@ function renderProfileMarks(team, containerId) {
     chip.appendChild(iconPlate);
     chip.appendChild(info);
 
-    // Full string including severity as tooltip
     chip.title = mark;
 
     el.appendChild(chip);
