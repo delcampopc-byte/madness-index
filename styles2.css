@@ -175,7 +175,7 @@ body {
   text-align: center;
 
   padding: 28px 20px 26px;
-  margin-bottom: 28px;
+  margin-bottom: 2px;
 
   border-radius: var(--mi-radius-lg);
   border: 1px solid var(--mi-border-subtle);
@@ -777,7 +777,7 @@ body {
 /* Compact hero when matchup active */
 .app-shell.has-matchup .enhanced-header {
   padding-top: 28px;
-  padding-bottom: 24px,
+  padding-bottom: 24px;
   margin-bottom: 14px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -2614,7 +2614,11 @@ select:focus {
 .profile-section.flip-tile.flipped .tile-face.tile-back  { display: block; }
 
 /* Back-of-core layout */
-.core-back-container { }
+.core-back-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 .core-back-list {
   list-style: none;
@@ -3515,10 +3519,10 @@ select:focus {
 
 /* 2) Once CSV is loaded, REMOVE the halo from the dataset card */
 .app-shell.csv-loaded .controls-card.is-primary-entry{
-  border-color: 1px solid var(--mi-border-card);
   box-shadow: var(--mi-shadow-soft), var(--mi-shadow-card-inset);
   background: var(--mi-grad-card);
   transform: none;
+  border: 1px solid var(--mi-border-card);
 }
 
 /* =========================================
@@ -4627,6 +4631,494 @@ button,
   text-transform: uppercase;
 }
 
+/* =========================
+   Scorecards Summary Hierarchy (Verdict Stack)
+   ========================= */
+
+.summary-block.summary-lean{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-block.summary-lean .summary-delta-label{
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  opacity: .8;
+}
+
+.summary-block.summary-lean .summary-delta-value{
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+.summary-block.summary-lean .summary-pred-line{
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.summary-block.summary-lean .summary-pred-line strong{
+  font-weight: 900;
+  letter-spacing: .01em;
+}
+
+/* Confidence line (pill) */
+.summary-confidence-line{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: -2px;
+}
+
+.summary-mini-label{
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .65;
+}
+
+.summary-confidence-pill{
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  border: 1px solid rgba(148,163,184,.28);
+  background: rgba(2, 6, 23, .55);
+}
+
+/* Driver / Risk: analyst commentary (quiet, readable) */
+.summary-driver-line,
+.summary-risk-line{
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 2px;
+}
+
+.summary-driver-text{
+  font-size: 14px;
+  opacity: .9;
+}
+
+.summary-risk-text{
+  font-size: 14px;
+  opacity: .78;
+}
+
+/* Lean paragraph becomes supporting translation, not headline */
+.summary-lean-text{
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: .78;
+}
+
+/* Optional support line: whisper tier */
+.summary-support-line{
+  margin-top: -2px;
+  font-size: 12px;
+  line-height: 1.3;
+  opacity: .62;
+}
+
+/* Baseline vs Matchup MI hierarchy on side cards */
+.summary-mi-secondary{
+  opacity: .70;
+  font-size: 14px;
+}
+
+.summary-mi-primary{
+  opacity: .95;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* ================================
+   SCORECARDS: Role Color Semantics
+   (Cinderella = green, Favorite = orange)
+   ================================ */
+
+/* Left cell (Cinderella) */
+#summaryTable tbody td:first-child .summary-block{
+  border-color: rgba(34, 197, 94, 0.55); /* fallback */
+  box-shadow:
+    inset 0 0 0 1px var(--mi-role-cinderella-soft),
+    0 10px 26px rgba(0,0,0,0.35);
+  background:
+    radial-gradient(circle at top, var(--mi-role-cinderella-soft), rgba(9, 9, 15, 0.98));
+}
+
+/* Right cell (Favorite) */
+#summaryTable tbody td:last-child .summary-block{
+  border-color: rgba(249, 115, 22, 0.55); /* fallback */
+  box-shadow:
+    inset 0 0 0 1px var(--mi-role-favorite-soft),
+    0 10px 26px rgba(0,0,0,0.35);
+  background:
+    radial-gradient(circle at top, var(--mi-role-favorite-soft), rgba(9, 9, 15, 0.98));
+}
+
+/* Make the role label itself carry the role color */
+#summaryTable tbody td:first-child .summary-team-label{
+  color: var(--mi-role-cinderella);
+  opacity: 0.95;
+}
+
+#summaryTable tbody td:last-child .summary-team-label{
+  color: var(--mi-role-favorite);
+  opacity: 0.95;
+}
+
+/* Optional: give Matchup MI a slight role-tinted emphasis */
+#summaryTable tbody td:first-child .summary-mi-primary{
+  color: rgba(226, 232, 240, 0.95);
+  text-shadow: 0 0 18px rgba(34, 197, 94, 0.12);
+}
+
+#summaryTable tbody td:last-child .summary-mi-primary{
+  color: rgba(226, 232, 240, 0.95);
+  text-shadow: 0 0 18px rgba(249, 115, 22, 0.12);
+}
+
+/* Optional: interaction leverage line picks up a faint tint */
+#summaryTable tbody td:first-child .summary-int-line{
+  color: rgba(148, 163, 184, 0.95);
+}
+
+#summaryTable tbody td:last-child .summary-int-line{
+  color: rgba(148, 163, 184, 0.95);
+}
+
+/* Center card stays neutral/authoritative; tighten its border slightly */
+#summaryTable tbody td:nth-child(2) .summary-block.summary-lean{
+  border-color: rgba(148, 163, 184, 0.28);
+}
+
+/* ================================
+   SCORECARDS: Column Proportions
+   Narrow center verdict, widen team tiles
+   ================================ */
+
+#summaryTable{
+  width: 100%;
+  table-layout: fixed; /* enables predictable column widths */
+}
+
+#summaryTable colgroup col:nth-child(1){ width: 34%; }
+#summaryTable colgroup col:nth-child(2){ width: 32%; }
+#summaryTable colgroup col:nth-child(3){ width: 34%; }
+
+/* If you don't have a <colgroup>, fall back to cell targeting */
+#summaryTable tbody td:first-child,
+#summaryTable thead th:first-child{
+  width: 34%;
+}
+
+#summaryTable tbody td:nth-child(2),
+#summaryTable thead th:nth-child(2){
+  width: 32%;
+}
+
+#summaryTable tbody td:last-child,
+#summaryTable thead th:last-child{
+  width: 34%;
+}
+
+/* Keep inner tiles from stretching oddly */
+#summaryTable .summary-block{
+  max-width: 100%;
+}
+
+/* Keep lean text from becoming a wall */
+.summary-block.summary-lean .summary-lean-text{
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ================================
+   SCORECARDS: Equal Height + Better Proportions
+   ================================ */
+
+/* Use flex for the single rendered row so all three tiles match height */
+#summaryTable tbody tr{
+  display: flex;
+  align-items: stretch;
+  gap: 18px;               /* controls spacing between tiles */
+}
+
+/* Make each cell act like a flex item */
+#summaryTable tbody td{
+  display: flex;
+  padding: 0;              /* remove table cell padding so tiles align cleanly */
+}
+
+/* Proportions tuned to content:
+   - Side tiles slightly narrower than before
+   - Center tile a bit wider to justify its narrative stack */
+#summaryTable tbody td:first-child{ flex: 0 0 30.5%; }
+#summaryTable tbody td:nth-child(2){ flex: 0 0 39%; }
+#summaryTable tbody td:last-child{  flex: 0 0 30.5%; }
+
+/* Ensure the inner tiles stretch to equal height */
+#summaryTable tbody td .summary-block{
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
+
+/* Keep the center from “running tall” */
+#summaryTable tbody td:nth-child(2) .summary-block.summary-lean{
+  gap: 6px;                /* slightly tighter vertical rhythm */
+}
+
+/* Reduce the headline stack just a hair (keeps center tile in check) */
+#summaryTable tbody td:nth-child(2) .summary-block.summary-lean .summary-delta-value{
+  font-size: 21px;
+}
+
+#summaryTable tbody td:nth-child(2) .summary-block.summary-lean .summary-pred-line{
+  font-size: 21px;
+}
+
+/* Confidence pill: tighten vertically so it doesn't add height */
+#summaryTable tbody td:nth-child(2) .summary-confidence-pill{
+  padding: 4px 10px;
+}
+
+/* (Optional) keep lean text at 2 lines (you already have this, re-stated for specificity) */
+#summaryTable tbody td:nth-child(2) .summary-lean-text{
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ================================
+   SCORECARDS: Table-safe equal height + proportions
+   ================================ */
+
+/* Keep table behavior predictable */
+#summaryTable{
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 18px 0; /* horizontal gap between the 3 tiles */
+}
+
+/* Column widths: slightly narrower sides, slightly wider center */
+#summaryTable colgroup col:nth-child(1){ width: 31%; }
+#summaryTable colgroup col:nth-child(2){ width: 38%; }
+#summaryTable colgroup col:nth-child(3){ width: 31%; }
+
+/* If no colgroup exists, these still help */
+#summaryTable tbody td:first-child{ width: 31%; }
+#summaryTable tbody td:nth-child(2){ width: 38%; }
+#summaryTable tbody td:last-child{ width: 31%; }
+
+/* Make the three cells align and feel consistent */
+#summaryTable tbody td{
+  vertical-align: top;
+}
+
+/* Force the tiles to be the same visual height */
+#summaryTable .summary-block{
+  min-height: 250px;     /* adjust 250–280 based on your taste */
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* centers content vertically */
+}
+
+/* Center tile: allow a bit more vertical rhythm without growing taller */
+#summaryTable .summary-block.summary-lean{
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Keep lean text compact */
+#summaryTable .summary-block.summary-lean .summary-lean-text{
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ===== SCORECARDS FIX: restore real table layout ===== */
+#summaryTable {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 18px 0;
+}
+
+/* undo the earlier flex conversion */
+#summaryTable tbody tr { display: table-row !important; }
+#summaryTable tbody td { display: table-cell !important; padding: 0; vertical-align: top; }
+
+/* keep your intended proportions (choose one set and keep it) */
+#summaryTable colgroup col:nth-child(1){ width: 25%; }
+#summaryTable colgroup col:nth-child(2){ width: 50%; }
+#summaryTable colgroup col:nth-child(3){ width: 25%; }
+
+/* make tiles equal-height without flex rows */
+#summaryTable .summary-block{
+  min-height: 260px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ================================
+   SCORECARDS: FORCE SYMMETRY
+   ================================ */
+
+/* 1) Make both team tiles identical “stack” containers */
+#summaryTable td.team-block,
+#summaryTable td.team-block-a,
+#summaryTable td.team-block-b,
+#summaryTable td.teamA,
+#summaryTable td.teamB,
+#summaryTable td.summary-team {
+  padding: 0 !important;
+  vertical-align: top;
+}
+
+/* If your actual wrappers are .summary-block or similar, this will catch them */
+#summaryTable .summary-block,
+#summaryTable .team-summary-block,
+#summaryTable .summary-team-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100%;
+  padding: 18px 18px 20px;
+  box-sizing: border-box;
+}
+
+/* 2) Header row styling stays centered and consistent */
+#summaryTable .team-header,
+#summaryTable .summary-header,
+#summaryTable .team-name-header {
+  width: 100%;
+  text-align: center;
+  margin: 0;
+}
+
+/* 3) ADD THE GAP you asked for between header and inner card */
+#summaryTable .team-header,
+#summaryTable .summary-header,
+#summaryTable .team-name-header {
+  margin-bottom: 16px; /* <-- increase/decrease this for the “gap” */
+}
+
+/* 4) The green/orange inner info card: same width rules for BOTH sides */
+#summaryTable .team-card,
+#summaryTable .team-info-card,
+#summaryTable .summary-team-card,
+#summaryTable .team-box {
+  width: 100%;
+  max-width: 360px;        /* <-- keeps both sides from looking “too wide” */
+  margin: 0 auto;          /* center it */
+  box-sizing: border-box;
+  padding: 18px 18px 16px; /* <-- consistent padding */
+  border-radius: 16px;
+}
+
+/* 5) Ensure text block inside card doesn’t introduce asymmetry */
+#summaryTable .team-card * ,
+#summaryTable .team-info-card * ,
+#summaryTable .summary-team-card * ,
+#summaryTable .team-box * {
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   SECTION 5 — SCORECARDS & MATCHUP SUMMARY (CANONICAL)
+   Table-safe grid. No flex rows. Exact symmetry + fixed tile height.
+========================================================= */
+
+:root{
+  --mi-summary-gap-x: 18px;     /* space between the 3 columns */
+  --mi-summary-gap-y: 14px;     /* space between header row and tiles */
+  --mi-summary-tile-h: 260px;   /* exact equal height for all 3 tiles */
+  --mi-summary-tile-pad: 18px;  /* consistent internal padding */
+}
+
+/* Table is only a grid: spacing is handled by border-spacing */
+#summaryTable{
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: var(--mi-summary-gap-x) var(--mi-summary-gap-y);
+}
+
+/* Keep true table semantics (no hybrid behavior) */
+#summaryTable thead tr,
+#summaryTable tbody tr{
+  display: table-row;
+}
+
+#summaryTable thead th,
+#summaryTable tbody td{
+  display: table-cell;
+  padding: 0;                 /* spacing comes from border-spacing */
+  text-align: center;
+  vertical-align: middle;     /* cards center nicely within equal-height tiles */
+}
+
+/* Header row: make it feel separate from the tiles */
+#summaryTable thead th{
+  padding: 10px 8px 2px;      /* a touch of breathing room */
+}
+
+/* ONE unified “card contract” used by all 3 tiles */
+#summaryTable tbody td > .summary-block{
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--mi-summary-tile-h);     /* hard guarantee: all 3 are identical height */
+  padding: var(--mi-summary-tile-pad);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;             /* stable, broadcast-like centering */
+  align-items: center;
+  gap: 6px;
+}
+
+/* Prevent the center tile from growing taller via long copy */
+#summaryTable tbody td:nth-child(2) > .summary-block .summary-lean-text{
+  display: -webkit-box;
+  -webkit-line-clamp: 2;               /* keep it controlled */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Optional: keep predicted line from wrapping awkwardly */
+#summaryTable tbody td:nth-child(2) > .summary-block .summary-pred-line{
+  max-width: 28ch;
+}
+
+/* IMPORTANT:
+   Role styling stays separate and ONLY changes color/gradient.
+   Your existing role tint rules can remain:
+   - td:first-child .summary-block (green)
+   - td:last-child  .summary-block (orange)
+*/
+
+
 /* ========== RESPONSIVE ========== */
 
 @media (max-width: 960px) {
@@ -4761,7 +5253,6 @@ button,
     gap: 12px; /* was roomy desktop spacing */
   }
 }
-
 
 /* =========================================================
    MOBILE FIXES — POST MATCHUP (Scorecards)

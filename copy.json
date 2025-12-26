@@ -1317,6 +1317,33 @@
       }
     }
   },
+  "summary": {
+    "verdict": {
+    "confidence_label": "",
+    "driver_label": "",
+    "risk_label": "",
+    "int_soft_threshold": 0.2,
+    "driver_templates": {
+      "neutral_balanced": "",
+      "neutral_swingy": "",
+      "edge_balanced": "",
+      "reinforces_winner": "",
+      "resists_winner": "",
+      "mixed_still_winner": "",
+      "mixed_live_loser": ""
+    },
+    "risk_templates": {
+      "heavy_default": "",
+      "heavy_resists": "",
+      "solid_default": "",
+      "solid_resists": "",
+      "slight_default": "",
+      "slight_resists": "",
+      "coin_default": "",
+      "coin_resists": ""
+    }
+  }
+},
   "debug": {
     "title": "Developer Debug Panel",
     "help": "Shows parsed inputs and rule evaluations for QA. Only visible when Debug View is enabled."

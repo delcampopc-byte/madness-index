@@ -3010,6 +3010,15 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
   const neutralText = summaryCopy.neutral_matchup || 'Neutral matchup';
   const towardWord  = summaryCopy.toward_phrase   || 'toward';
 
+  // ----- Baseline vs matchup values (define BEFORE any narration logic) -----
+  const baseA = typeof a.mi_base === 'number' ? a.mi_base : computeMIBase(a);
+  const baseB = typeof b.mi_base === 'number' ? b.mi_base : computeMIBase(b);
+  const intA  = interactions?.a || 0;
+  const intB  = interactions?.b || 0;
+
+  const centerHeaderLabel = summaryCopy.matchup_header || 'Matchup Edge';
+
+  // ----- Gap band (JSON) -----
   const gapKey    = getSummaryGapKey(diff);
   const gapCfg    = phrases[gapKey] || {};
   const bandLabel = gapCfg.label || '';
@@ -3019,7 +3028,6 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
   let leanText;
 
   if (diff === 0) {
-    // Pure coin flip / neutral case
     if (bandLabel && bandDesc) {
       leanText = bandLabel + ' — ' + bandDesc;
     } else {
@@ -3029,19 +3037,101 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
     const winnerName = diff > 0 ? a.name : b.name;
 
     if (bandLabel && bandDesc) {
-      // "Slight lean toward TEAM. A modest edge, but upset risk is very live."
       leanText = bandLabel + ' ' + towardWord + ' ' + winnerName + '. ' + bandDesc;
     } else if (bandDesc) {
       leanText = bandDesc + ' ' + towardWord + ' ' + winnerName + '.';
     } else if (bandLabel) {
       leanText = bandLabel + ' ' + towardWord + ' ' + winnerName;
     } else {
-      // Fallback to legacy band names if JSON is missing
       const fallbackBand = getLeanBand(diff);
       leanText = fallbackBand
         ? (fallbackBand + ' ' + towardWord + ' ' + winnerName)
         : (towardWord + ' ' + winnerName);
     }
+  }
+
+  // ----- Verdict → Confidence → Why → Risk (JSON-driven; NO hardcoded phrases) -----
+  const verdictCopy = summaryCopy.verdict || {}; // NEW namespace (we'll add to copy.json next)
+
+  // Optional labels (can be blank until JSON is added)
+  const confidenceLabelText = verdictCopy.confidence_label || tableLabels.confidence_label || '';
+  const driverLabelText     = verdictCopy.driver_label     || tableLabels.driver_label     || '';
+  const riskLabelText       = verdictCopy.risk_label       || tableLabels.risk_label       || '';
+
+  // Confidence label comes from summary_phrases band label (already JSON-driven)
+  const confidenceBand = (bandLabel || getLeanBand(diff) || '').trim();
+
+  // Determine winner side
+  const winnerIsA = (predicted === a.name);
+  const winName   = winnerIsA ? a.name : b.name;
+  const loseName  = winnerIsA ? b.name : a.name;
+
+  // Interaction leverage (winner vs loser)
+  const winInt  = winnerIsA ? intA : intB;
+  const loseInt = winnerIsA ? intB : intA;
+
+  // Thresholds: keep numeric logic in JS; wording lives in JSON
+  const INT_SOFT = typeof verdictCopy.int_soft_threshold === 'number'
+    ? verdictCopy.int_soft_threshold
+    : 0.20;
+
+  const intBalanced   = (Math.abs(winInt) <= INT_SOFT && Math.abs(loseInt) <= INT_SOFT);
+  const intReinforces = (winInt >  INT_SOFT && loseInt < -INT_SOFT);
+  const intResists    = (winInt < -INT_SOFT && loseInt >  INT_SOFT);
+
+  // Helper: tiny template renderer with {{TOKENS}}
+  const renderTpl = (tpl, tokens) => {
+    if (!tpl) return '';
+    return String(tpl).replace(/\{\{(\w+)\}\}/g, (_, k) => {
+      return (tokens && tokens[k] != null) ? String(tokens[k]) : '';
+    });
+  };
+
+  // Decide "edge tier" (keys only; wording comes from JSON)
+  const absDiff = Math.abs(diff);
+  const edgeTier = (absDiff >= 4) ? 'heavy'
+                : (absDiff >= 2) ? 'solid'
+                : (absDiff >  0) ? 'slight'
+                : 'coin';
+
+  // Decide driver case
+  let driverCase = '';
+  if (diff === 0) {
+    driverCase = intBalanced ? 'neutral_balanced' : 'neutral_swingy';
+  } else if (intBalanced) {
+    driverCase = 'edge_balanced';
+  } else if (intReinforces) {
+    driverCase = 'reinforces_winner';
+  } else if (intResists) {
+    driverCase = 'resists_winner';
+  } else {
+    // mixed
+    driverCase = (Math.abs(winInt) >= Math.abs(loseInt)) ? 'mixed_still_winner' : 'mixed_live_loser';
+  }
+
+  // Decide risk case (tier-aware + resistance-aware)
+  const riskCase = `${edgeTier}_${intResists ? 'resists' : 'default'}`;
+
+  // Pull templates from JSON (blank-safe)
+  const driverTpl = (verdictCopy.driver_templates && verdictCopy.driver_templates[driverCase]) || '';
+  const riskTpl   = (verdictCopy.risk_templates   && verdictCopy.risk_templates[riskCase])   || '';
+
+  const tokens = {
+    WINNER: winName,
+    LOSER: loseName,
+    DIFF: fmt(diff, 3),
+    EDGE_TIER: edgeTier,
+    WIN_INT: fmt(winInt, 3),
+    LOSE_INT: fmt(loseInt, 3)
+  };
+
+  const driverText = renderTpl(driverTpl, tokens);
+  const riskText   = renderTpl(riskTpl, tokens);
+
+  // Support line remains the band description (already JSON-driven via summary_phrases)
+  let supportText = bandDesc || '';
+  if (supportText && leanText && leanText.includes(supportText)) {
+    supportText = '';
   }
 
   // ----- Hero HUD updates -----
@@ -3084,14 +3174,6 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
   if (headA) headA.textContent = a.name;
   if (headB) headB.textContent = b.name;
 
-  // Baseline vs matchup values
-  const baseA = typeof a.mi_base === 'number' ? a.mi_base : computeMIBase(a);
-  const baseB = typeof b.mi_base === 'number' ? b.mi_base : computeMIBase(b);
-  const intA  = interactions?.a || 0;
-  const intB  = interactions?.b || 0;
-
-  const centerHeaderLabel = summaryCopy.matchup_header || 'Matchup Edge';
-
   // ----- Single clean matchup row using "mini cards" in each cell -----
   tbody.innerHTML = `
     <tr>
@@ -3100,8 +3182,8 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
         <div class="summary-block">
           <div class="summary-team-label">${cTeamLabel}</div>
           <div class="summary-team-name">${a.name}</div>
-          <div class="summary-mi-line">${baselineLabel}: ${fmt(baseA, 3)}</div>
-          <div class="summary-mi-line">${matchupLabel}: ${fmt(miA, 3)}</div>
+          <div class="summary-mi-line summary-mi-secondary">${baselineLabel}: ${fmt(baseA, 3)}</div>
+          <div class="summary-mi-line summary-mi-primary">${matchupLabel}: ${fmt(miA, 3)}</div>
           <div class="summary-int-line">
             ${interactionLabel}: ${fmt(intA, 3)}
           </div>
@@ -3113,12 +3195,39 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
         <div class="summary-block summary-lean">
           <div class="summary-delta-label">${centerHeaderLabel}</div>
           <div class="summary-delta-value">ΔMI: ${fmt(diff, 3)}</div>
+
           <div class="summary-pred-line">
             ${predictedLabel}: <strong>${predicted}</strong>
           </div>
+
+          ${confidenceBand ? `
+            <div class="summary-confidence-line">
+              ${confidenceLabelText ? `<span class="summary-mini-label">${confidenceLabelText}</span>` : ''}
+              <span class="summary-confidence-pill">${confidenceBand}</span>
+            </div>
+          ` : ''}
+
+          ${driverText ? `
+            <div class="summary-driver-line">
+              ${driverLabelText ? `<span class="summary-mini-label">${driverLabelText}</span>` : ''}
+              <span class="summary-driver-text">${driverText}</span>
+            </div>
+          ` : ''}
+
+          ${riskText ? `
+            <div class="summary-risk-line">
+              ${riskLabelText ? `<span class="summary-mini-label">${riskLabelText}</span>` : ''}
+              <span class="summary-risk-text">${riskText}</span>
+            </div>
+          ` : ''}
+
           <div class="summary-lean-text">
             ${leanText}
           </div>
+
+          ${supportText ? `
+            <div class="summary-support-line">${supportText}</div>
+          ` : ''}
         </div>
       </td>
 
@@ -3127,8 +3236,8 @@ function renderSummary({ a, b, miA, miB, diff, predicted, interactions, round, s
         <div class="summary-block">
           <div class="summary-team-label">${fTeamLabel}</div>
           <div class="summary-team-name">${b.name}</div>
-          <div class="summary-mi-line">${baselineLabel}: ${fmt(baseB, 3)}</div>
-          <div class="summary-mi-line">${matchupLabel}: ${fmt(miB, 3)}</div>
+          <div class="summary-mi-line summary-mi-secondary">${baselineLabel}: ${fmt(baseB, 3)}</div>
+          <div class="summary-mi-line summary-mi-primary">${matchupLabel}: ${fmt(miB, 3)}</div>
           <div class="summary-int-line">
             ${interactionLabel}: ${fmt(intB, 3)}
           </div>
@@ -3609,8 +3718,11 @@ function renderProfileMarks(team, containerId) {
   const el = document.getElementById(containerId);
   if (!el || !team || !Array.isArray(team.profileMarks)) return;
 
-  el.innerHTML = '';
+  const PROFILE_MARK_BADGE_PATH = "assets/img/badges/";
 
+  el.innerHTML = '';
+  
+  // Empty state
   if (team.profileMarks.length === 0) {
     el.innerHTML = `
       <div class="pm-empty" role="status" aria-live="polite">
@@ -3678,7 +3790,7 @@ function renderProfileMarks(team, containerId) {
     iconPlate.className = 'mark-icon-plate';
 
     const img = document.createElement('img');
-    img.src = filename;
+    img.src = PROFILE_MARK_BADGE_PATH + filename;
     img.alt = baseName;
     img.className = 'mark-badge';
     iconPlate.appendChild(img);
