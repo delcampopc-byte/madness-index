@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="256"
+     height="256"
+     viewBox="0 0 256 256"
+     role="img"
+     aria-label="Cold Arc — Severe">
+
+  <defs>
+    <!-- Cold glow -->
+    <filter id="coldGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- Arc gradient -->
+    <linearGradient id="arcCold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#38bdf8"/>
+      <stop offset="50%"  stop-color="#bae6fd"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+
+    <!-- Runner gradient -->
+    <linearGradient id="freezeFront" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="rgba(186,230,253,0)"/>
+      <stop offset="50%"  stop-color="rgba(186,230,253,0.95)"/>
+      <stop offset="100%" stop-color="rgba(186,230,253,0)"/>
+    </linearGradient>
+  </defs>
+
+  <style>
+    .bg { fill:#020817; }
+
+    .arc, .arc-hi, .arc-run {
+      fill:none;
+      stroke-linecap:round;
+      stroke-linejoin:round;
+    }
+
+    .arc {
+      stroke: url(#arcCold);
+      stroke-width:10;
+    }
+
+    .arc-hi {
+      stroke: rgba(186,230,253,0.6);
+      stroke-width:3.2;
+      opacity:0.25;
+    }
+
+    .arc-run {
+      stroke: url(#freezeFront);
+      stroke-width:6;
+      stroke-dasharray:18 240;
+      stroke-dashoffset:240;
+      opacity:0;
+    }
+
+    .flake {
+      stroke: rgba(186,230,253,0.95);
+      stroke-width:10;
+      transform-origin:128px 136px;
+    }
+
+    .glow {
+      filter: url(#coldGlow);
+      opacity:0.9;
+    }
+
+    /* HOVER WAKE */
+    svg:hover .arc-hi {
+      opacity:0.6;
+    }
+
+    svg:hover .arc-run {
+      opacity:1;
+      animation: run 1.35s ease-in-out infinite;
+    }
+
+    svg:hover .flake {
+      animation: drift 2.2s ease-in-out infinite;
+    }
+
+    svg:hover .glow {
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes run {
+      0%   { stroke-dashoffset:260; opacity:0; }
+      20%  { opacity:1; }
+      60%  { opacity:.55; }
+      100% { stroke-dashoffset:0; opacity:0; }
+    }
+
+    @keyframes drift {
+      0%,100% { transform:rotate(-6deg) translateY(0); }
+      50%     { transform:rotate(6deg) translateY(-1.6px); }
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity:.85; }
+      50%     { opacity:1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      svg:hover .arc-run,
+      svg:hover .flake,
+      svg:hover .glow {
+        animation:none !important;
+      }
+      svg:hover .arc-run { opacity:0.5; }
+    }
+  </style>
+
+  <!-- Background -->
+  <rect class="bg" width="256" height="256" rx="32"/>
+
+  <!-- Icon -->
+  <g class="glow">
+    <path class="arc"     d="M64 176a64 64 0 0 1 128 0"/>
+    <path class="arc-hi"  d="M64 176a64 64 0 0 1 128 0"/>
+    <path class="arc-run" d="M64 176a64 64 0 0 1 128 0"/>
+
+    <g class="flake" transform="translate(128 136)">
+      <line x1="-18" y1="0" x2="18" y2="0"/>
+      <line x1="0" y1="-18" x2="0" y2="18"/>
+      <line x1="-13" y1="-13" x2="13" y2="13"/>
+      <line x1="-13" y1="13" x2="13" y2="-13"/>
+    </g>
+  </g>
+</svg>

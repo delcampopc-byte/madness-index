@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"></feGaussianBlur>
+      <feMerge>
+        <feMergeNode in="coloredBlur"></feMergeNode>
+        <feMergeNode in="SourceGraphic"></feMergeNode>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="256" height="256" rx="32" fill="#020817"></rect>
+  <g stroke="#38bdf8" fill="none" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    
+    <!-- Metronome body -->
+    <path d="M110 64 L90 184 L166 184 L146 64 Z"></path>
+
+    <!-- Tempo arm (showing strain) -->
+    <line x1="128" y1="80" x2="176" y2="48"></line>
+
+    <!-- Tempo bars at the base -->
+    <line x1="96" y1="196" x2="96" y2="212"></line>
+    <line x1="128" y1="188" x2="128" y2="212"></line>
+    <line x1="160" y1="196" x2="160" y2="212"></line>
+
+  </g>
+</svg>

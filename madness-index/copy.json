@@ -1,0 +1,1355 @@
+{
+  "hero": {
+    "tagline": "Predict the Madness. Master the Bracket.",
+    "overline": "NCAA TOURNAMENT MATCHUP ENGINE",
+    "title_main": "THE MADNESS INDEX",
+    "subtitle": "Head-to-head NCAA Tournament matchup engine",
+    "subtitle_highlight": "powered by advanced analytics."
+  }, 
+  "prematch": {
+    "progress": {
+    "status_label": "PROGRESS BAR",
+    "status_waiting_csv": "Waiting for tournament dataset.",
+    "status_pick_teams": "Select two teams to continue.",
+    "status_pick_team_a": "Select Team A to continue.",
+    "status_pick_team_b": "Select Team B to continue.",
+    "status_choose_round": "Choose a round to unlock Compare.",
+    "status_pending": "Pending",
+    "status_in_progress": "In progress",
+    "status_ready": "Ready. Press Compare to generate results.",
+    "step1_pending": "Tournament field not loaded.",
+    "step1_ready": "Field loaded and teams unlocked.",
+    "step2_pending": "Select two teams to compare.",
+    "step2_ready": "Teams selected. Matchup is queued.",
+    "step3_pending": "Choose a round or choose Sandbox Mode to ignore round constraints.",
+    "step3_ready": "Matchup queued. Click Compare when ready.",
+    "title": "Start a matchup",
+    "subtitle": "",
+    "briefing_kicker": "Analyst Briefing",
+    "briefing_title": "Locked intelligence — pending inputs.",
+    "briefing_p1": "",
+    "briefing_p2": "",
+    "briefing_p3": "",
+    "step1": "Load tournament data to unlock team selection.",
+    "step2": "Choose one team for each side.",
+    "step3": "Run the comparison to begin analysis.",
+    "note": "Once a matchup is active, this briefing clears and the app shifts into analysis mode.",
+    "preview_caption": "After compare is run, the app will generate full scorecards, interaction leverage, and an explained lean in one direction or the other.",
+    "preview_title": "First time here?",
+    "preview_text": "Pick any two teams. Run Compare. The model will take a side — and show why.",
+    "preview_b1": "Lean: —  (pending matchup)",
+    "preview_b2": "Pressure profile: —  (pending matchup)",
+    "preview_b3": "Identity read: —  (pending matchup)",
+    "more_btn_closed": "What you'll get (optional)",
+    "more_btn_open": "Hide details"
+    }
+  },
+  "pre_matchup": {
+   "intro": {
+    "eyebrow": "Matchup Brief",
+    "title": "Build a matchup and reveal who has the edge.",
+    "lead": "The Madness Index compares two NCAA tournament teams using 24 different season-long metrics, including efficiency, résumé strength, and matchup-specific statistical interactions.",
+    "secondary": "Run Compare to unlock the full breakdown."
+  },
+  "steps": [
+    {
+      "step": "1",
+      "title": "Load the field.",
+      "description": "Import the tournament dataset to unlock team profiles."
+    },
+    {
+      "step": "2",
+      "title": "Choose two teams to queue the matchup.",
+      "description": "Select one team for each side. The model automatically assigns Favorite and Cinderella based on seed unless overridden using Sandbox mode."
+    },
+    {
+      "step": "3",
+      "title": "Run the matchup",
+      "description": "Click Compare to generate full scorecards, matchup pressure analysis, and a predicted lean."
+    }
+  ],
+  "outcome": {
+    "title": "What unlocks after a matchup is run",
+    "items": [
+      "A side-by-side scorecard for each team.",
+      "A single Madness Index rating for each side.",
+      "Matchup pressure points that explain why one team has an edge.",
+      "A clear model lean and a grounded read of the matchup."
+    ]
+  },
+  "cta": {
+    "primary": "Start a matchup",
+    "hint": "Everything below updates automatically once a matchup is run."
+    }
+  },
+  "ui_templates": {
+    "team_title_with_seed": "#{{seed}} Seed {{team}}",
+    "team_title_no_seed": "{{team}}",
+    "team_fallback_a": "Team A",
+    "team_fallback_b": "Team B",
+    "mi_badge_title": "Baseline MI: {{mi_base}}",
+    "rating_missing_fallback": "01",
+    "dash": "—"
+  },
+  "resume_tile_ui": {
+    "tier_rules": [
+      { "min": 0.10, "label": "Strong", "class": "resume-tier-strong" },
+      { "min": 0.05, "label": "Above Average", "class": "resume-tier-above" },
+      { "min": -0.05, "label": "Average", "class": "resume-tier-average" },
+      { "min": -0.10, "label": "Weak", "class": "resume-tier-weak" },
+      { "min": -999, "label": "Fragile", "class": "resume-tier-fragile" }
+    ],
+    "sign_classes": {
+      "positive": "context-positive",
+      "negative": "context-negative",
+      "neutral": "context-neutral"
+    }
+  },
+  "identity_tile_ui": {
+    "headers": {
+      "favorite": "Favorite Authenticity Score",
+      "cinderella": "Cinderella Identity Score",
+      "neutral": "Tournament Identity"
+    },
+    "role_labels": {
+      "favorite": "Favorite",
+      "cinderella": "Cinderella",
+      "neutral": "Neutral"
+    },
+    "detail_templates": {
+      "favorite": "Favorite Authenticity: {{fas}}",
+      "cinderella": "Cinderella Identity: {{cis}}",
+      "neutral": "CIS: {{cis}} • FAS: {{fas}}"
+    }
+  },
+  "formula_explain": {
+    "template": "Team Total ({{total}}) = Core Traits ({{core}}) + Breadth Bonus ({{breadth}}) + Résumé Context ({{resume}}) + Matchup Interactions ({{interactions}})."
+  }, 
+  "card": {
+    "cinderella_label": "Cinderella",
+    "favorite_label": "Favorite",
+    "cind_profile_title": "Cinderella Core Traits Profile",
+    "fav_profile_title": "Favorite Core Traits Profile",
+    "explain_btn": "Explain",
+    "profile_subtotal": "Profile Subtotal",
+    "identity_label": "Tournament Identity",
+    "resume_label": "Résumé Context",
+    "marks_label": "Profile Marks",
+    "marks_subtitle": "Volatility diagnostics",
+    "madness_label": "Madness Index Rating",
+    "core_tile_header": "Explanation:",
+    "marks_tile_header": "Explanation:",
+    "identity_tile_header": "Explanation:",
+    "resume_tile_header": "Explanation:",
+    "madness_tile_header": "Explanation:",
+    "tile_back_helper_core": "Tap again to return to the full Core Traits table.",
+    "tile_back_helper_marks": "Tap again to see the badges.",
+    "tile_back_helper_identity": "Tap again to see the identity tile.",
+    "tile_back_helper_resume": "Tap again to see the résumé tile.",
+    "tile_back_helper_madness": "Tap again to return.",
+    "card_back_helper": "Click this card again to flip back to the full stat view.",
+    "card_back_title": "How This Scorecard Works"
+  },
+  "interactions": {
+    "title": "4. Interaction Metrics",
+    "help": "Matchup-specific leverage from 3PT Tension, FT Pressure, Paint Tension, Turnover Pressure, Glass Tension, Résumé Pressure, Physicality, Shot Quality, and Variance Sensitivity.",
+    "howto_title": "How to read this table",
+    "howto_items": [
+    "Each row corresponds to a single pressure channel (3PT, FT, paint, turnovers, tempo, or glass).",
+    "The edge pill shows which team holds the leverage in that channel, or if it’s essentially even.",
+    "Row shading mirrors the edge: soft teal tint for the Cinderella card, warm orange tint for the Favorite card, and neutral for even.",
+    "Edges come from matchup-based adjustments, not just the raw team ratings — a strong unit can still be neutralized by a great counter.",
+    "The totals row at the bottom summarizes net interaction leverage: how many channels tilt toward each team once everything is blended."
+    ],  
+    "howto_note": "Think of this like your matchup chessboard: each row is one pressure point. The totals tell you who wins that board overall."
+  },
+  "rounds": {
+    "R64": "Round of 64",
+    "R32": "Round of 32",
+    "S16": "Sweet Sixteen",
+    "E8": "Elite Eight",
+    "F4": "Final Four",
+    "Champ": "Championship"
+  },
+  "status": {
+    "csv_parsing_ok": "CSV loaded successfully. Teams and stats are now available.",
+    "csv_parsing_error": "Could not parse this CSV. Check headers and numeric formats.",
+    "no_teams_selected": "Select a team on each side before comparing the matchup.",
+    "same_team_selected": "Team A and Team B must be different.",
+    "no_data_for_matchup": "No data available for this matchup."
+  },
+  "summary_phrases": {
+    "tiny_gap": {
+      "label": "Coin flip",
+      "description": "True toss-up. The model sees almost no separation between these teams."
+    },
+    "small_gap": {
+      "label": "Slight lean",
+      "description": "A modest edge, but upset risk is very live."
+    },
+    "medium_gap": {
+      "label": "Clear lean",
+      "description": "One side has a clear but not insurmountable advantage."
+    },
+    "large_gap": {
+      "label": "Strong favorite",
+      "description": "The model strongly prefers this side barring extreme variance."
+    }
+  },
+  "controls": {
+    "data_title": "Load Tournament Data",
+    "dataset_label": "Dataset",
+    "dataset_placeholder": "Select a dataset...",
+    "csv_label_manual": "Upload CSV manually",
+    "csv_label": "Upload the Tournament Dataset",
+    "csv_spec_show": "Data format required (optional)", 
+    "csv_spec_hide": "Hide data format", 
+    "template_btn": "Download CSV Template",
+    "matchup_title": "Select Matchup",
+    "teamA_label": "Team A",
+    "teamB_label": "Team B",
+    "step1_label": "STEP 1: Select Teams",
+    "step2_label": "STEP 2: Select Round",
+    "step3_label": "STEP 3: Run the Matchup",
+    "role_mode_label": "Role Mode",
+    "role_mode_hint": "The app automatically assigns roles by seed specific to the matchup chosen.",
+    "role_auto": "Auto (by seed)",
+    "role_Afav": "Force Team A Favorite",
+    "role_Bfav": "Force Team B Favorite",
+    "compare_btn": "Compare Matchup",
+    "swap_btn": "Swap Teams",
+    "round_help": "",
+    "debug_btn": "Toggle Debug View"
+  },
+  "summary": {
+  "title": "5. Scorecards & Matchup Summary",
+  "help": "Final Madness Index scores for each team, the MI gap, and the model’s predicted lean.",
+  "matchup_header": "Matchup Edge",
+  "round": "Round:",
+  "neutral_matchup": "Neutral matchup",
+  "toward_phrase": "toward",
+  "table_labels": {
+    "cinderella_label": "Cinderella",
+    "favorite_label": "Favorite",
+    "baseline_label": "Baseline MI",
+    "matchup_label": "Matchup MI",
+    "interaction_label": "Interaction Leverage",
+    "predicted_label": "Predicted Winner",
+    "edge_label": "Matchup Edge"
+    }
+  },
+  "glossary": {
+    "title": "Stat & Rule Glossary",
+    "help": "Definitions for all metrics and rules used in the Madness Index.",
+    "entries": [
+      {
+        "term": "Offensive Efficiency",
+        "abbr": "OffEff",
+        "category": "Core Traits",
+        "definition": "Points scored per 100 possessions. Higher values indicate a more efficient offense."
+      },
+      {
+        "term": "Defensive Efficiency",
+        "abbr": "DefEff",
+        "category": "Core Traits",
+        "definition": "Points allowed per 100 possessions. Lower values indicate a stronger defense."
+      },
+      {
+        "term": "Adj. Efficiency Margin",
+        "abbr": "AdjEM",
+        "category": "Core Traits",
+        "definition": "Net efficiency (OffEff minus DefEff), adjusted for field strength. Captures overall quality."
+      },
+      {
+        "term": "True Shooting %",
+        "abbr": "TS%",
+        "category": "Core Traits",
+        "definition": "Shooting efficiency that weights 2s, 3s, and free throws into a single scoring metric."
+      },
+      {
+        "term": "Effective FG %",
+        "abbr": "eFG%",
+        "category": "Core Traits",
+        "definition": "Field-goal percentage that gives extra weight to 3-pointers."
+      }
+    ]
+  },
+  "marks": {
+    "descriptions": {
+      "Offensive Rigidity": {
+       "moderate":"Typically one-dimensional offense.",
+       "severe": "Can collapse when primary option is removed."
+      },
+      "Unstable Perimeter": {
+       "moderate": "3PT-reliant yet inconsistent.",
+       "severe": "Severe volatility from 3PT-range."
+      },
+      "Cold Arc Team": {
+       "moderate": "Relatively poor 3PT-shooting team.",
+       "severe": "Not a threat from 3PT-range."
+      },
+      "Undisciplined Defense": {
+       "moderate": "Aggressive defense yet prone to fouling.",
+       "severe": "Over-aggressive defense with fouling problems."
+      },
+      "Soft Interior": {
+       "moderate": "Insignificant paint presence.",
+       "severe": "Poor rim resistance and shot deterrence."
+      },
+      "Perimeter Leakage": {
+       "moderate": "Tends to allow clean perimeter looks.",
+       "severe": "Prone to teams with high 3PT-volume."
+      },
+      "Tempo Strain": {
+       "moderate": "Vulnerable when out of play-style comfort zone.",
+       "severe": "Susceptible to strong halfcourt disruiption."
+      }
+    }
+  },
+  "back": {
+    "formula": {
+      "card": "Each Madness Index score starts from MI_base, a blend of Core Traits, Breadth, and Résumé Context. Matchup-specific interaction leverage is added on top to get MI_matchup."
+    },
+    "core": {
+      "card": "Core Traits measure who a team is possession-to-possession: offensive efficiency, defensive efficiency, shooting quality, and possession control.",
+      "tile": "This tile shows each core stat, how it grades versus the 64-team field, and how much weight it carries in the Core composite."
+    },
+    "breadth": {
+      "card": "Breadth rewards teams that are strong in multiple core areas at once rather than leaning on a single spike. More overlapping strengths create a larger Breadth bonus.",
+      "tile": "The Breadth summary highlights how many core metrics clear the above-average threshold and how much bonus that coverage adds."
+    },
+    "resume": {
+      "card": "Résumé Context blends record and schedule strength into a single index. Elite résumés earn a small boost; fragile or inflated résumés receive a small penalty.",
+      "tile": "This tile summarizes how the team's win percentage and schedule difficulty stack up versus the field and how that converts into a résumé adjustment."
+    },
+    "marks": {
+      "card": "Profile Marks are diagnostic flags. They do not change the score directly, but they reveal structural strengths or vulnerabilities that may matter in specific matchups.",
+      "tile": "Each badge reflects a repeatable pattern in the stats (for example, rim softness, turnover fragility, or cold perimeter shooting). Use them as quick scouting shortcuts."
+    },
+    "identity": {
+      "tile": "Tournament Identity blends CIS (Cinderella Index Score) and FAS (Favorite Alignment Score) into a single snapshot of how this team tends to show up in a bracket."
+    }
+  },
+  "core_explain": {
+    "paragraph_prefix": "{{team}}'s core profile shows the following pattern:",
+    "fallback_template": "{{team}} shows a generally balanced core profile with no extreme strengths or weaknesses.",
+    "metrics": {
+      "offeff": {
+        "label": "Offensive Efficiency",
+        "role": "primary scoring engine",
+        "phrases": {
+          "Elite": "an elite scoring engine",
+          "Strong": "a strong scoring attack",
+          "Above Average": "a capable offense",
+          "Average": "an offense that can hold its own",
+          "Weak": "an inconsistent scoring output",
+          "Fragile": "a fragile scoring identity"
+        },
+        "back_phrases": {
+          "Elite": "This offense reliably turns possessions into high-quality results, flowing into strong chances and finishing them with poise. They maintain pressure throughout the game and are difficult to disrupt without major defensive adjustments.",
+           "Strong": "Their offense produces steady, repeatable scoring by creating workable looks and converting them at a strong clip. Opponents can slow them in stretches, but they generally find their way back into rhythm.",
+           "Above Average": "They generate enough clean chances to keep pace against most opponents, especially when spacing and tempo break their way. While not dominant, their scoring can carry stretches when the game opens up.",
+           "Average": "Their offense is capable but not forceful, relying more on solid execution than natural advantage. They can score within the flow of the game but rarely dictate terms without help from pace or matchups.",
+           "Weak": "They struggle to create or finish quality looks consistently, leading to long, momentum-halting possessions. When the game tightens, their scoring can fade and leave them searching for answers.",
+           "Fragile": "This offense often breaks down before good opportunities develop, resulting in extended droughts that opponents can exploit. They seldom find stable scoring rhythm and rely heavily on game script going their way."
+        },
+        "back_phrases_alt": {
+          "Elite": "Their offense operates with a clarity and steadiness that carries possessions on its own. They create clean chances early or late in the clock and rarely need favorable conditions to sustain pressure.",
+          "Strong": "Their scoring approach holds firm across most game states, giving them a dependable rhythm even against disciplined defenses. They stay productive without needing extended runs or unusually soft coverages.",
+          "Above Average": "Their offense generally moves possessions in the right direction, leaning on workable spacing and reliable touch. They tend to capitalize when defenses slip but won’t consistently tilt the floor by themselves.",
+          "Average": "Their scoring output is serviceable but rarely dictates terms. They can keep pace when the game stays orderly, though they depend more on flow, matchups, or occasional bursts to maintain momentum.",
+          "Weak": "Their offense often needs help from pace, turnovers, or timely shot-making to stay afloat. When possessions tighten, they struggle to maintain rhythm and have difficulty generating steady pressure.",
+          "Fragile": "Their scoring profile leaves little margin for error, as productive stretches are difficult to sustain. Halfcourt possessions frequently stall, and they rely heavily on external factors to keep games within reach."
+        }
+      },
+      "defeff": {
+        "label": "Defensive Efficiency",
+        "role": "defensive floor",
+        "phrases": {
+          "Elite": "an elite defensive floor",
+          "Strong": "a strong defensive core",
+          "Above Average": "a reliably solid defense",
+          "Average": "a defense that can survive most matchups",
+          "Weak": "a leaky defense that can be stressed",
+          "Fragile": "a fragile defensive core that invites pressure"
+        },
+        "back_phrases": {
+          "Elite": "This defense consistently takes opponents out of their comfort zones, limiting clean looks and forcing them into difficult decisions. They set the tone for how games are played and rarely allow easy scoring stretches.",
+          "Strong": "Their defense reliably contests shots and closes off preferred actions, making opponents work hard for points. They can steady a game when the offense stalls and respond well to different styles.",
+          "Above Average": "They defend with enough structure and discipline to keep most opponents from fully settling in. While not overpowering, they avoid major breakdowns and remain dependable from possession to possession.",
+          "Average": "They compete on defense but lack a defining element that consistently turns stops into momentum. When connected, they hold up well, but sharp opponents can still find scoring lanes.",
+          "Weak": "Their defense often allows opponents to reach the spots they want, opening windows for rhythm scoring. They have difficulty managing surges and can lose control when pressure increases.",
+          "Fragile": "Their defensive structure breaks easily, yielding clean looks and allowing opponents to dictate pace. They rarely generate resistance and often rely on outscoring problems instead of solving them."
+        },
+        "back_phrases_alt": {
+          "Elite": "Their defense consistently shrinks possessions, removing clean looks and forcing opponents into difficult decisions. They control the terms of engagement, allowing almost no comfortable rhythm to develop.",
+          "Strong": "Their defensive structure holds up against most styles, limiting efficient chances and slowing opposing momentum. Even when beaten initially, they recover well enough to keep outcomes in manageable ranges.",
+          "Above Average": "Their defense reliably challenges first options and steers opponents into less efficient routes. They may bend at times, but they rarely give up effortless stretches without resistance.",
+          "Average": "Their defensive presence is stable but unspecialized. They can contain straightforward actions, yet stronger offenses often find workable solutions as possessions wear on.",
+          "Weak": "Their defense frequently concedes accessible paths to scoring, struggling to disrupt flow or remove high-quality looks. Opponents can maintain comfort for long stretches without being pushed off plan.",
+          "Fragile": "Their defensive resistance breaks easily under pressure, offering little deterrence once opponents initiate actions. Clean windows appear often, creating an uphill battle on most trips down the floor."
+        }
+      },
+      "adjem": {
+        "label": "Adj. Efficiency Margin",
+        "role": "overall efficiency margin",
+        "phrases": {
+          "Elite": "an elite overall efficiency margin",
+          "Strong": "a strong overall efficiency margin",
+          "Above Average": "an above-average overall margin",
+          "Average": "a roughly average overall margin",
+          "Weak": "a thin overall margin",
+          "Fragile": "a fragile overall margin"
+        },
+        "back_phrases": {
+          "Elite": "Their overall performance reflects a team that consistently wins the possession battle on both ends. They impose their identity regardless of opponent style and maintain control across long stretches of play.",
+          "Strong": "They show a sturdy blend of scoring punch and defensive reliability, giving them an advantage that travels across most matchups. Games tend to bend toward their preferred rhythm.",
+          "Above Average": "Their balanced profile allows them to stay competitive against a wide range of opponents. While not overpowering, they bring enough consistency to stay within striking distance in most scenarios.",
+          "Average": "They play roughly to the level of their opponents, with neither end of the floor pulling them significantly ahead. Matchups, pace, and game script often dictate their results.",
+          "Weak": "Their combined performance shows noticeable strain, with one or both ends of the floor struggling to hold firm. They often need favorable conditions to stay in control.",
+          "Fragile": "They have difficulty sustaining competitiveness across possessions, with gaps that opponents can exploit early and often. Their ability to dictate games is limited, forcing them into uphill battles."
+        },
+        "back_phrases_alt": {
+          "Elite": "Their overall profile leaves almost no weak entry points—both sides of the ball reinforce each other, producing steady control over game flow. They rarely need ideal conditions to create separation.",
+          "Strong": "Their combined strengths give them a reliable foothold in most matchups. Even when one phase cools off, the other is steady enough to keep them in command for long stretches.",
+          "Above Average": "Their balance across offense and defense typically places them on the favorable side of game pressure. They may not overwhelm, but they accumulate small edges that add up over time.",
+          "Average": "Their performance level keeps most games within a workable margin. They can trade punches effectively but don’t consistently generate the cushion that higher-tier teams create.",
+          "Weak": "Their overall efficiency blend often puts them behind the curve. They struggle to build lasting leads and rely more on opponent mistakes or short-lived momentum swings to stay competitive.",
+          "Fragile": "Their combined profile creates constant strain, as neither phase reliably supports the other. They face uphill battles to stay within reach and often require highly specific conditions to avoid slipping behind."
+        }
+      },
+      "ts": {
+        "label": "True Shooting %",
+        "role": "shot quality and efficiency",
+        "phrases": {
+          "Elite": "elite shot quality and efficiency",
+          "Strong": "strong shot selection and efficiency",
+          "Above Average": "above-average shot quality",
+          "Average": "steady, average shot quality",
+          "Weak": "shot selection and efficiency concerns",
+          "Fragile": "high-risk, low-return shot quality"
+        },
+        "back_phrases": {
+          "Elite": "This team extracts maximum value from its scoring chances, pairing sharp shot selection with confident finishing. They pressure defenses by capitalizing on quality looks, earning trips to the line, and converting at a rate that forces opponents to adjust.",
+          "Strong": "They consistently turn good decisions into points, balancing perimeter accuracy, touch around the rim, and steady free-throw production. Their efficiency keeps their offense on schedule even when the game tightens.",
+          "Above Average": "They make solid use of the shots they create, rewarding well-run possessions with dependable scoring. Their efficiency rises when spacing and rhythm align, giving them stretches of real offensive lift.",
+          "Average": "Their shot value generally matches the opportunities they generate. They can score effectively within their comfort zone, but their efficiency doesn’t naturally elevate the offense without matchup support.",
+          "Weak": "They often leave points on the table through rushed attempts, limited finishing, or inconsistent free-throw results. Even good possessions can end without payoff, putting pressure on pace and defense to compensate.",
+          "Fragile": "Their shot profile yields low returns, with frequent empty possessions that stall momentum. Missed clean looks and unreliable conversion make it difficult for them to sustain rhythm or punish defensive mistakes."
+        },
+        "back_phrases_alt": {
+          "Elite": "Their shot profile is built on unwavering precision, turning even modest openings into high-value results. Defenses must react early or concede, as their efficiency rarely fluctuates across game states.",
+          "Strong": "Their finishing touch consistently rewards good possessions, allowing them to stay productive without needing heavy volume. They convert the chances they earn and punish lapses with dependable accuracy.",
+          "Above Average": "Their scoring efficiency holds up well over the course of a game. They make the most of clean looks and generally keep their offense on schedule, even if they don’t elevate every possession.",
+          "Average": "Their shooting output is stable but unspectacular. They can finish opportunities when created, though they don't reliably lift the team when possessions stall or shot quality dips.",
+          "Weak": "Their touch wavers, leaving solid possessions undercut by missed chances. They often need extra opportunities—through tempo, turnovers, or the glass—to offset inconsistent finishing.",
+          "Fragile": "Their scoring efficiency gives them little room for error, as even quality looks may not translate into steady production. Long dry spells are common and can shift control of the game quickly."
+        }
+      },
+      "efg": {
+        "label": "Effective FG %",
+        "role": "shooting efficiency and spacing",
+        "phrases": {
+          "Elite": "elite shooting efficiency and spacing",
+          "Strong": "strong perimeter efficiency and spacing",
+          "Above Average": "above-average shooting efficiency",
+          "Average": "serviceable shooting efficiency",
+          "Weak": "shaky shooting efficiency",
+          "Fragile": "fragile shooting profile"
+        },
+        "back_phrases": {
+          "Elite": "Their shooters and finishers convert at a level that stresses defenses from the opening tip. They pair confident perimeter touch with efficient inside scoring, creating a shot profile that consistently produces high-value returns.",
+          "Strong": "They generate reliable scoring from both the arc and the paint, making opponents respect multiple levels of the floor. Even when contested, their overall accuracy keeps their offense functioning smoothly.",
+          "Above Average": "Their shooting provides a steady lift, with enough perimeter and interior efficiency to support long possessions. When their spacing is clean, they convert chances at a rate that can tilt stretches of play.",
+          "Average": "Their shooting output generally mirrors the quality of looks they create. They can keep pace when the ball moves well, but their accuracy alone does not naturally separate them from most opponents.",
+          "Weak": "They struggle to convert at a strong rate, forcing them to work harder for the same scoring return as more efficient teams. Missed perimeter shots and inconsistent finishing can flatten offensive momentum.",
+          "Fragile": "Their shot-making is unreliable, with poor conversion both at the rim and beyond the arc. Defenses can collapse confidently, knowing this team rarely capitalizes at the rate needed to stay competitive."
+        },
+        "back_phrases_alt": {
+          "Elite": "Their shot selection and accuracy work seamlessly together, producing clean, high-yield possessions from all levels. Opponents must overextend to contest, knowing that even modest space often becomes efficient scoring.",
+          "Strong": "Their shooting discipline consistently generates quality outcomes. They identify and convert the right shots, maintaining pressure without requiring an exceptional volume of attempts.",
+          "Above Average": "Their shot distribution leans in productive directions, giving them a steady baseline of efficiency. While not overpowering, they reliably turn good looks into points and avoid low-value attempts.",
+          "Average": "Their effectiveness rises and falls with shot quality. They capitalize when possessions unfold cleanly but don’t consistently create the sort of looks that elevate an offense on their own.",
+          "Weak": "Their shooting profile limits how much value they extract from each possession. Contested or lower-quality attempts appear too often, making it difficult to sustain scoring against organized defenses.",
+          "Fragile": "Their shot diet rarely yields efficient returns, as both selection and accuracy struggle to hold up under pressure. Opponents can guard them honestly and still expect favorable outcomes possession to possession."
+        }
+      },
+      "def_efg": {
+        "label": "Defensive eFG %",
+        "role": "shot suppression",
+        "phrases": {
+          "Elite": "elite suppression of opponent shot quality",
+          "Strong": "strong shot suppression",
+          "Above Average": "solid shot contesting",
+          "Average": "serviceable shot defense",
+          "Weak": "a defense that gives up clean looks",
+          "Fragile": "a defense that consistently surrenders efficient shots"
+        },
+        "back_phrases": {
+          "Elite": "This defense consistently forces opponents into low-value attempts, taking away clean looks both at the rim and from the perimeter. Their contests are disciplined and disruptive, making efficient scoring unusually difficult.",
+          "Strong": "They limit the quality of opponent shots with solid positioning and timely contests. Opponents rarely find extended rhythm, and clean looks tend to be the exception rather than the norm.",
+          "Above Average": "They defend with enough structure to make opponents work for strong chances. While not suffocating, they contest well and generally prevent opponents from finding easy scoring outlets.",
+          "Average": "They can hold up when connected, but their shot defense doesn’t consistently erase opponent strengths. Good execution still generates workable looks against them, especially over longer stretches.",
+          "Weak": "They allow too many comfortable attempts, giving opponents clean windows at the rim or in space. Once a team finds rhythm, this defense struggles to break possessions apart.",
+          "Fragile": "Opponents generate high-value shots with regularity, facing little resistance at key moments. This defense rarely forces difficult decisions, allowing efficient scoring to build quickly and repeatedly."
+        },
+        "back_phrases_alt": {
+          "Elite": "They consistently erase high-quality attempts, forcing opponents into uncomfortable angles or rushed releases. Few teams can maintain rhythm against this level of shot disruption.",
+          "Strong": "They limit the value of opponent looks with steady contests and disciplined positioning. Even when opponents execute well, clean windows are hard to come by for long stretches.",
+          "Above Average": "They regularly challenge primary options and steer offenses into less efficient shots. While not entirely suffocating, their presence makes opponents work harder than usual for good outcomes.",
+          "Average": "They can hold their ground against standard actions, though stronger offenses may still find dependable looks. Their shot defense helps in spurts but doesn’t consistently tilt the floor.",
+          "Weak": "They allow opponents to reach comfortable scoring spots too frequently. Contest quality varies, creating stretches where opposing offenses operate with little resistance.",
+          "Fragile": "They provide minimal deterrence at the point of attack or in space, giving up clean, in-rhythm attempts throughout the game. Opponents often dictate terms without significant adjustment required."
+        }
+      },
+      "epr": {
+        "label": "Effective Possession Ratio",
+        "role": "possession stability",
+        "phrases": {
+          "Elite": "elite possession stability",
+          "Strong": "strong control of possessions",
+          "Above Average": "solid possession management",
+          "Average": "roughly average possession control",
+          "Weak": "possession-control concerns",
+          "Fragile": "fragile possession structure"
+        },
+        "back_phrases": {
+          "Elite": "Their possessions are remarkably stable, rarely ending without a meaningful scoring chance. They value the ball, stay organized under pressure, and string together productive trips that wear opponents down over time.",
+          "Strong": "They manage possessions with confidence, routinely creating chances or earning free throws rather than wasting trips. Even when tempo rises, they maintain enough control to stay in rhythm.",
+          "Above Average": "They show generally steady possession habits, avoiding long stretches of empty trips. Their structure holds up well when the offense is flowing, though they may need alignment in spacing or pacing to sustain it.",
+          "Average": "Their possession control mirrors the flow of the game. When organized, they create clean chances, but lapses in spacing or decision-making can lead to uneven stretches that level out their impact.",
+          "Weak": "They experience too many possessions that fail to produce pressure, whether through turnovers, stalled actions, or poor late-clock decisions. These gaps make it difficult to sustain momentum against steady opponents.",
+          "Fragile": "Their possession structure unravels easily, leading to frequent empty trips that compound quickly. Opponents can disrupt them with modest resistance, and they struggle to generate reliable opportunities across a full game."
+        },
+        "back_phrases_alt": {
+          "Elite": "Their possessions stay remarkably clean, with few wasted trips and steady conversion of opportunities. This stability shapes game flow, giving them control even before shot-making comes into play.",
+          "Strong": "They manage possessions with discipline, keeping empty trips to a minimum and maintaining forward pressure. Opponents rarely gain extra chances or easy momentum off their mistakes.",
+          "Above Average": "Their possession structure is generally reliable, producing more productive trips than damaging ones. While not airtight, it provides a consistent enough backbone to support their broader style.",
+          "Average": "Their trips vary in quality, mixing solid sequences with occasional breakdowns. They can maintain balance, but they don’t consistently generate the clean possessions that separate stronger teams.",
+          "Weak": "Their possession outcomes often drift off-script, with too many trips failing to create pressure. This inconsistency forces them to rely on hot shooting or matchup breaks to stay level.",
+          "Fragile": "Their possessions unravel frequently, limiting their ability to sustain runs or control tempo. Empty or chaotic trips accumulate quickly, putting immediate stress on every other phase of their profile."
+        }
+      },
+      "to": {
+        "label": "Turnover %",
+        "role": "ball security",
+        "phrases": {
+          "Elite": "elite ball security",
+          "Strong": "strong ball protection",
+          "Above Average": "reliable ball handling",
+          "Average": "manageable turnover profile",
+          "Weak": "turnover issues that can stall runs",
+          "Fragile": "severe turnover risk"
+        },
+        "back_phrases": {
+          "Elite": "This team protects the ball with exceptional poise, rarely offering opponents free possessions. Their offense stays organized under pressure, allowing them to fully capitalize on the scoring chances they create.",
+          "Strong": "They show reliable ball security, keeping turnovers to a manageable level even when the game speeds up. Their possessions stay intact, and opponents struggle to generate easy transition opportunities.",
+          "Above Average": "They generally handle the ball well, avoiding the kind of mistakes that stall momentum. Turnovers pop up occasionally but rarely define long stretches of their offensive flow.",
+          "Average": "Their ball control fluctuates with game rhythm. They can execute cleanly for long stretches, but pressure or pace can push them into pockets of sloppiness that level out their offensive impact.",
+          "Weak": "Turnovers interrupt their possessions too frequently, cutting off scoring chances and feeding opponent runs. They struggle to maintain rhythm when defenses apply consistent pressure.",
+          "Fragile": "Their ball security breaks down easily, leading to frequent giveaways that opponents convert into immediate scoring threats. These mistakes disrupt their entire offensive structure and create uphill battles."
+        },
+        "back_phrases_alt": {
+          "Elite": "They protect the ball with remarkable consistency, keeping opponents from gaining free possessions or transition chances. Their offense stays connected because they rarely surrender control of the possession.",
+          "Strong": "Their ball security holds firm under typical pressure, allowing them to run their sets cleanly and stay on schedule. Opponents must work to create mistakes rather than waiting for them to appear.",
+          "Above Average": "They generally manage the ball well, limiting the kinds of giveaways that swing momentum. While not flawless, their turnover profile supports steady offensive flow.",
+          "Average": "Their ball handling is serviceable, mixing stable stretches with occasional lapses. They can maintain rhythm when focused, though they don’t provide a built-in safety net against pressure.",
+          "Weak": "Their giveaways show up often enough to interrupt runs and stall possessions. Opponents gain extra chances without having to overextend, narrowing the margin for any offensive efficiency they create.",
+          "Fragile": "They struggle to keep possession intact, with turnovers emerging from both pressure and routine situations. These breakdowns place constant strain on their offense and feed opponents easy scoring opportunities."
+      }
+    }
+  },
+    "support_phrases": {
+      "two_plus_elite": "With multiple elite core metrics, this profile tends to travel well into tougher rounds.",
+      "one_elite_plus_depth": "One standout core strength supported by several solid traits gives this team a stable identity.",
+      "balanced": "Even without a single overwhelming strength, the balance across the core metrics keeps the floor reasonably high.",
+      "polarized": "The gap between the best and weakest cores creates a polarized profile that can look very different game-to-game."
+    }
+  },
+  "core_profile": {
+    "breadth_row": {
+      "threshold_text": "Scales with total hits across Core Traits",
+      "tier_text": "-"
+    }
+  },
+  "breadth_explain": {
+    "template": "{{team}}’s breadth score reflects {{summary}}. {{support}}",
+    "fallback_template": "{{team}} shows a narrow core profile with limited overlap across efficiency, shooting, and possession stability.",
+    "lanes": {
+      "efficiency": {
+        "0": "no consistent advantage in overall efficiency",
+        "1": "a modest efficiency edge in one or two areas",
+        "2plus": "stacked efficiency strengths across multiple metrics"
+      },
+      "shooting": {
+        "0": "no clear shooting advantage versus the field",
+        "1": "at least one above-average shooting angle",
+        "2plus": "multiple strong shooting levers that travel well"
+      },
+      "possession": {
+        "0": "no meaningful possession-control edge",
+        "1": "a basic possession-control cushion",
+        "2plus": "strong possession stability through EPR and turnover management"
+      }
+    },
+    "support_phrases": {
+      "high": "With this many overlapping hits, the profile tends to hold up even when one area is off on a given night.",
+      "medium": "The breadth is good enough to survive most matchups, but extreme opponents can still drag the game into narrow territory.",
+      "low": "With limited overlap, this team leans heavily on its primary strengths and can feel brittle when those are taken away.",
+      "none": "Without notable breadth, this profile is highly dependent on matchup and game script."
+    }
+  },
+  "resume_explain": {
+    "template_positive": "{{team}} carries a {{tier}} résumé, pairing {{record}} with {{schedule}}. {{impact}}",
+    "template_negative": "{{team}} brings a {{tier}} résumé, with {{record}} and {{schedule}}. {{impact}}",
+    "fallback_template": "{{team}} shows a roughly average résumé once record and schedule are blended together.",
+    "record_phrases": {
+      "Elite": "an elite win–loss profile versus the field",
+      "Strong": "a strong overall record",
+      "Above Average": "an above-average win–loss mark",
+      "Average": "a solid but unspectacular record",
+      "Weak": "a shaky record that lags behind true contenders",
+      "Fragile": "a fragile win–loss profile that raises questions"
+    },
+    "schedule_phrases": {
+      "Elite": "a very demanding schedule that has already stress-tested this team",
+      "Strong": "a clearly challenging schedule",
+      "Above Average": "a reasonably tough slate of opponents",
+      "Average": "a middle-of-the-pack schedule",
+      "Weak": "a softer schedule that may inflate the numbers",
+      "Fragile": "one of the softer schedules in the field"
+    },
+    "impact_phrases": {
+      "Elite": "The model treats this as real evidence-of-quality and adds a notable credibility bump, while still keeping core efficiency in charge.",
+      "Strong": "This earns a meaningful nudge in their favor, reinforcing what the efficiency data already suggests.",
+      "Above Average": "This grants a modest positive adjustment, but core and breadth remain the primary drivers.",
+      "Average": "This is effectively neutral — the résumé neither boosts nor penalizes the core profile.",
+      "Weak": "The model applies a light skepticism penalty, trimming back any inflated stat profile.",
+      "Fragile": "The résumé drives a clear skepticism penalty; strong-looking efficiency here needs more proof before the model buys in."
+    }
+  },
+  "marks_explain": {
+    "template_some": "{{team}} currently carries {{summary}}. {{impact}}",
+    "template_none": "{{team}} has no active Profile Marks. This suggests a structurally clean statistical profile, at least within the limits of this model.",
+    "severity_order": [
+      "Severe",
+      "Moderate"
+    ],
+    "severity_phrases": {
+      "Severe": {
+        "singular": "one Severe badge: {{list}}",
+        "plural": "{{count}} Severe badges: {{list}}"
+      },
+      "Moderate": {
+        "singular": "one Moderate badge: {{list}}",
+        "plural": "{{count}} Moderate badges: {{list}}"
+      }
+    },
+    "impact_phrases": {
+      "Severe_heavy": "Multiple Severe flags mark structural risks that can swing a tournament game if the matchup tilts the wrong way.",
+      "Mixed": "The blend of Severe and Moderate flags points to real pressure points, but also some room for matchups to break in their favor.",
+      "Moderate_light": "Moderate flags alone act more like caution labels than full stop signs — they matter, but only when the matchup leans into them.",
+      "None": "Without any badges, this profile doesn’t raise obvious structural red flags, so matchups hinge more on pure efficiency and style."
+    }
+  },
+  "identity_explain": {
+    "template_favorite": "{{team}} enters this matchup as a {{band}} based on its FAS_static score and seed context. {{support}}",
+    "template_cinderella": "{{team}} shows a {{band}} when slotted as the underdog, driven by its CIS_static score and résumé overperformance. {{support}}",
+    "template_neutral": "{{team}} sits in a neutral identity band here, neither a clear Favorite nor a true Cinderella in the model. {{support}}",
+    "fallback_template": "{{team}}’s tournament identity is neutral in this matchup.",
+    "bands": {
+      "cis": {
+        "Live Cinderella": "High CIS_static with real upset volatility as an underdog.",
+        "Potential Cinderella": "Noticeable underdog upside without full-blown chaos.",
+        "Mild Upset Signal": "Some upset noise, but more matchup-dependent.",
+        "Low Cinderella Identity": "Little in the profile that suggests a classic bracket-buster."
+      },
+      "fas": {
+        "True Favorite": "High FAS_static with a strong efficiency and résumé backbone.",
+        "Strong Favorite": "Clearly favored, but not quite on the top shelf.",
+        "Questionable Favorite": "Favored by seed, but carrying some structural doubt.",
+        "Fragile Favorite": "Technically favored, but with enough holes to worry about."
+      }
+    },
+    "support_phrases": {
+      "aligned": "The identity band lines up with how the bracket already sees this team.",
+      "misaligned": "The identity band pushes against the bracket’s default view, hinting at either upset or disappointment risk.",
+      "ambiguous": "The CIS/FAS signals are mixed, so the identity band here is more descriptive than predictive."
+    }
+  },
+  "madness_explain": {
+    "template": "{{team}}’s Madness Index sits in {{mi_tier}} for this matchup. {{role_clause}} {{gap_clause}} {{round_clause}}",
+    "fallback_template": "{{team}}’s Madness Index does not show a meaningful edge in either direction for this matchup.",
+    "mi_tiers": {
+      "Top": "the very top tier of the field for this round",
+      "High": "a clearly favorable tier versus most of the bracket",
+      "Solid": "a solid, above-field baseline",
+      "Balanced": "a roughly field-average tier",
+      "Low": "a vulnerable tier that leans on matchup help",
+      "Fragile": "a fragile tier that often needs chaos to break through"
+    },
+    "role_phrases": {
+      "Favorite": "The model treats this side as the functional favorite once all matchup adjustments are applied.",
+      "Cinderella": "The model reads this as a live Cinderella profile — capable of punching up when the matchup cooperates.",
+      "Neutral": "The model doesn’t see a clear favorite; both sides live in roughly the same tier.",
+      "Auto": "Role mode is auto-assigned by seed, but the scoring still reflects pure matchup behavior rather than committee seeding."
+    },
+    "gap_phrases": {
+      "Major": "The MI_gap is substantial; it usually takes extreme shot variance or foul trouble to flip a game like this.",
+      "Moderate": "The MI_gap is meaningful but still in the range where game script, whistle, or shooting luck can swing it.",
+      "Thin": "The MI_gap is thin enough that this plays like a true coin flip.",
+      "None": "With almost no MI_gap, this is effectively a pick’em; bracket context and personal risk tolerance matter more than the raw number."
+    },
+    "round_phrases": {
+      "R64": "In the Round of 64, these edges mostly translate into upset insulation or upset risk.",
+      "R32": "By the Round of 32, the remaining field is stronger, so edges tighten and interaction leverage matters more.",
+      "S16": "In the Sweet 16, structural strengths and weaknesses tend to show up more reliably over 40 minutes.",
+      "E8": "In the Elite Eight, a strong MI tier often reflects both quality and survivor bias from earlier rounds.",
+      "F4": "Final Four matchups exaggerate tiny gaps; any edge here is real but not deterministic.",
+      "Champ": "In the title game, the Madness Index behaves more like a probability nudge than a guarantee."
+    },
+    "driver_phrases": {
+      "core_led": "Most of the score comes from core efficiency and breadth rather than matchup quirks.",
+      "resume_led": "Résumé context adds a meaningful credibility nudge on top of the underlying efficiency profile.",
+      "interaction_led": "Most of the edge is driven by matchup-specific interactions where their strengths line up cleanly against the opponent’s weaknesses.",
+      "balanced": "The score reflects a fairly even blend of core profile, résumé context, and matchup interaction leverage."
+    }
+  },
+  "interactions_console": {
+  "meta": {
+    "team_tokens": {
+      "a": "{{TEAM_A}}",
+      "b": "{{TEAM_B}}"
+    },
+    "defaults": {
+      "pair_count_default": 1,
+      "pair_count_if_top_driver": 2,
+      "pair_count_if_strength_at_least": "moderate",
+      "matchup_anchor_required": true,
+      "ambiguity_required": true
+    }
+  },
+
+  "channels": {
+    "three_pt_tension": {
+      "label": "3PT Tension",
+      "pov": "constraint",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, {{TEAM_A}}’s closeout discipline can make it harder for {{TEAM_B}} to find clean perimeter looks and sustain shooting rhythm.",
+              "When {{TEAM_B}}’s perimeter approach meets {{TEAM_A}}’s contest profile, outside attempts may become more crowded and less rhythmic."
+            ],
+            "s2": [
+              "That shift can push {{TEAM_B}} toward lower-comfort attempts, reducing the payoff of its preferred offensive identity.",
+              "Over possessions, shot selection may drift away from {{TEAM_B}}’s most efficient perimeter outcomes."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, {{TEAM_A}} can narrow the margin for error on the perimeter, making rhythm threes harder for {{TEAM_B}} to access consistently.",
+              "When {{TEAM_A}}’s perimeter coverage meets {{TEAM_B}}’s shooting profile, outside looks can arrive with less balance and timing."
+            ],
+            "s2": [
+              "That pressure can push {{TEAM_B}} toward more improvised perimeter attempts as {{TEAM_A}} keeps recovery angles intact.",
+              "Across possessions, {{TEAM_A}} may subtly influence how confidently {{TEAM_B}} steps into catch-and-shoot chances."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, {{TEAM_B}}’s closeout discipline can make it harder for {{TEAM_A}} to find clean perimeter looks and sustain shooting rhythm.",
+      "When {{TEAM_A}}’s perimeter approach meets {{TEAM_B}}’s contest profile, outside attempts may become more crowded and less rhythmic."
+            ],
+            "s2": ["That shift can push {{TEAM_A}} toward lower-comfort attempts, reducing the payoff of its preferred offensive identity.",
+      "Over possessions, shot selection may drift away from {{TEAM_A}}’s most efficient perimeter outcomes."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, {{TEAM_B}} can narrow the margin for error on the perimeter, making rhythm threes harder for {{TEAM_A}} to access consistently.",
+      "When {{TEAM_B}}’s perimeter coverage meets {{TEAM_A}}’s shooting profile, outside looks can arrive with less balance and timing."
+            ],
+            "s2": [
+              "That pressure can push {{TEAM_A}} toward more improvised perimeter attempts as {{TEAM_B}} keeps recovery angles intact.",
+      "Across possessions, {{TEAM_B}} may subtly influence how confidently {{TEAM_A}} steps into catch-and-shoot chances."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} appear closely matched in how perimeter looks are created and contested, making arc outcomes more execution-dependent than profile-driven.",
+      "When {{TEAM_A}}’s perimeter approach meets {{TEAM_B}}’s closeout structure (and vice versa), neither side projects a built-in three-point separation in this specific pairing."
+            ], 
+            "s2": ["That balance can keep perimeter scoring from tilting structurally toward either {{TEAM_A}} or {{TEAM_B}}, with short-run rhythm potentially carrying extra weight in this head-to-head context.",
+      "If the arc becomes decisive here, it may reflect timing and shot selection within this pairing rather than a consistent mismatch between {{TEAM_A}} and {{TEAM_B}}."
+            ]
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may neutralize each other’s perimeter identity enough that clean looks come and go without a sustained advantage from either side.",
+      "Against each other’s specific profiles, {{TEAM_A}} and {{TEAM_B}} can trade perimeter pressure in ways that keep three-point leverage from settling into a clear direction."
+                  ], 
+            "s2": ["That dynamic can shift emphasis toward possession quality and secondary creation for both {{TEAM_A}} and {{TEAM_B}} in this matchup.",
+      "If one side gains perimeter control here, it may come from in-game adjustments rather than an inherent edge for {{TEAM_A}} or {{TEAM_B}} in this interaction."
+            ]
+        }
+      }
+    }
+  },
+    "ft_pressure": {
+      "label": "FT Pressure",
+      "pov": "imposition",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "Against {{TEAM_B}}’s defensive tendencies, {{TEAM_A}} may be positioned to convert pressure into frequent contact and sustained foul stress.",
+              "In this head-to-head context, {{TEAM_A}}’s ability to draw contact can put {{TEAM_B}} in more defensive decision pressure than usual."
+            ],
+            "s2": [
+              "As possessions tighten, that dynamic can create scoring equity for {{TEAM_A}} even when clean looks are limited.",
+              "If contact accumulates, {{TEAM_B}} may be forced into more conservative defense, changing how {{TEAM_A}} can attack."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can generate enough downhill contact to test how {{TEAM_B}} manages fouls across defensive possessions.",
+              "When {{TEAM_A}}’s attacking lanes meet {{TEAM_B}}’s defensive habits, free-throw pressure can quietly accumulate."
+            ],
+            "s2": [
+              "That contact profile can keep {{TEAM_A}} productive even if shot efficiency fluctuates against {{TEAM_B}}.",
+              "If whistles stack up, {{TEAM_B}} may adjust its aggression level, opening different driving windows for {{TEAM_A}}."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "Against {{TEAM_A}}’s defensive tendencies, {{TEAM_B}} may be positioned to convert pressure into frequent contact and sustained foul stress.",
+      "In this head-to-head context, {{TEAM_B}}’s ability to draw contact can put {{TEAM_A}} in more defensive decision pressure than usual."
+            ],
+            "s2": [
+              "As possessions tighten, that dynamic can create scoring equity for {{TEAM_B}} even when clean looks are limited.",
+      "If contact accumulates, {{TEAM_A}} may be forced into more conservative defense, changing how {{TEAM_B}} can attack."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, {{TEAM_B}} can generate enough downhill contact to test how {{TEAM_A}} manages fouls across defensive possessions.",
+      "When {{TEAM_B}}’s attacking lanes meet {{TEAM_A}}’s defensive habits, free-throw pressure can quietly accumulate."
+            ],
+            "s2": [
+              "That contact profile can keep {{TEAM_B}} productive even if shot efficiency fluctuates against {{TEAM_A}}.",
+      "If whistles stack up, {{TEAM_A}} may adjust its aggression level, opening different driving windows for {{TEAM_B}}."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+             "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} project similar leverage in how contact is created and absorbed, making free-throw impact more situational within this specific pairing.",
+      "When {{TEAM_A}}’s pressure meets {{TEAM_B}}’s foul discipline (and vice versa), neither side appears positioned to generate a consistent line-based advantage in this head-to-head context."], 
+             "s2": ["That balance can keep scoring equity tied more closely to shot quality and possession execution for both {{TEAM_A}} and {{TEAM_B}} in this matchup.",
+      "If foul pressure becomes decisive here, it may reflect game texture and tactical choices rather than a built-in contact mismatch between {{TEAM_A}} and {{TEAM_B}}."
+          ] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may trade stretches of contact advantage without either side sustaining foul-driven control across the game.",
+      "Against each other’s tendencies, {{TEAM_A}} and {{TEAM_B}} can keep whistle leverage from becoming a stable scoring outlet for either team in this matchup."], "s2": [] }
+        }
+      }
+    },
+
+    "paint_tension": {
+      "label": "Paint Tension",
+      "pov": "constraint",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can make interior access less available, removing the easy finishes {{TEAM_B}} often depends on when actions break down.",
+              "When {{TEAM_B}}’s rim-oriented pressure runs into {{TEAM_A}}’s interior resistance, paint efficiency may be harder to sustain."
+            ],
+            "s2": [
+              "As rim access tightens, {{TEAM_B}} may be pushed outward into attempts that fall outside its preferred scoring profile.",
+              "That constraint can narrow {{TEAM_B}}’s bailout options and increase reliance on tougher shot outcomes."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, {{TEAM_A}}’s interior presence can compress space, making paint touches more contested for {{TEAM_B}}.",
+              "When {{TEAM_B}} looks to establish inside scoring, {{TEAM_A}} can make those entries arrive under heavier resistance."
+            ],
+            "s2": [
+              "As interior paths tighten, {{TEAM_B}} may be redirected toward secondary options rather than direct rim pressure against {{TEAM_A}}.",
+              "That constraint can change how {{TEAM_B}} sequences its offense when early paint reads aren’t available."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, {{TEAM_B}} can make interior access less available, removing the easy finishes {{TEAM_A}} often depends on when actions break down.",
+      "When {{TEAM_A}}’s rim-oriented pressure runs into {{TEAM_B}}’s interior resistance, paint efficiency may be harder to sustain."
+            ],
+            "s2": [
+              "As rim access tightens, {{TEAM_A}} may be pushed outward into attempts that fall outside its preferred scoring profile.",
+      "That constraint can narrow {{TEAM_A}}’s bailout options and increase reliance on tougher shot outcomes."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, {{TEAM_B}}’s interior presence can compress space, making paint touches more contested for {{TEAM_A}}.",
+      "When {{TEAM_A}} looks to establish inside scoring, {{TEAM_B}} can make those entries arrive under heavier resistance."
+            ],
+            "s2": [
+              "As interior paths tighten, {{TEAM_A}} may be redirected toward secondary options rather than direct rim pressure against {{TEAM_B}}.",
+      "That constraint can change how {{TEAM_A}} sequences its offense when early paint reads aren’t available."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} look relatively matched in rim access and interior resistance, making paint outcomes more dependent on finishing and timing within this specific pairing.",
+      "When {{TEAM_A}}’s interior approach meets {{TEAM_B}}’s rim deterrence (and vice versa), neither side projects a clear paint-based separation in this head-to-head context."], 
+            "s2": ["That balance can keep shot geography from tilting heavily toward either {{TEAM_A}} or {{TEAM_B}}, elevating the importance of secondary creation paths in this matchup.",
+      "If interior scoring separates here, it may reflect sequencing and conversion rather than a consistent profile mismatch between {{TEAM_A}} and {{TEAM_B}} in this interaction."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may contest the rim at similar levels, keeping paint touches valuable but not reliably advantaged for either side in this matchup.",
+      "Against each other’s interior profiles, {{TEAM_A}} and {{TEAM_B}} can trade stretches of rim success without a stable paint edge emerging in this interaction."], 
+            "s2": ["That dynamic can push both {{TEAM_A}} and {{TEAM_B}} to win possessions through shot selection and movement rather than interior dominance in this matchup.",
+      "If one team gains paint control here, it may come from tactical adjustments rather than an inherent mismatch for {{TEAM_A}} or {{TEAM_B}} in this pairing."] 
+          }
+        }
+      }
+    },
+
+    "turnover_pressure": {
+      "label": "Turnover Pressure",
+      "pov": "imposition",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "When {{TEAM_A}}’s disruption profile meets {{TEAM_B}}’s ball-handling tendencies, early pressure may prevent {{TEAM_B}} from settling into its preferred structure.",
+              "In this pairing, {{TEAM_A}} can create enough defensive activity to speed {{TEAM_B}} into earlier decisions than it wants."
+            ],
+            "s2": [
+              "That can shift possession value toward reaction and short-clock execution for {{TEAM_B}}, rather than extended half-court comfort against {{TEAM_A}}.",
+              "If empty possessions show up, {{TEAM_A}} can find scoring chances without needing perfect shot-making against {{TEAM_B}}."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can apply enough ball pressure to disrupt how comfortably {{TEAM_B}} initiates offense.",
+              "When {{TEAM_A}}’s activity level meets {{TEAM_B}}’s handling profile, possessions can feel rushed earlier than planned."
+            ],
+            "s2": [
+              "That tempo stress can shift {{TEAM_B}} into quicker decisions, reducing time to fully organize against {{TEAM_A}}.",
+              "If mistakes surface, {{TEAM_A}} can benefit from shortened possessions without changing its own shot selection."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "When {{TEAM_B}}’s disruption profile meets {{TEAM_A}}’s ball-handling tendencies, early pressure may prevent {{TEAM_A}} from settling into its preferred structure.",
+      "In this pairing, {{TEAM_B}} can create enough defensive activity to speed {{TEAM_A}} into earlier decisions than it wants."
+            ],
+            "s2": [
+              "That can shift possession value toward reaction and short-clock execution for {{TEAM_A}}, rather than extended half-court comfort against {{TEAM_B}}.",
+      "If empty possessions show up, {{TEAM_B}} can find scoring chances without needing perfect shot-making against {{TEAM_A}}."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, {{TEAM_B}} can apply enough ball pressure to disrupt how comfortably {{TEAM_A}} initiates offense.",
+      "When {{TEAM_B}}’s activity level meets {{TEAM_A}}’s handling profile, possessions can feel rushed earlier than planned."
+            ],
+            "s2": [
+              "That tempo stress can shift {{TEAM_A}} into quicker decisions, reducing time to fully organize against {{TEAM_B}}.",
+      "If mistakes surface, {{TEAM_B}} can benefit from shortened possessions without changing its own shot selection."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} appear closely matched in disruption and ball security, making the possession battle more sequence-dependent within this specific pairing.",
+      "When {{TEAM_A}}’s pressure meets {{TEAM_B}}’s handling profile (and vice versa), neither side projects a consistent turnover-driven separation in this head-to-head context."], 
+            "s2": ["That balance can keep the game from being decided by giveaways alone, placing more weight on shot-making and rebounding outcomes for both {{TEAM_A}} and {{TEAM_B}} here.",
+      "If the turnover margin swings in this matchup, it may reflect moment-to-moment execution under stress rather than a stable mismatch between {{TEAM_A}} and {{TEAM_B}} in this interaction."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may trade stretches of ball pressure without either side sustaining a clear possession-control advantage through turnovers in this matchup.",
+      "Against each other’s profiles, {{TEAM_A}} and {{TEAM_B}} can keep disruption from becoming a predictable source of scoring chances in this specific interaction."], 
+            "s2": ["That dynamic can shift emphasis toward half-court quality for both {{TEAM_A}} and {{TEAM_B}} in this matchup.",
+      "If mistakes cluster for one side here, it may come from pace spikes and situational decisions rather than a built-in edge for {{TEAM_A}} or {{TEAM_B}}."] 
+          }
+        }
+      }
+    },
+
+    "glass_tension": {
+      "label": "Glass Tension",
+      "pov": "control",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, the glass can become a control point, where {{TEAM_A}}’s rebounding presence can limit {{TEAM_B}}’s extra possessions and runouts.",
+              "When {{TEAM_A}}’s box-out discipline meets {{TEAM_B}}’s crash tendencies, the second-chance economy can swing on a few bounces and clean-outs."
+            ],
+            "s2": [
+              "If the rebound battle tilts, {{TEAM_B}} may see fewer reset opportunities, while {{TEAM_A}} can extend possessions without changing its shot mix.",
+              "That possession texture can amplify small stretches of shot-making, since {{TEAM_A}} and {{TEAM_B}} aren’t getting the same number of clean repeats."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, control of the boards can tilt possession flow as {{TEAM_A}} challenges {{TEAM_B}}’s ability to extend trips.",
+              "When both teams contest the glass, {{TEAM_A}}’s positioning can limit how often {{TEAM_B}} earns second looks."
+            ],
+            "s2": [
+              "That rebounding texture can reduce reset chances for {{TEAM_B}}, placing more weight on first-shot efficiency.",
+              "Small rebounding swings may carry extra weight as {{TEAM_A}} and {{TEAM_B}} trade possessions without easy repeats."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, the glass can become a control point, where {{TEAM_B}}’s rebounding presence can limit {{TEAM_A}}’s extra possessions and runouts.",
+      "When {{TEAM_B}}’s box-out discipline meets {{TEAM_A}}’s crash tendencies, the second-chance economy can swing on a few bounces and clean-outs."
+            ],
+            "s2": [
+              "If the rebound battle tilts, {{TEAM_A}} may see fewer reset opportunities, while {{TEAM_B}} can extend possessions without changing its shot mix.",
+      "That possession texture can amplify small stretches of shot-making, since {{TEAM_A}} and {{TEAM_B}} aren’t getting the same number of clean repeats."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, control of the boards can tilt possession flow as {{TEAM_B}} challenges {{TEAM_A}}’s ability to extend trips.",
+      "When both teams contest the glass, {{TEAM_B}}’s positioning can limit how often {{TEAM_A}} earns second looks."
+            ],
+            "s2": [
+              "That rebounding texture can reduce reset chances for {{TEAM_A}}, placing more weight on first-shot efficiency.",
+      "Small rebounding swings may carry extra weight as {{TEAM_A}} and {{TEAM_B}} trade possessions without easy repeats."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} appear closely matched on the glass, making second-chance outcomes more bounce- and positioning-dependent within this specific pairing.",
+      "When {{TEAM_A}}’s crash tendencies meet {{TEAM_B}}’s box-out structure (and vice versa), neither side projects a consistent rebounding-based separation in this head-to-head context."], 
+            "s2": ["That balance can keep possession volume relatively even for {{TEAM_A}} and {{TEAM_B}}, placing more weight on first-shot efficiency in this matchup.",
+      "If the board battle tilts here, it may reflect lineup moments and effort swings rather than a stable mismatch between {{TEAM_A}} and {{TEAM_B}} in this interaction."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may trade rebounding runs without either side consistently extending possessions or shutting them down in this matchup.",
+      "Against each other’s rebounding profiles, {{TEAM_A}} and {{TEAM_B}} can keep the second-chance economy from settling into a clear direction in this specific interaction."], 
+            "s2": ["That dynamic can make small rebounding sequences feel amplified, since {{TEAM_A}} and {{TEAM_B}} aren’t projecting a built-in possession edge here.",
+      "If one team earns extra looks in this matchup, it may come from tactical emphasis rather than an inherent glass advantage for {{TEAM_A}} or {{TEAM_B}}."] 
+          }
+        }
+      }
+    },
+
+    "resume_pressure": {
+      "label": "Résumé Pressure",
+      "pov": "control",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this pairing, the game can carry a résumé-weighted texture where {{TEAM_A}}’s steadiness can compress {{TEAM_B}}’s margin for sloppy stretches.",
+              "When {{TEAM_A}}’s proven baseline meets {{TEAM_B}}’s profile, early runs can feel more consequential, shaping how each side manages tempo and risk."
+            ],
+            "s2": [
+              "If momentum flips, {{TEAM_B}} may feel compelled to chase cleaner answers faster, while {{TEAM_A}} can stay patient and protect possession value.",
+              "That environment can make late-clock choices sharper, since {{TEAM_A}} and {{TEAM_B}} are reacting to the same run-risk in different ways."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, the broader game context can amplify stretches where {{TEAM_A}} plays clean, pressuring {{TEAM_B}} to respond efficiently.",
+              "When {{TEAM_A}}’s steadier baseline meets {{TEAM_B}}’s profile, momentum pockets can shape decision-making pace."
+            ],
+            "s2": [
+              "That environment can make missed opportunities feel heavier for {{TEAM_B}}, while {{TEAM_A}} stays within its comfort script.",
+              "As runs form, both teams may manage risk differently, subtly changing how possessions unfold."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this pairing, the game can carry a résumé-weighted texture where {{TEAM_B}}’s steadiness can compress {{TEAM_A}}’s margin for sloppy stretches.",
+      "When {{TEAM_B}}’s proven baseline meets {{TEAM_A}}’s profile, early runs can feel more consequential, shaping how each side manages tempo and risk."
+            ],
+            "s2": [
+              "If momentum flips, {{TEAM_A}} may feel compelled to chase cleaner answers faster, while {{TEAM_B}} can stay patient and protect possession value.",
+      "That environment can make late-clock choices sharper, since {{TEAM_A}} and {{TEAM_B}} are reacting to the same run-risk in different ways."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, the broader game context can amplify stretches where {{TEAM_B}} plays clean, pressuring {{TEAM_A}} to respond efficiently.",
+      "When {{TEAM_B}}’s steadier baseline meets {{TEAM_A}}’s profile, momentum pockets can shape decision-making pace."
+            ],
+            "s2": [
+              "That environment can make missed opportunities feel heavier for {{TEAM_A}}, while {{TEAM_B}} stays within its comfort script.",
+      "As runs form, both teams may manage risk differently, subtly changing how possessions unfold."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} project similar résumé-weighted context, making composure and execution more defining than a built-in toughness gap in this specific pairing.",
+      "When {{TEAM_A}}’s baseline meets {{TEAM_B}}’s baseline in this head-to-head context, neither side appears to carry a clear résumé-driven advantage that reshapes game texture on its own."], 
+            "s2": ["That balance can keep momentum management and risk decisions symmetrical, with {{TEAM_A}} and {{TEAM_B}} reacting to runs from a similar footing in this matchup.",
+      "If the moment feels heavy here, it may show up as tactical conservatism on both sides rather than a structural résumé mismatch between {{TEAM_A}} and {{TEAM_B}}."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may meet with comparable contextual profiles, limiting how much résumé texture separates decision-making in this matchup.",
+      "Against each other’s scheduling and performance context, {{TEAM_A}} and {{TEAM_B}} can enter on similar footing, keeping this interaction relatively neutral in this head-to-head setup."], 
+            "s2": ["That dynamic can place more weight on tactical edges and shot execution for both {{TEAM_A}} and {{TEAM_B}} in this matchup.",
+      "If one side looks steadier here, it may reflect in-game control rather than a built-in résumé gap between {{TEAM_A}} and {{TEAM_B}}."] 
+          }
+        }
+      }
+    },
+
+    "physicality_tolerance": {
+      "label": "Physicality Tolerance",
+      "pov": "imposition",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can apply a more physical screen-and-bodying level that tests how comfortably {{TEAM_B}} holds spacing and balance through contact.",
+              "When {{TEAM_A}}’s strength profile meets {{TEAM_B}}’s tolerance, drives and cuts can turn into collision possessions that wear on timing."
+            ],
+            "s2": [
+              "If the contact tone rises, {{TEAM_B}} may spend more energy finishing plays than creating them, while {{TEAM_A}} can keep pressure on the next action.",
+              "That can affect late-game legs, where {{TEAM_A}} and {{TEAM_B}} may not get the same lift on jumpers or the same sharpness on closeouts."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, {{TEAM_A}} can sustain a physical tone that tests how smoothly {{TEAM_B}} executes through contact.",
+              "When bodies collide on cuts and screens, {{TEAM_A}}’s strength can challenge {{TEAM_B}}’s offensive balance."
+            ],
+            "s2": [
+              "That contact level can tax timing and lift for {{TEAM_B}} as the game progresses against {{TEAM_A}}.",
+              "Over time, physical exchanges may influence how both teams finish plays and recover defensively."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, {{TEAM_B}} can apply a more physical screen-and-bodying level that tests how comfortably {{TEAM_A}} holds spacing and balance through contact.",
+      "When {{TEAM_B}}’s strength profile meets {{TEAM_A}}’s tolerance, drives and cuts can turn into collision possessions that wear on timing."
+            ],
+            "s2": [
+              "If the contact tone rises, {{TEAM_A}} may spend more energy finishing plays than creating them, while {{TEAM_B}} can keep pressure on the next action.",
+      "That can affect late-game legs, where {{TEAM_A}} and {{TEAM_B}} may not get the same lift on jumpers or the same sharpness on closeouts."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, {{TEAM_B}} can sustain a physical tone that tests how smoothly {{TEAM_A}} executes through contact.",
+      "When bodies collide on cuts and screens, {{TEAM_B}}’s strength can challenge {{TEAM_A}}’s offensive balance."
+            ],
+            "s2": [
+              "That contact level can tax timing and lift for {{TEAM_A}} as the game progresses against {{TEAM_B}}.",
+      "Over time, physical exchanges may influence how both teams finish plays and recover defensively."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} appear similarly equipped to play through contact, making physical exchanges less likely to create a consistent separation in this specific pairing.",
+      "When {{TEAM_A}}’s contact level meets {{TEAM_B}}’s tolerance (and vice versa), neither side projects a clear advantage in how physicality reshapes timing and balance here."], 
+            "s2": ["That balance can keep finishing and defensive recovery more execution-dependent for both {{TEAM_A}} and {{TEAM_B}} in this matchup.",
+      "If physicality becomes decisive here, it may reflect whistle texture and rotation stress rather than an inherent mismatch between {{TEAM_A}} and {{TEAM_B}}."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may absorb contact at similar levels, keeping collision possessions meaningful but not predictably advantaged for either side in this matchup.",
+      "Against each other’s profiles, {{TEAM_A}} and {{TEAM_B}} can trade physical stretches without a stable tone advantage emerging in this head-to-head context."], 
+            "s2": ["That dynamic can push both {{TEAM_A}} and {{TEAM_B}} to win possessions through precision rather than pure force in this matchup.",
+      "If one team imposes more physical control here, it may come from tactical emphasis rather than a built-in edge for {{TEAM_A}} or {{TEAM_B}} in this interaction."] 
+          }
+        }
+      }
+    },
+
+    "shot_discipline": {
+      "label": "Shot Discipline",
+      "pov": "constraint",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, clean shot access can be harder to maintain, as {{TEAM_A}}’s containment can push {{TEAM_B}} into quicker, less-set attempts.",
+              "When {{TEAM_B}}’s shot diet meets {{TEAM_A}}’s ability to shrink windows, the best looks can arrive later in the clock and under more contest."
+            ],
+            "s2": [
+              "That can raise the value of patience for {{TEAM_B}}, since rushed attempts are more likely to play into {{TEAM_A}}’s preferred defensive outcomes.",
+              "Over time, {{TEAM_A}} can influence {{TEAM_B}} toward lower-quality bailouts, changing how each possession is built from the first trigger."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, {{TEAM_A}} can make clean shot selection harder, nudging {{TEAM_B}} toward attempts later in the possession.",
+              "When {{TEAM_A}} shrinks space, {{TEAM_B}}’s preferred looks may require extra movement or faster decisions."
+            ],
+            "s2": [
+              "That pressure can reward patience for {{TEAM_B}}, while rushed attempts tend to align with {{TEAM_A}}’s defensive goals.",
+              "Across the game, {{TEAM_A}} may subtly dictate which shots {{TEAM_B}} feels comfortable taking."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+               "In this matchup, clean shot access can be harder to maintain, as {{TEAM_B}}’s containment can push {{TEAM_A}} into quicker, less-set attempts.",
+      "When {{TEAM_A}}’s shot diet meets {{TEAM_B}}’s ability to shrink windows, the best looks can arrive later in the clock and under more contest."
+            ],
+            "s2": [
+              "That can raise the value of patience for {{TEAM_A}}, since rushed attempts are more likely to play into {{TEAM_B}}’s preferred defensive outcomes.",
+      "Over time, {{TEAM_B}} can influence {{TEAM_A}} toward lower-quality bailouts, changing how each possession is built from the first trigger."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this pairing, {{TEAM_B}} can make clean shot selection harder, nudging {{TEAM_A}} toward attempts later in the possession.",
+      "When {{TEAM_B}} shrinks space, {{TEAM_A}}’s preferred looks may require extra movement or faster decisions."
+            ],
+            "s2": [
+              "That pressure can reward patience for {{TEAM_A}}, while rushed attempts tend to align with {{TEAM_B}}’s defensive goals.",
+      "Across the game, {{TEAM_B}} may subtly dictate which shots {{TEAM_A}} feels comfortable taking."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": ["In this matchup, {{TEAM_A}} and {{TEAM_B}} appear similarly capable of protecting their shot diet, making shot-quality outcomes more dependent on possession-level execution in this specific pairing.",
+      "When {{TEAM_A}}’s defensive structure meets {{TEAM_B}}’s shot creation (and vice versa), neither side projects a consistent ability to distort the other’s preferred looks here."], 
+            "s2": ["That balance can keep shot quality from drifting structurally toward either {{TEAM_A}} or {{TEAM_B}}, increasing the importance of timing and decision quality in this matchup.",
+      "If shot selection degrades for one side here, it may reflect pace spikes and adjustments rather than a stable mismatch between {{TEAM_A}} and {{TEAM_B}} in this interaction."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may each access a workable shot mix, keeping the shot ecosystem relatively stable in this head-to-head context.",
+      "Against each other’s profiles, {{TEAM_A}} and {{TEAM_B}} can trade stretches of clean creation without a sustained distortion pattern emerging in this matchup."], 
+            "s2": ["That dynamic can place more weight on shot-making and late-clock choices for both {{TEAM_A}} and {{TEAM_B}} in this matchup.",
+      "If one team dictates shot selection here, it may come from targeted adjustments rather than an inherent discipline edge for {{TEAM_A}} or {{TEAM_B}}."] 
+          }
+        }
+      }
+    },
+
+    "variance_sensitivity": {
+      "label": "Variance Sensitivity",
+      "pov": "control",
+      "cases": {
+        "a_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, the game’s swing potential can hinge on how {{TEAM_A}} and {{TEAM_B}} absorb shooting runs without abandoning their preferred pace.",
+              "When {{TEAM_A}}’s stability meets {{TEAM_B}}’s volatility profile, a couple of makes or misses can reshape spacing and decision speed on both ends."
+            ],
+            "s2": [
+              "If the first run lands, {{TEAM_B}} may lean harder into higher-variance shots, while {{TEAM_A}} can try to steady possessions and limit quick exchanges.",
+              "That dynamic can make short stretches disproportionately loud, since {{TEAM_A}} and {{TEAM_B}} are both responding to momentum rather than structure alone."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, short shooting runs can disproportionately shape flow as {{TEAM_A}} and {{TEAM_B}} trade momentum.",
+              "When volatility enters, both teams may feel pressure to respond quickly rather than settle into structure."
+            ],
+            "s2": [
+              "That sensitivity can elevate the impact of brief streaks, especially if {{TEAM_B}} leans into quicker answers.",
+              "As swings emerge, {{TEAM_A}} may try to slow exchanges while {{TEAM_B}} rides rhythm-dependent stretches."
+            ]
+          }
+        },
+        "b_adv": {
+          "primary": {
+            "s1": [
+              "In this matchup, the game’s swing potential can hinge on how {{TEAM_A}} and {{TEAM_B}} absorb shooting runs without abandoning their preferred pace.",
+      "When {{TEAM_B}}’s stability meets {{TEAM_A}}’s volatility profile, a couple of makes or misses can reshape spacing and decision speed on both ends."
+            ],
+            "s2": [
+              "If the first run lands, {{TEAM_A}} may lean harder into higher-variance shots, while {{TEAM_B}} can try to steady possessions and limit quick exchanges.",
+      "That dynamic can make short stretches disproportionately loud, since {{TEAM_A}} and {{TEAM_B}} are both responding to momentum rather than structure alone."
+            ]
+          },
+          "alt": {
+            "s1": [
+              "In this matchup, short shooting runs can disproportionately shape flow as {{TEAM_A}} and {{TEAM_B}} trade momentum.",
+              "When volatility enters, both teams may feel pressure to respond quickly rather than settle into structure."
+            ],
+            "s2": [
+              "That sensitivity can elevate the impact of brief streaks, especially if {{TEAM_A}} leans into quicker answers.",
+      "As swings emerge, {{TEAM_B}} may try to slow exchanges while {{TEAM_A}} rides rhythm-dependent stretches."
+            ]
+          }
+        },
+        "even": {
+          "primary": { 
+            "s1": [
+              "In this matchup, {{TEAM_A}} and {{TEAM_B}} project similar volatility interaction, making runs and momentum shifts more rhythm-driven than structurally amplified in this specific pairing.",
+      "When {{TEAM_A}}’s stability and {{TEAM_B}}’s volatility profile collide in this head-to-head context, neither side appears uniquely positioned to suppress or amplify swings on its own."], 
+            "s2": ["That balance can keep the game from being predisposed to chaos or stability, with {{TEAM_A}} and {{TEAM_B}} both needing to manage runs in real time here.",
+      "If volatility spikes in this matchup, it may reflect shot variance and sequence timing rather than a consistent mismatch between {{TEAM_A}} and {{TEAM_B}} in this interaction."] 
+          },
+          "alt": { 
+            "s1": ["In this pairing, {{TEAM_A}} and {{TEAM_B}} may experience swing stretches without either side reliably controlling the volatility dial in this matchup.",
+      "Against each other’s profiles, {{TEAM_A}} and {{TEAM_B}} can keep variance sensitivity from tilting predictably toward chaos or control in this specific head-to-head setup."], 
+            "s2": ["That dynamic can elevate the importance of timeout management and possession pacing for both {{TEAM_A}} and {{TEAM_B}} here.",
+      "If one team rides a run in this matchup, it may come from momentary rhythm rather than an inherent variance edge for {{TEAM_A}} or {{TEAM_B}}."] 
+          }
+        }
+      }
+    }
+  },
+  "summary": {
+    "verdict": {
+    "confidence_label": "",
+    "driver_label": "",
+    "risk_label": "",
+    "int_soft_threshold": 0.2,
+    "driver_templates": {
+      "neutral_balanced": "",
+      "neutral_swingy": "",
+      "edge_balanced": "",
+      "reinforces_winner": "",
+      "resists_winner": "",
+      "mixed_still_winner": "",
+      "mixed_live_loser": ""
+    },
+    "risk_templates": {
+      "heavy_default": "",
+      "heavy_resists": "",
+      "solid_default": "",
+      "solid_resists": "",
+      "slight_default": "",
+      "slight_resists": "",
+      "coin_default": "",
+      "coin_resists": ""
+    }
+  }
+},
+  "debug": {
+    "title": "Developer Debug Panel",
+    "help": "Shows parsed inputs and rule evaluations for QA. Only visible when Debug View is enabled."
+  },
+  "footer": {
+    "note": "All logic is deterministic and based solely on the uploaded season stats."
+  }
+  }
+}
